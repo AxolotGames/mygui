@@ -19,6 +19,7 @@ namespace MyGUI
 		mBuffer(nullptr),
 		mManager(_pRenderManager)
 	{
+		create();
 	}
 
 	DirectX11VertexBuffer::~DirectX11VertexBuffer()

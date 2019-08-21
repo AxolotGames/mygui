@@ -330,8 +330,12 @@ namespace MyGUI
 		MYGUI_ASSERT_RANGE_INSERT(_index, mItemsInfo.size(), "ItemBox::insertItemAt");
 		if (_index == ITEM_NONE) _index = mItemsInfo.size();
 
-		_resetContainer(false);
-		resetCurrentActiveItem();
+		if (update)
+		{
+			_resetContainer(false);
+
+			resetCurrentActiveItem();
+		}
 
 		mItemsInfo.insert(mItemsInfo.begin() + _index, ItemDataInfo(_data));
 
@@ -359,8 +363,11 @@ namespace MyGUI
 	{
 		MYGUI_ASSERT_RANGE(_index, mItemsInfo.size(), "ItemBox::removeItemAt");
 
-		_resetContainer(false);
-		resetCurrentActiveItem();
+		if (update)
+		{
+			_resetContainer(false);
+			resetCurrentActiveItem();
+		}
 
 		mItemsInfo.erase(mItemsInfo.begin() + _index);
 
@@ -599,7 +606,7 @@ namespace MyGUI
 	{
 		mouseButtonPressed(_id);
 
-		if ( MouseButton::Left == _id)
+		if( mDropButton == MouseButton::None )
 		{
 			size_t old = mIndexSelect;
 
@@ -618,7 +625,7 @@ namespace MyGUI
 			}
 
 			// смещение внутри виджета, куда кликнули мышкой
-			mClickInWidget = InputManager::getInstance().getLastPressedPosition(MouseButton::Left) - _sender->getAbsolutePosition();
+			mClickInWidget = InputManager::getInstance().getLastPressedPosition( _id ) - _sender->getAbsolutePosition();
 
 			// отсылаем событие
 			eventMouseItemActivate(this, mIndexSelect);
@@ -634,8 +641,8 @@ namespace MyGUI
 		bool needEvent = !mStartDrop;
 		mouseButtonReleased(_id);
 
-		if (needEvent)
-			eventNotifyItem(this, IBNotifyItemData(getIndexByWidget(_sender), IBNotifyItemData::MouseReleased, _left, _top, _id));
+		//if (needEvent)
+		eventNotifyItem(this, IBNotifyItemData(getIndexByWidget(_sender), IBNotifyItemData::MouseReleased, _left, _top, _id));
 	}
 
 	void ItemBox::notifyRootMouseChangeFocus(Widget* _sender, bool _focus)
