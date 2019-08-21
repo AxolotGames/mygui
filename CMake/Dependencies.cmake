@@ -68,7 +68,7 @@ elseif(MYGUI_RENDERSYSTEM EQUAL 6)
 	# Find DirectX11
 	if(WIN32)
 		find_package(DirectX11)
-		macro_log_feature(DirectX_FOUND "DirectX11" "Support for the DirectX11 render system" "http://msdn.microsoft.com/en-us/directx/" TRUE "" "")
+		macro_log_feature(DirectX11_FOUND "DirectX11" "Support for the DirectX11 render system" "http://msdn.microsoft.com/en-us/directx/" TRUE "" "")
 	endif()
 #elseif for RENDERSYSTEM 7 is covered with RENDERSYSTEM 4
 endif()
