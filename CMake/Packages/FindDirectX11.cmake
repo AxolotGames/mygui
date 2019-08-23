@@ -24,12 +24,12 @@ if(WIN32) # The only platform it makes sense to check for DirectX11 SDK
 		# Windows Phone 8.1 SDK
 		if(WINDOWS_PHONE AND MSVC12)
 			find_path(DirectX11_INCLUDE_DIR NAMES d3d11.h HINTS "C:/Program Files (x86)/Windows Phone Kits/8.1/include" "C:/Program Files/Windows Phone Kits/8.1/include")
-			set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib) # in "C:/Program Files (x86)/Windows Phone Kits/8.1/lib/${MSVC_CXX_ARCHITECTURE_ID}/"
+			set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib d3dcompiler.lib) # in "C:/Program Files (x86)/Windows Phone Kits/8.1/lib/${MSVC_CXX_ARCHITECTURE_ID}/"
 
 		# Windows Phone 8.0 SDK
 		elseif(WINDOWS_PHONE AND MSVC11)
 			find_path(DirectX11_INCLUDE_DIR NAMES d3d11.h HINTS "C:/Program Files (x86)/Windows Phone Kits/8.0/include" "C:/Program Files/Windows Phone Kits/8.0/include")
-			set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib) # in "C:/Program Files (x86)/Windows Phone Kits/8.0/lib/${MSVC_CXX_ARCHITECTURE_ID}/"
+			set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib d3dcompiler.lib) # in "C:/Program Files (x86)/Windows Phone Kits/8.0/lib/${MSVC_CXX_ARCHITECTURE_ID}/"
 
 		endif()
 	elseif( NOT MSVC90 )
@@ -46,18 +46,18 @@ if(WIN32) # The only platform it makes sense to check for DirectX11 SDK
 				get_filename_component(kit10_ver ${tmp_elem} NAME)
 				set(DirectX11_LIB_SEARCH_PATH "${kit10_dir}/Lib/${kit10_ver}/um")
 				find_path(DirectX11_INCLUDE_DIR NAMES d3d11.h HINTS "${tmp_elem}/um")
-				set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib) # in "C:/Program Files (x86)/Windows Kits/10/Lib/10.*/um/${MSVC_CXX_ARCHITECTURE_ID}/"
+				set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib d3dcompiler.lib) # in "C:/Program Files (x86)/Windows Kits/10/Lib/10.*/um/${MSVC_CXX_ARCHITECTURE_ID}/"
 			endif()
 		endforeach()
 		# Windows 8.1 SDK
 		if(NOT DirectX11_INCLUDE_DIR)
 			find_path(DirectX11_INCLUDE_DIR NAMES d3d11.h HINTS "C:/Program Files (x86)/Windows Kits/8.1/include/um" "C:/Program Files/Windows Kits/8.1/include/um")
-			set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib) # in "C:/Program Files (x86)/Windows Kits/8.1/lib/winv6.3/um/${MSVC_CXX_ARCHITECTURE_ID}/"
+			set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib d3dcompiler.lib) # in "C:/Program Files (x86)/Windows Kits/8.1/lib/winv6.3/um/${MSVC_CXX_ARCHITECTURE_ID}/"
 		endif()
 		# Windows 8.0 SDK
 		if(NOT DirectX11_INCLUDE_DIR)
 			find_path(DirectX11_INCLUDE_DIR NAMES d3d11.h HINTS "C:/Program Files (x86)/Windows Kits/8.0/include/um" "C:/Program Files/Windows Kits/8.0/include/um")
-			set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib) # in "C:/Program Files (x86)/Windows Kits/8.0/lib/win8/um/${MSVC_CXX_ARCHITECTURE_ID}/"
+			set(DirectX11_LIBRARY d3d11.lib dxgi.lib dxguid.lib d3dcompiler.lib) # in "C:/Program Files (x86)/Windows Kits/8.0/lib/win8/um/${MSVC_CXX_ARCHITECTURE_ID}/"
 		endif()
 	endif()
 
