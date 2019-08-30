@@ -178,6 +178,8 @@ namespace MyGUI
 		srvDesc.Texture2D.MostDetailedMip = 0;
 
 		mPixelFormat = PixelFormat::R8G8B8A8;
+		mWidth = desc.Width;
+		mHeight = desc.Height;
 		
 		hr = mManager->mpD3DDevice->CreateShaderResourceView(mTexture, &srvDesc, &mResourceView);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Create Shader ResourceView failed!");
