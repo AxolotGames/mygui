@@ -52,7 +52,20 @@ namespace MyGUI
 		"	Out = sampleTexture.SampleLevel(sampleSampler, inTexcoord, 0).rrrg * inColor;\n"
 		"}\n"
 	};
-	
+
+	static const char* psTexturedMixSource = R"(
+		uniform Texture2D<float4> sampleTexture : register( t0 );
+		uniform SamplerState sampleSampler : register( s0 );
+
+		float4 main( in float4 inPosition : SV_POSITION, in float4 inColor : TEXCOORD0, in float2 inTexcoord : TEXCOORD1 ) : SV_TARGET 
+		{
+			float4 vColor = sampleTexture.SampleLevel( sampleSampler, inTexcoord, 0 ).rgba * inColor;
+			float4 vOther = float4( 1,0,0,1 );
+
+			return lerp( vColor, vOther, 0.4 );
+		}
+	)";
+
 	static const D3D11_INPUT_ELEMENT_DESC vertexLayout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -189,7 +202,7 @@ namespace MyGUI
 		// Build Textured L8A8 Pixel Shader
 		bytecode = 0;
 		errors = 0;
-		hr = D3DCompile(psTexturedSourceL8A8, strlen(psTexturedSource), "PixelShader2", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors);
+		hr = D3DCompile(psTexturedSourceL8A8, strlen( psTexturedSourceL8A8 ), "PixelShader2", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Compilation failed, unknown errors!"));
 
 		hr = mpD3DDevice->CreatePixelShader(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), 0, &mPixelShader2);
@@ -197,7 +210,19 @@ namespace MyGUI
 
 		if ( bytecode ) bytecode->Release();
 		if ( errors ) errors->Release();
-		
+
+		// Build Pixel Shader For Mixing Two Textures
+		bytecode = 0;
+		errors = 0;
+		hr = D3DCompile( psTexturedMixSource, strlen( psTexturedMixSource ), "PixelShader3", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors );
+		MYGUI_PLATFORM_ASSERT( hr == S_OK, ( errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Compilation failed, unknown errors!" ) );
+
+		hr = mpD3DDevice->CreatePixelShader( bytecode->GetBufferPointer(), bytecode->GetBufferSize(), 0, &mPixelShader3 );
+		MYGUI_PLATFORM_ASSERT( hr == S_OK, ( errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Create failed!" ) );
+
+		if( bytecode ) bytecode->Release();
+		if( errors ) errors->Release();
+
 		// Create Sampler State
 		D3D11_SAMPLER_DESC samplerDesc;
 		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -285,6 +310,8 @@ namespace MyGUI
 		if ( mPixelShader0 ) mPixelShader0->Release();
 		if ( mPixelShader1 ) mPixelShader1->Release();
 		if ( mPixelShader2 ) mPixelShader2->Release();
+		if ( mPixelShader3 ) mPixelShader3->Release();
+
 		if ( mSamplerState ) mSamplerState->Release();
 		if ( mBlendState ) mBlendState->Release();
 		if ( mDepthStencilState ) mDepthStencilState->Release();
@@ -309,6 +336,9 @@ namespace MyGUI
 
 	void DirectX11RenderManager::doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count)
 	{
+		doRenderUsingMixShader( _buffer, _texture, _count );
+		return;
+
 		DirectX11Texture* texture = static_cast<DirectX11Texture*>(_texture);
 		if ( texture == 0 || texture->mResourceView == 0 )
 		{
@@ -445,5 +475,23 @@ namespace MyGUI
 		mUpdate = true;
 	}
 
+	void DirectX11RenderManager::doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, size_t _count )
+	{
+		DirectX11Texture* texture = static_cast<DirectX11Texture*>( _texture );
+		// TODO (daniel): Pass the texture to mix with
+
+		DirectX11VertexBuffer* buffer = static_cast<DirectX11VertexBuffer*>( _buffer );
+
+		mpD3DContext->VSSetShader( mVertexShader1, 0, 0 );
+		mpD3DContext->PSSetShader( mPixelShader3, 0, 0 );
+
+		mpD3DContext->PSSetSamplers( 0, 1, &mSamplerState );
+		mpD3DContext->PSSetShaderResources( 0, 1, &texture->mResourceView );
+
+		UINT stride = sizeof( Vertex ), offset = 0;
+		mpD3DContext->IASetVertexBuffers( 0, 1, &buffer->mBuffer, &stride, &offset );
+		mpD3DContext->IASetInputLayout( mInputLayout1 );
+		mpD3DContext->Draw( _count, 0 );		
+	}
 
 } // namespace MyGUI
