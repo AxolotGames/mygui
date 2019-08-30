@@ -20,6 +20,7 @@ struct ID3D11BlendState;
 struct ID3D11RasterizerState;
 struct ID3D11DepthStencilState;
 struct ID3D11InputLayout;
+struct ID3D11ShaderResourceView;
 
 namespace MyGUI
 {
@@ -89,7 +90,7 @@ namespace MyGUI
 		void setViewSize(int _width, int _height);
 
 		/*modified*/
-		void doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, size_t _count );
+		void doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, ID3D11ShaderResourceView* _mixTexture, size_t _count );
 
 	private:
 		void destroyAllResources();

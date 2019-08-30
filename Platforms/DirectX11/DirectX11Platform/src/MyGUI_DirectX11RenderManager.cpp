@@ -57,12 +57,16 @@ namespace MyGUI
 		uniform Texture2D<float4> sampleTexture : register( t0 );
 		uniform SamplerState sampleSampler : register( s0 );
 
+		uniform Texture2D<float4> mixTexture : register( t1 );
+
 		float4 main( in float4 inPosition : SV_POSITION, in float4 inColor : TEXCOORD0, in float2 inTexcoord : TEXCOORD1 ) : SV_TARGET 
 		{
-			float4 vColor = sampleTexture.SampleLevel( sampleSampler, inTexcoord, 0 ).rgba * inColor;
-			float4 vOther = float4( 1,0,0,1 );
+			float2 vUv = float2( inPosition.x / 1024, inPosition.y / 1024 );
 
-			return lerp( vColor, vOther, 0.4 );
+			float4 vColor = sampleTexture.SampleLevel( sampleSampler, inTexcoord, 0 ).rgba * inColor;
+			float4 vMix = mixTexture.SampleLevel( sampleSampler, vUv, 0 ).rgba;
+			
+			return lerp( vColor, vMix, 0.25 );
 		}
 	)";
 
@@ -336,9 +340,6 @@ namespace MyGUI
 
 	void DirectX11RenderManager::doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count)
 	{
-		doRenderUsingMixShader( _buffer, _texture, _count );
-		return;
-
 		DirectX11Texture* texture = static_cast<DirectX11Texture*>(_texture);
 		if ( texture == 0 || texture->mResourceView == 0 )
 		{
@@ -475,18 +476,18 @@ namespace MyGUI
 		mUpdate = true;
 	}
 
-	void DirectX11RenderManager::doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, size_t _count )
+	void DirectX11RenderManager::doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, ID3D11ShaderResourceView* _mixTexture, size_t _count )
 	{
 		DirectX11Texture* texture = static_cast<DirectX11Texture*>( _texture );
-		// TODO (daniel): Pass the texture to mix with
-
 		DirectX11VertexBuffer* buffer = static_cast<DirectX11VertexBuffer*>( _buffer );
 
 		mpD3DContext->VSSetShader( mVertexShader1, 0, 0 );
 		mpD3DContext->PSSetShader( mPixelShader3, 0, 0 );
 
 		mpD3DContext->PSSetSamplers( 0, 1, &mSamplerState );
-		mpD3DContext->PSSetShaderResources( 0, 1, &texture->mResourceView );
+
+		ID3D11ShaderResourceView* const views[] = { texture->mResourceView, texture->mResourceView };
+		mpD3DContext->PSSetShaderResources( 0, ARRAYSIZE(views), views );
 
 		UINT stride = sizeof( Vertex ), offset = 0;
 		mpD3DContext->IASetVertexBuffers( 0, 1, &buffer->mBuffer, &stride, &offset );
