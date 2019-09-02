@@ -91,7 +91,7 @@ namespace MyGUI
 		void setViewSize(int _width, int _height);
 
 		/*modified*/
-		void doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, ID3D11ShaderResourceView* _mixTexture, size_t _count );
+		void doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, ID3D11ShaderResourceView* _mixTexture, float _mixFactor, size_t _count );
 
 	private:
 		void destroyAllResources();

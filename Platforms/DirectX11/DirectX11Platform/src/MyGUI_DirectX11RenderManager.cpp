@@ -61,17 +61,17 @@ namespace MyGUI
 
 		cbuffer CB_VIEWPORT : register( b0 )
 		{
-			float4 viewport;
+			float4 vViewportMixfactor;
 		};
 
 		float4 main( in float4 inPosition : SV_POSITION, in float4 inColor : TEXCOORD0, in float2 inTexcoord : TEXCOORD1 ) : SV_TARGET 
 		{
-			float2 vUv = float2( inPosition.x / viewport.x, inPosition.y / viewport.y );
+			float2 vUv = float2( inPosition.x / vViewportMixfactor.x, inPosition.y / vViewportMixfactor.y );
 
 			float4 vColor = sampleTexture.SampleLevel( sampleSampler, inTexcoord, 0 ).rgba * inColor;
 			float4 vMix = mixTexture.SampleLevel( sampleSampler, vUv, 0 ).rgba;
 			
-			return lerp( vColor, vMix, 0.25 );
+			return lerp( vColor, vMix, vViewportMixfactor.z );
 		}
 	)";
 
@@ -491,7 +491,7 @@ namespace MyGUI
 		mUpdate = true;
 	}
 
-	void DirectX11RenderManager::doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, ID3D11ShaderResourceView* _mixTexture, size_t _count )
+	void DirectX11RenderManager::doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, ID3D11ShaderResourceView* _mixTexture, float _mixFactor, size_t _count )
 	{
 		DirectX11Texture* texture = static_cast<DirectX11Texture*>( _texture );
 		DirectX11VertexBuffer* buffer = static_cast<DirectX11VertexBuffer*>( _buffer );
@@ -501,7 +501,7 @@ namespace MyGUI
 
 		mpD3DContext->PSSetSamplers( 0, 1, &mSamplerState );
 
-		float dims[4] = { float( mViewSize.width ), float( mViewSize.height ), 0, 0 };
+		float dims[4] = { float( mViewSize.width ), float( mViewSize.height ), _mixFactor, 0 };
 		D3D11_MAPPED_SUBRESOURCE subResource;
 		mpD3DContext->Map( mConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource );
 		memcpy( subResource.pData, dims, sizeof( dims ) );
