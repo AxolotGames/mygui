@@ -21,6 +21,7 @@ struct ID3D11RasterizerState;
 struct ID3D11DepthStencilState;
 struct ID3D11InputLayout;
 struct ID3D11ShaderResourceView;
+struct ID3D11Buffer;
 
 namespace MyGUI
 {
@@ -105,6 +106,7 @@ namespace MyGUI
 		ID3D11RasterizerState*   mRasterizerState;
 		ID3D11DepthStencilState* mDepthStencilState;
 		ID3D11InputLayout*       mInputLayout0, *mInputLayout1;
+		ID3D11Buffer*			 mConstantBuffer;
 
 	private:
 		IntSize                  mViewSize;

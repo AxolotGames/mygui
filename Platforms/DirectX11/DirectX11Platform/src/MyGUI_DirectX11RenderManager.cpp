@@ -59,9 +59,14 @@ namespace MyGUI
 
 		uniform Texture2D<float4> mixTexture : register( t1 );
 
+		cbuffer CB_VIEWPORT : register( b0 )
+		{
+			float4 viewport;
+		};
+
 		float4 main( in float4 inPosition : SV_POSITION, in float4 inColor : TEXCOORD0, in float2 inTexcoord : TEXCOORD1 ) : SV_TARGET 
 		{
-			float2 vUv = float2( inPosition.x / 1024, inPosition.y / 1024 );
+			float2 vUv = float2( inPosition.x / viewport.x, inPosition.y / viewport.y );
 
 			float4 vColor = sampleTexture.SampleLevel( sampleSampler, inTexcoord, 0 ).rgba * inColor;
 			float4 vMix = mixTexture.SampleLevel( sampleSampler, vUv, 0 ).rgba;
@@ -296,6 +301,15 @@ namespace MyGUI
 
 		signature1->Release();
 
+		// Create constant buffer
+		D3D11_BUFFER_DESC desc{};
+		desc.ByteWidth = 16;
+		desc.StructureByteStride = 0;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		mpD3DDevice->CreateBuffer( &desc, nullptr, &mConstantBuffer );
+
 		mUpdate = false;
 
 		MYGUI_PLATFORM_LOG(Info, getClassTypeName() << " successfully initialized");
@@ -322,6 +336,7 @@ namespace MyGUI
 		if ( mRasterizerState ) mRasterizerState->Release();
 		if ( mInputLayout0 ) mInputLayout0->Release();
 		if ( mInputLayout1 ) mInputLayout1->Release();
+		if ( mConstantBuffer ) mConstantBuffer->Release();
 		if ( mpD3DContext) mpD3DContext->Release();
 
 		MYGUI_PLATFORM_LOG(Info, getClassTypeName() << " successfully shutdown");
@@ -486,9 +501,17 @@ namespace MyGUI
 
 		mpD3DContext->PSSetSamplers( 0, 1, &mSamplerState );
 
-		ID3D11ShaderResourceView* const views[] = { texture->mResourceView, texture->mResourceView };
-		mpD3DContext->PSSetShaderResources( 0, ARRAYSIZE(views), views );
+		float dims[4] = { float( mViewSize.width ), float( mViewSize.height ), 0, 0 };
+		D3D11_MAPPED_SUBRESOURCE subResource;
+		mpD3DContext->Map( mConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource );
+		memcpy( subResource.pData, dims, sizeof( dims ) );
+		mpD3DContext->Unmap( mConstantBuffer, 0 );
 
+		mpD3DContext->PSSetConstantBuffers( 0, 1, &mConstantBuffer );
+
+		ID3D11ShaderResourceView* const views[] = { texture->mResourceView, _mixTexture };
+		mpD3DContext->PSSetShaderResources( 0, ARRAYSIZE( views ), views );
+	
 		UINT stride = sizeof( Vertex ), offset = 0;
 		mpD3DContext->IASetVertexBuffers( 0, 1, &buffer->mBuffer, &stride, &offset );
 		mpD3DContext->IASetInputLayout( mInputLayout1 );
