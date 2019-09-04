@@ -66,12 +66,18 @@ namespace MyGUI
 
 		float4 main( in float4 inPosition : SV_POSITION, in float4 inColor : TEXCOORD0, in float2 inTexcoord : TEXCOORD1 ) : SV_TARGET 
 		{
-			float2 vUv = float2( inPosition.x / vViewportMixfactor.x, inPosition.y / vViewportMixfactor.y );
+			float4 vColor = sampleTexture.SampleLevel( sampleSampler, inTexcoord, 0 ).rgba;
+			float fAlpha = vColor.a;
+			vColor = vColor * inColor;
 
-			float4 vColor = sampleTexture.SampleLevel( sampleSampler, inTexcoord, 0 ).rgba * inColor;
-			float4 vMix = mixTexture.SampleLevel( sampleSampler, vUv, 0 ).rgba;
+			if( fAlpha <= 0.1f )
+				discard;
 			
-			return lerp( vColor, vMix, vViewportMixfactor.z );
+			float2 vMixUv = float2( inPosition.x / vViewportMixfactor.x, inPosition.y / vViewportMixfactor.y );
+
+			float4 vMix = mixTexture.SampleLevel( sampleSampler, vMixUv, 0 ).rgba;
+
+			return lerp( vMix, vColor, fAlpha );
 		}
 	)";
 
