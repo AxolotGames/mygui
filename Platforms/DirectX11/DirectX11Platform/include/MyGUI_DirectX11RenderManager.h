@@ -20,6 +20,8 @@ struct ID3D11BlendState;
 struct ID3D11RasterizerState;
 struct ID3D11DepthStencilState;
 struct ID3D11InputLayout;
+struct ID3D11ShaderResourceView;
+struct ID3D11Buffer;
 
 namespace MyGUI
 {
@@ -88,6 +90,9 @@ namespace MyGUI
 		void drawOneFrame();
 		void setViewSize(int _width, int _height);
 
+		/*modified*/
+		void doRenderUsingMixShader( IVertexBuffer* _buffer, ITexture* _texture, ID3D11ShaderResourceView* _mixTexture, float _mixFactor, size_t _count );
+
 	private:
 		void destroyAllResources();
 
@@ -95,12 +100,13 @@ namespace MyGUI
 		ID3D11Device*            mpD3DDevice;
 		ID3D11DeviceContext*     mpD3DContext;
 		ID3D11VertexShader*      mVertexShader0, *mVertexShader1;
-		ID3D11PixelShader*       mPixelShader0, *mPixelShader1, *mPixelShader2;
+		ID3D11PixelShader*       mPixelShader0, *mPixelShader1, *mPixelShader2, *mPixelShader3;
 		ID3D11SamplerState*      mSamplerState;
 		ID3D11BlendState*        mBlendState;
 		ID3D11RasterizerState*   mRasterizerState;
 		ID3D11DepthStencilState* mDepthStencilState;
 		ID3D11InputLayout*       mInputLayout0, *mInputLayout1;
+		ID3D11Buffer*			 mConstantBuffer;
 
 	private:
 		IntSize                  mViewSize;
