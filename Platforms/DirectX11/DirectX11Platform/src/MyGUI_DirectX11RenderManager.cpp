@@ -75,9 +75,9 @@ namespace MyGUI
 			
 			float2 vMixUv = float2( inPosition.x / vViewportMixfactor.x, inPosition.y / vViewportMixfactor.y );
 
-			float4 vMix = mixTexture.SampleLevel( sampleSampler, vMixUv, 0 ).rgba;
+			float3 vMix = mixTexture.SampleLevel( sampleSampler, vMixUv, 0 ).rgb;
 
-			return lerp( vMix, vColor, fAlpha );
+			return float4( lerp( vMix, vColor.rgb, fAlpha ), 1.0 );
 		}
 	)";
 
