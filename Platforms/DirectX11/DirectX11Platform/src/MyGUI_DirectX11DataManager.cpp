@@ -16,6 +16,7 @@ namespace MyGUI
 	DirectX11DataManager::DirectX11DataManager() :
 		mIsInitialise(false)
 	{
+		mGetFullPathCallback = []( const std::string&, bool& success ) -> std::string { success = false; return ""; };
 	}
 
 	void DirectX11DataManager::initialise()
@@ -63,8 +64,16 @@ namespace MyGUI
 
 	bool DirectX11DataManager::isDataExist(const std::string& _name)
 	{
-		const VectorString& files = getDataListNames(_name);
-		return !files.empty();
+		bool callbackSuccess = false;
+
+		mGetFullPathCallback( _name, callbackSuccess );
+		
+		if( !callbackSuccess )
+		{
+			const VectorString& files = getDataListNames( _name );
+			return !files.empty();
+		}
+		return true;
 	}
 
 	const VectorString& DirectX11DataManager::getDataListNames(const std::string& _pattern)
@@ -91,14 +100,11 @@ namespace MyGUI
 		static std::string path;
 		bool callbackSuccess = false;
 		
-		if( mGetFullPathCallback )
-		{
-			const std::string result = mGetFullPathCallback(_name, callbackSuccess);
+		const std::string result = mGetFullPathCallback(_name, callbackSuccess);
 
-			if( callbackSuccess )
-			{
-				path = result;
-			}
+		if( callbackSuccess )
+		{
+			path = result;
 		}
 		
 		if (!callbackSuccess)

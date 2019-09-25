@@ -24,6 +24,7 @@ namespace MyGUI
 		mResourceView(nullptr),
 		mWidth(0),
 		mHeight(0),
+		mExternal(false),
 		mName(_name),
 		mNumElemBytes(0),
 		mLock(false),
@@ -99,18 +100,12 @@ namespace MyGUI
 	{
 		destroy();
 
-		UString fullname = DirectX11DataManager::getInstance().getDataPath(_filename);
+		UString fullname = DirectX11DataManager::getInstance().getDataPath( _filename );
 		HRESULT hr;
 
 		if( sCreateTextureCallback )
 		{
-			mTexture = sCreateTextureCallback->createTextureFromFile( fullname );
-
-			D3D11_TEXTURE2D_DESC desc;
-			mTexture->GetDesc( &desc );
-
-			mWidth = desc.Width;
-			mHeight = desc.Height;
+			mTexture = sCreateTextureCallback->createTextureFromFile( fullname, mName, mWidth, mHeight, mExternal );
 		}
 		else
 		{
@@ -166,6 +161,9 @@ namespace MyGUI
 
 			HRESULT result = mManager->mpD3DDevice->CreateTexture2D( &desc, &srd, &mTexture );
 			FreeImage_Unload( pBitmap );
+
+			mWidth = int( uWidth );
+			mHeight = int( uHeight );
 		}
 
 		D3D11_TEXTURE2D_DESC desc;
@@ -178,8 +176,6 @@ namespace MyGUI
 		srvDesc.Texture2D.MostDetailedMip = 0;
 
 		mPixelFormat = PixelFormat::R8G8B8A8;
-		mWidth = desc.Width;
-		mHeight = desc.Height;
 		
 		hr = mManager->mpD3DDevice->CreateShaderResourceView(mTexture, &srvDesc, &mResourceView);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Create Shader ResourceView failed!");
@@ -189,7 +185,10 @@ namespace MyGUI
 	{
 		if ( mTexture )
 		{
-			mTexture->Release();
+			if( mExternal == false )
+			{
+				mTexture->Release();
+			}
 			mTexture = 0;
 		}
 
@@ -274,6 +273,30 @@ namespace MyGUI
 	{
 		if ( mRenderTarget == 0 ) mRenderTarget = new DirectX11RTTexture(this, mManager);
 		return mRenderTarget;
+	}
+
+	bool DirectX11Texture::setTexture( ::ID3D11Texture2D* _texture, bool _external )
+	{
+		D3D11_TEXTURE2D_DESC newDesc;
+
+		_texture->GetDesc( &newDesc );
+
+		HRESULT hr;
+		mResourceView->Release();
+		
+		mTexture = _texture;
+		mExternal = _external;
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+		srvDesc.Format = newDesc.Format;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = 1;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+
+		hr = mManager->mpD3DDevice->CreateShaderResourceView( mTexture, &srvDesc, &mResourceView );
+		MYGUI_PLATFORM_ASSERT( hr == S_OK, "Create Shader ResourceView failed!" );
+
+		return hr == S_OK;
 	}
 
 	ID3D11Texture2D* DirectX11Texture::getTexture()
