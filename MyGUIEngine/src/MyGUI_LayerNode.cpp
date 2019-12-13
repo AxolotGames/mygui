@@ -167,7 +167,7 @@ namespace MyGUI
 				itemFound = true;
 				continue;
 			}
-			else if (!(*iter)->getManualRender() && (*iter)->getTexture() == _texture)
+			else if ((*iter)->getTexture() == _texture && (*iter)->getManualRender() == _manualRender)
 			{
 				iter++;
 				itemFound = true;
@@ -181,6 +181,7 @@ namespace MyGUI
 		{
 			iter--;
 			(*iter)->setTexture(_texture);
+			(*iter)->setManualRender(_manualRender);
 
 			return (*iter);
 		}
@@ -200,7 +201,7 @@ namespace MyGUI
 		// use first buffer with same texture or empty buffer
 		for (VectorRenderItem::iterator iter = mSecondRenderItems.begin(); iter != mSecondRenderItems.end(); ++iter)
 		{
-			if ((*iter)->getTexture() == _texture)
+			if ((*iter)->getTexture() == _texture && (*iter)->getManualRender() == _manualRender)
 			{
 				return (*iter);
 			}
