@@ -204,9 +204,6 @@ namespace MyGUI
 		VectorWidgetPtr::iterator iter = std::find(mWidgetChild.begin(), mWidgetChild.end(), _widget);
 		if (iter != mWidgetChild.end())
 		{
-			// сохраняем указатель
-			MyGUI::Widget* widget = *iter;
-
 			// удаляем из списка
 			mWidgetChild.erase(iter);
 
@@ -214,7 +211,7 @@ namespace MyGUI
 			mWidgetManager->unlinkFromUnlinkers(_widget);
 
 			// непосредственное удаление
-			WidgetManager::getInstance()._deleteWidget(widget);
+			WidgetManager::getInstance()._deleteWidget(_widget);
 		}
 		else
 		{
