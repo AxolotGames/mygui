@@ -70,8 +70,10 @@ namespace MyGUI
 			float fAlpha = vColor.a;
 			vColor = vColor * inColor;
 
-			if( fAlpha <= 0.1f )
+			if( fAlpha == 0.0 )
 				discard;
+			if( fAlpha < 0.5 )
+				return float4( vColor.rgb, fAlpha );
 			
 			float2 vMixUv = float2( inPosition.x / vViewportMixfactor.x, inPosition.y / vViewportMixfactor.y );
 
