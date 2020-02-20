@@ -32,7 +32,7 @@ namespace MyGUI
 		*/
 		static IntCoord convertFromRelative(const FloatCoord& _coord, const IntSize& _view)
 		{
-			return IntCoord(int(_coord.left * _view.width), int(_coord.top * _view.height), int(_coord.width * _view.width), int(_coord.height * _view.height));
+			return IntCoord(int(_coord.left * _view.width + 0.5f), int(_coord.top * _view.height + 0.5f), int(_coord.width * _view.width + 0.5f), int(_coord.height * _view.height + 0.5f));
 		}
 
 		/* Convert from relative to pixel coordinates.
@@ -40,7 +40,7 @@ namespace MyGUI
 		*/
 		static IntSize convertFromRelative(const FloatSize& _size, const IntSize& _view)
 		{
-			return IntSize(int(_size.width * _view.width), int(_size.height * _view.height));
+			return IntSize(int(_size.width * _view.width + 0.5f), int(_size.height * _view.height + 0.5f));
 		}
 
 		/* Convert from relative to pixel coordinates.
@@ -48,7 +48,7 @@ namespace MyGUI
 		*/
 		static IntPoint convertFromRelative(const FloatPoint& _point, const IntSize& _view)
 		{
-			return IntPoint(int(_point.left * _view.width), int(_point.top * _view.height));
+			return IntPoint(int(_point.left * _view.width + 0.5f), int(_point.top * _view.height + 0.5f));
 		}
 
 		/* Convert from pixel to relative coordinates.
