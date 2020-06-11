@@ -46,10 +46,10 @@ namespace MyGUI
 		"}\n"
 	};
 
-	static const char psTexturedSourceL8A8[] =
+	static const char psTexturedSourceR8[] =
 	{
 		"void main( uniform Texture2D<float4> sampleTexture : register(t0), uniform SamplerState sampleSampler : register(s0), in float4 inPosition : SV_POSITION, in float4 inColor : TEXCOORD0, in float2 inTexcoord : TEXCOORD1, out float4 Out : SV_TARGET ) {\n"
-		"	Out = sampleTexture.SampleLevel(sampleSampler, inTexcoord, 0).rrrg * inColor;\n"
+		"	Out = float4(1.0, 1.0, 1.0, sampleTexture.SampleLevel(sampleSampler, inTexcoord, 0).r) * inColor;\n"
 		"}\n"
 	};
 
@@ -219,7 +219,7 @@ namespace MyGUI
 		// Build Textured L8A8 Pixel Shader
 		bytecode = 0;
 		errors = 0;
-		hr = D3DCompile(psTexturedSourceL8A8, strlen( psTexturedSourceL8A8 ), "PixelShader2", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors);
+		hr = D3DCompile(psTexturedSourceR8, strlen( psTexturedSourceR8 ), "PixelShader2", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Compilation failed, unknown errors!"));
 
 		hr = mpD3DDevice->CreatePixelShader(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), 0, &mPixelShader2);
@@ -380,7 +380,7 @@ namespace MyGUI
 			DirectX11VertexBuffer* buffer = static_cast<DirectX11VertexBuffer*>(_buffer);
 
 			mpD3DContext->VSSetShader(mVertexShader1, 0, 0);
-			if( texture->getFormat() == PixelFormat::L8A8 )
+			if( texture->getFormat() == PixelFormat::L8 )
 			{
 				mpD3DContext->PSSetShader(mPixelShader2, 0, 0);
 			}
