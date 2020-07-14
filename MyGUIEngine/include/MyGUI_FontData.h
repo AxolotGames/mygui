@@ -23,6 +23,7 @@ namespace MyGUI
 			CR = 0x000D,
 			Space = 0x0020,
 			NEL = 0x0085,
+			ZWSP = 0x200B,
 
 			// The following are special code points. These are used represent displayable text elements that do not correspond to
 			// any actual Unicode code point. To prevent collisions, they must be defined with values higher than that of the

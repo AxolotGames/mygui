@@ -202,15 +202,20 @@ namespace MyGUI
 				}
 			}
 
-			const GlyphInfo* info = _font->getGlyphInfo(character);
-
-			if (info == nullptr)
-				continue;
-
 			if (FontCodeType::Space == character || FontCodeType::Tab == character)
 			{
 				roll_back.set(line_info.symbols.size(), index, count, width);
 			}
+			else if (FontCodeType::ZWSP == character)
+			{
+				roll_back.set(line_info.symbols.size(), index, count, width);
+				continue;
+			}
+
+			const GlyphInfo* info = _font->getGlyphInfo(character);
+
+			if (info == nullptr)
+				continue;
 
 			float char_width = info->width;
 			float char_height = info->height;
