@@ -203,19 +203,20 @@ namespace MyGUI
 				}
 			}
 
+			if (character == FontCodeType::Space || character == FontCodeType::Tab)
+			{
+				roll_back.set(line_info.simbols.size(), index, count, width);
+			}
+			else if (character == FontCodeType::ZWSP)
+			{
+				roll_back.set(line_info.simbols.size(), index, count, width);
+				continue;
+			}
+
 			GlyphInfo* info = _font->getGlyphInfo(character);
 
 			if (info == nullptr)
 				continue;
-
-			if (FontCodeType::Space == character)
-			{
-				roll_back.set(line_info.simbols.size(), index, count, width);
-			}
-			else if (FontCodeType::Tab == character)
-			{
-				roll_back.set(line_info.simbols.size(), index, count, width);
-			}
 
 			float char_width = info->width;
 			float char_height = info->height;
