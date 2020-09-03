@@ -19,7 +19,7 @@ namespace tools
 
 		struct StrCmpI : public std::binary_function<std::string, std::string, bool>
 		{
-			result_type operator()(const first_argument_type& _a, const second_argument_type& _b)
+			result_type operator()(const first_argument_type& _a, const second_argument_type& _b) const
 			{
 				size_t aLength = _a.length(), bLength = _b.length(), length = (std::min)(aLength, bLength);
 				first_argument_type::const_iterator aIter = _a.begin();
