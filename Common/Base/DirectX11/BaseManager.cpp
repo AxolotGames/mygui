@@ -422,9 +422,23 @@ namespace base
 	{
 		if (mDevice != nullptr)
 		{
-			// Ресайзимся
-			mSwapChain->ResizeBuffers(1, _width, _height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+			ID3D11RenderTargetView* nullViews [] = { nullptr };
+			mDeviceContext->OMSetRenderTargets(1, nullViews, NULL);
+			
+			mBackBuffer->Release();		
+			mRenderTarget->Release();
+			 
+			mDeviceContext->ClearState();
+			mDeviceContext->Flush();
+			
+			mSwapChain->ResizeBuffers(0, _width, _height, DXGI_FORMAT_UNKNOWN, 0);
 
+			mSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&mBackBuffer );
+			
+			mDevice->CreateRenderTargetView( mBackBuffer, NULL, &mRenderTarget );
+			
+			mDeviceContext->OMSetRenderTargets( 1, &mRenderTarget, NULL );
+			
 			// Устанавливаем новый вьюпорт
 			D3D11_VIEWPORT vp;
 			vp.Width = (float)_width;
@@ -471,6 +485,7 @@ namespace base
 		swapChainDesc.SampleDesc.Count = 1;
 		swapChainDesc.SampleDesc.Quality = 0;
 		swapChainDesc.Windowed = _windowed;
+		swapChainDesc.Flags = 0;
 
 		HRESULT hr = S_OK;
 
@@ -490,14 +505,12 @@ namespace base
 		{
 			return false;
 		}
-
-		ID3D11Texture2D* backBuffer;
-
+		
 		// Достаём back buffer из swap chain
-		hr = mSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&backBuffer );
+		hr = mSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&mBackBuffer );
 
 		// Создаём render target для back buffer
-		mDevice->CreateRenderTargetView( backBuffer, NULL, &mRenderTarget );
+		mDevice->CreateRenderTargetView( mBackBuffer, NULL, &mRenderTarget );
 
 		// Устанавливаем back buffer rt текущим
 		mDeviceContext->OMSetRenderTargets( 1, &mRenderTarget, NULL );
@@ -531,6 +544,12 @@ namespace base
 
 	void BaseManager::destroyRender()
 	{
+		if (mBackBuffer)
+		{
+			mBackBuffer->Release();
+			mBackBuffer = nullptr;
+		}
+		
 		if (mRenderTarget)
 		{
 			mRenderTarget->Release();
