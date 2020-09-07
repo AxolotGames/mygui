@@ -26,6 +26,7 @@
 #include "GridManager.h"
 #include "FactoryManager.h"
 #include "ComponentFactory.h"
+#include "MyGUI_CommonStateInfo.h"
 
 namespace tools
 {
@@ -69,7 +70,11 @@ namespace tools
 
 		std::string subWidgetCategory = MyGUI::SubWidgetManager::getInstance().getCategoryName();
 		MyGUI::FactoryManager::getInstance().registerFactory<MyGUI::FilterNone>(subWidgetCategory);
+		MyGUI::FactoryManager::getInstance().registerFactory<MyGUI::SubSkin>( subWidgetCategory, "BlurrySubSkin" );
 
+		std::string stateCategoryName = MyGUI::SubWidgetManager::getInstance().getStateCategoryName();
+		MyGUI::FactoryManager::getInstance().registerFactory<MyGUI::SubSkinStateInfo>( stateCategoryName, "BlurrySubSkin" );
+		
 		new SettingsManager();
 		SettingsManager::getInstance().loadSettingsFile(MyGUI::DataManager::getInstance().getDataPath("Settings.xml"));
 		std::string userSettingsFileName = SettingsManager::getInstance().getValue("Editor/UserSettingsFileName");
