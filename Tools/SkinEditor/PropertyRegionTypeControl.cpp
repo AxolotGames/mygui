@@ -31,6 +31,7 @@ namespace tools
 		assignWidget(mName, "Name", false);
 		assignWidget(mComboBox, "ComboBox");
 
+		mComboBox->addItem("BlurrySubSkin");
 		mComboBox->addItem("SubSkin");
 		mComboBox->addItem("TileRect");
 		mComboBox->addItem("TileRect Horz");
