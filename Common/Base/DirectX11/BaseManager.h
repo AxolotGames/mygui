@@ -22,6 +22,7 @@ struct ID3D11DeviceContext;
 struct ID3D11RenderTargetView;
 struct IDXGISwapChain;
 
+struct ID3D11Texture2D;
 
 struct HWND__;
 typedef HWND__* HWND;
@@ -103,6 +104,8 @@ namespace base
 
 		std::string mRootMedia;
 		std::string mResourceFileName;
+
+		ID3D11Texture2D* mBackBuffer;
 	};
 
 } // namespace base

@@ -293,7 +293,7 @@ namespace tools
 
 	void SkinExportSerializer::fillSeparatorData(DataPtr _data, pugi::xml_node _node)
 	{
-		pugi::xpath_node_set regions = _node.select_nodes("BasisSkin[@type=\"SubSkin\"or@type=\"TileRect\"]");
+		pugi::xpath_node_set regions = _node.select_nodes("BasisSkin[@type=\"SubSkin\"or@type=\"TileRect\"or@type=\"BlurrySubSkin\"]");
 		for (pugi::xpath_node_set::const_iterator region = regions.begin(); region != regions.end(); region ++)
 		{
 			MyGUI::IntCoord offset = MyGUI::IntCoord::parse((*region).node().attribute("offset").value());
@@ -339,7 +339,7 @@ namespace tools
 
 	void SkinExportSerializer::fillRegionData(DataPtr _data, pugi::xml_node _node)
 	{
-		pugi::xpath_node_set regions = _node.select_nodes("BasisSkin[@type=\"SubSkin\"or@type=\"TileRect\"]");
+		pugi::xpath_node_set regions = _node.select_nodes("BasisSkin[@type=\"SubSkin\"or@type=\"TileRect\"or@type=\"BlurrySubSkin\"]");
 		for (pugi::xpath_node_set::const_iterator region = regions.begin(); region != regions.end(); region ++)
 		{
 			DataPtr regionData = nullptr;
