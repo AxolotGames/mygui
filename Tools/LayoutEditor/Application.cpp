@@ -144,9 +144,9 @@ namespace tools
 		new GridManager();
 		GridManager::getInstance().initialise();
 
-		MyGUI::ResourceManager::getInstance().load("Initialise.xml");
-
 		LoadGuiSettings();
+		
+		MyGUI::ResourceManager::getInstance().load("Initialise.xml");
 
 		bool maximized = SettingsManager::getInstance().getValue<bool>("Controls/Main/Maximized");
 		setWindowMaximized(maximized);
