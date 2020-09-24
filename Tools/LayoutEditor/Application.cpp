@@ -28,6 +28,11 @@
 #include "ComponentFactory.h"
 #include "MyGUI_CommonStateInfo.h"
 
+class BlurrySubSkin : public MyGUI::SubSkin
+{
+	MYGUI_RTTI_DERIVED( BlurrySubSkin )
+};
+
 namespace tools
 {
 	MYGUI_SINGLETON_DEFINITION(Application);
