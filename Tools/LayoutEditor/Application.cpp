@@ -28,6 +28,12 @@
 #include "ComponentFactory.h"
 #include "MyGUI_CommonStateInfo.h"
 
+
+class BlurrySubSkin : public MyGUI::SubSkin
+{
+	MYGUI_RTTI_DERIVED( BlurrySubSkin )
+};
+
 template <> tools::Application* MyGUI::Singleton<tools::Application>::msInstance = nullptr;
 template <> const char* MyGUI::Singleton<tools::Application>::mClassTypeName = "Application";
 
