@@ -25,6 +25,7 @@ namespace MyGUI
 		mWidth(0),
 		mHeight(0),
 		mExternal(false),
+		mExternalSRV( false ),
 		mName(_name),
 		mNumElemBytes(0),
 		mLock(false),
@@ -185,7 +186,7 @@ namespace MyGUI
 	{
 		if ( mTexture )
 		{
-			if( mExternal == false )
+			if( !mExternal )
 			{
 				mTexture->Release();
 			}
@@ -194,7 +195,10 @@ namespace MyGUI
 
 		if ( mResourceView )
 		{
-			mResourceView->Release();
+			if( !mExternalSRV ) 
+			{
+				mResourceView->Release();
+			}
 			mResourceView = 0;
 		}
 	}
@@ -277,28 +281,54 @@ namespace MyGUI
 
 	bool DirectX11Texture::setTexture( ::ID3D11Texture2D* _texture, bool _external )
 	{
-		D3D11_TEXTURE2D_DESC newDesc;
-
-		_texture->GetDesc( &newDesc );
-
-		HRESULT hr;
-		mResourceView->Release();
+		destroy();
 		
 		mTexture = _texture;
 		mExternal = _external;
-
+		
+		D3D11_TEXTURE2D_DESC newDesc;
+		_texture->GetDesc( &newDesc );
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 		srvDesc.Format = newDesc.Format;
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = 1;
 		srvDesc.Texture2D.MostDetailedMip = 0;
-
+		HRESULT hr;
 		hr = mManager->mpD3DDevice->CreateShaderResourceView( mTexture, &srvDesc, &mResourceView );
 		MYGUI_PLATFORM_ASSERT( hr == S_OK, "Create Shader ResourceView failed!" );
 
 		return hr == S_OK;
 	}
 
+	bool DirectX11Texture::setTexture ( ID3D11Texture2D* _texture, unsigned _width, unsigned _height,
+		ID3D11ShaderResourceView* _srv, bool _external, TextureUsage _usage, PixelFormat _format )
+	{
+		destroy();
+		mPixelFormat = _format;
+		mTextureUsage = _usage;
+		mTexture = _texture;
+		mExternal = _external;
+		mWidth = static_cast<int>( _width );
+		mHeight = static_cast<int>( _height );
+		
+		if( _srv )
+		{
+			mResourceView = _srv;
+			mExternalSRV = true;
+		}
+		else
+		{
+			mExternalSRV = false;
+			D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+			srvDesc.Format = getDXGIFormatFromPixelFormat(_format);
+			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			srvDesc.Texture2D.MipLevels = 1;
+			srvDesc.Texture2D.MostDetailedMip = 0;
+			return mManager->mpD3DDevice->CreateShaderResourceView(mTexture, &srvDesc, &mResourceView) == S_OK;
+		}
+		return true;
+	}
+	
 	ID3D11Texture2D* DirectX11Texture::getTexture()
 	{
 		return mTexture;

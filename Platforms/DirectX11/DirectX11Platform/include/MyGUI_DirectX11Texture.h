@@ -53,6 +53,7 @@ namespace MyGUI
 		virtual IRenderTarget*	getRenderTarget();
 
 		bool					setTexture( ID3D11Texture2D* _texture, bool _external );
+		bool					setTexture ( ID3D11Texture2D* _texture, unsigned _width, unsigned _height, ID3D11ShaderResourceView* _srv, bool _external, TextureUsage _usage, PixelFormat _format );
 		ID3D11Texture2D*		getTexture();
 
 		static void				setCreateTextureCallback( ICreateTextureCallbackStruct* _callbackStruct );
@@ -69,6 +70,7 @@ namespace MyGUI
 		int                       mWidth;
 		int                       mHeight;
 		bool                      mExternal;
+		bool					  mExternalSRV;
 		TextureUsage              mTextureUsage;
 		PixelFormat				  mPixelFormat;
 		size_t                    mNumElemBytes;
