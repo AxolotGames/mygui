@@ -11,6 +11,12 @@
 #include <exception>
 #include <string>
 
+#if MYGUI_COMPILER == MYGUI_COMPILER_MSVC
+ // disable: warning C4275: non dll-interface class '***' used as base for dll-interface clas '***'
+#	pragma warning (push)
+#	pragma warning (disable : 4275)
+#endif
+
 namespace MyGUI
 {
 
@@ -20,9 +26,6 @@ namespace MyGUI
 		Exception(const std::string& _description, const std::string& _source, const char* _file, long _line);
 
 		Exception(const Exception& _rhs);
-
-		// Needed for  compatibility with std::exception
-		~Exception() throw();
 
 		Exception& operator = (const Exception& _rhs);
 
@@ -36,8 +39,7 @@ namespace MyGUI
 
 		virtual const std::string& getDescription() const;
 
-		// Override std::exception::what
-		const char* what() const throw();
+		const char* what() const noexcept override;
 
 	protected:
 		std::string mDescription;
@@ -48,5 +50,9 @@ namespace MyGUI
 	};
 
 } // namespace MyGUI
+
+#if MYGUI_COMPILER == MYGUI_COMPILER_MSVC
+#	pragma warning (pop)
+#endif
 
 #endif // MYGUI_EXCEPTION_H_

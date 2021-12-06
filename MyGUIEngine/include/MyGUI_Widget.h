@@ -109,11 +109,11 @@ namespace MyGUI
 		}
 
 		/** Set widget position (position of left top corner) */
-		virtual void setPosition(const IntPoint& _value);
+		void setPosition(const IntPoint& _value) override;
 		/** Set widget size */
-		virtual void setSize(const IntSize& _value);
+		void setSize(const IntSize& _value) override;
 		/** Set widget position and size */
-		virtual void setCoord(const IntCoord& _value);
+		void setCoord(const IntCoord& _value) override;
 
 		/** See Widget::setPosition(const IntPoint& _pos) */
 		void setPosition(int _left, int _top);
@@ -225,6 +225,7 @@ namespace MyGUI
 
 		/** Get client area widget or nullptr if widget don't have client */
 		Widget* getClientWidget();
+		const Widget* getClientWidget() const;
 
 		/** Detach widget from widgets hierarchy
 			@param _layer Attach to specified layer (if any)
@@ -302,7 +303,7 @@ namespace MyGUI
 
 	protected:
 		// все создание только через фабрику
-		virtual ~Widget();
+		~Widget() override = default;
 
 		virtual void shutdownOverride();
 		virtual void initialiseOverride();
@@ -321,8 +322,8 @@ namespace MyGUI
 		virtual void baseUpdateEnable();
 
 		// наследуемся он LayerInfo
-		virtual ILayerItem* getLayerItemByPoint(int _left, int _top) const;
-		virtual const IntCoord& getLayerItemCoord() const;
+		ILayerItem* getLayerItemByPoint(int _left, int _top) const override;
+		const IntCoord& getLayerItemCoord() const override;
 
 		template <typename T>
 		void assignWidget(T*& _widget, const std::string& _name)
@@ -347,12 +348,12 @@ namespace MyGUI
 		virtual void onWidgetDestroy(Widget* _widget);
 
 		void setWidgetClient(Widget* _widget);
+		/// If there is client widget return it, otherwise return this
+		Widget* _getClientWidget();
 
 		virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
 	private:
-		void frameEntered(float _frame);
-
 		const WidgetInfo* initialiseWidgetSkinBase(ResourceSkin* _info, ResourceLayout* _templateInfo);
 		void shutdownWidgetSkinBase();
 
@@ -377,7 +378,7 @@ namespace MyGUI
 
 		void setSkinProperty(ResourceSkin* _info);
 
-		virtual void resizeLayerItemView(const IntSize& _oldView, const IntSize& _newView);
+		void resizeLayerItemView(const IntSize& _oldView, const IntSize& _newView) override;
 
 		void addWidget(Widget* _widget);
 

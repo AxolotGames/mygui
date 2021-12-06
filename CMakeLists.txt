@@ -25,6 +25,7 @@ include(Utils)
 set(MYGUI_TEMPLATES_DIR "${MYGUI_SOURCE_DIR}/CMake/Templates")
 set(MYGUI_WORK_DIR ${MYGUI_BINARY_DIR})
 
+SET(CMAKE_CXX_STANDARD 11)
 
 #####################################################################
 # Set up the basic build environment
@@ -71,16 +72,10 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_C
 	endif (MYGUI_GCC_VISIBILITY)
 
 	# Fix x64 issues on Linux
-	if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
+	if(("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" OR "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "amd64") AND NOT APPLE)
 		add_definitions(-fPIC)
-	endif()  
+	endif()
 endif ()
-
-# determine system endianess
-include(TestBigEndian)
-test_big_endian(MYGUI_TEST_BIG_ENDIAN)
-
-# Add MyGUIEngine include path
 
 # definitions for samples
 set(MYGUI_LIBRARIES MyGUIEngine)
@@ -107,8 +102,26 @@ endif(WIN32 OR APPLE)
 # Provide user options to customise the build process
 ######################################################################
 
+if (EMSCRIPTEN)
+	set(MYGUI_SAMPLES_INPUT 4 CACHE STRING "")
+	set(MYGUI_STATIC True CACHE BOOL "")
+	set(MYGUI_DISABLE_PLUGINS True CACHE BOOL "")
+	set(MYGUI_USE_SYSTEM_GLEW True CACHE BOOL "")
+
+	set(OPENGL_gl_LIBRARY Dummy CACHE STRING "")
+	set(OPENGL_glu_LIBRARY Dummy CACHE STRING "")
+	set(GLEW_LIBRARY Dummy CACHE STRING "")
+	set(SDL2_LIBRARY Dummy CACHE STRING "")
+	set(SDL2_IMAGE_LIBRARY Dummy CACHE STRING "")
+	set(SDL2_INCLUDE_DIR "" CACHE STRING "")
+	set(SDL2_IMAGE_INCLUDE_DIR "" CACHE STRING "")
+
+	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -O2 --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/Media/@/ -s FULL_ES3=1 -s ALLOW_MEMORY_GROWTH=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]'")
+endif ()
+
 # Customise what to build
 option(MYGUI_STATIC "Static build" FALSE)
+option(MYGUI_DISABLE_PLUGINS "Disable plugins support" FALSE)
 option(MYGUI_USE_FREETYPE "Use freetype for font rendering" TRUE)
 option(MYGUI_DONT_USE_OBSOLETE "Remove obsole functions from build" FALSE)
 
@@ -120,7 +133,8 @@ set(MYGUI_RENDERSYSTEM 6 CACHE STRING
   4 - OpenGL
   5 - Direct3D 9
   6 - Direct3D 11
-  7 - OpenGL 3.x"
+  7 - OpenGL 3.x
+  8 - OpenGL ES 2.0 (Emscripten)"
 )
 
 if(MYGUI_RENDERSYSTEM EQUAL 4 OR MYGUI_RENDERSYSTEM EQUAL 7)
@@ -157,7 +171,7 @@ else()
 	set(MYGUI_SAMPLES_INPUT 1)
 endif()
 
-if(MYGUI_RENDERSYSTEM EQUAL 4)
+if(MYGUI_RENDERSYSTEM EQUAL 4 OR MYGUI_RENDERSYSTEM EQUAL 7 OR MYGUI_RENDERSYSTEM EQUAL 8)
 	set(MYGUI_SAMPLES_INPUT 4)
 endif()
 
@@ -205,13 +219,24 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_C
 			# to avoid warnings from OIS
 			ignore_warnings(${OIS_INCLUDE_DIR})
 		endif ()
+		if (MYGUI_RENDERSYSTEM EQUAL 4 OR MYGUI_RENDERSYSTEM EQUAL 7 OR MYGUI_RENDERSYSTEM EQUAL 8)
+			# to avoid warnings from SDL2
+			ignore_warnings(${SDL2_INCLUDE_DIRS})
+
+			if (NOT MSVC)
+				# violated in glew.h
+				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-id-macro")
+			endif ()
+		endif ()
 
 		if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
                         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything")
+                        # useful, TODO
+                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override")
                         # might be useful
-                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option -Wno-sign-conversion -Wno-conversion -Wno-c++11-extensions -Wno-documentation -Wno-old-style-cast")
+                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-exceptions -Wno-documentation-unknown-command -Wno-unknown-warning-option -Wno-sign-conversion -Wno-conversion -Wno-documentation -Wno-old-style-cast")
                         # not useful
-                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-float-equal -Wno-padded -Wno-padded -Wno-weak-vtables -Wno-duplicate-enum -Wno-exit-time-destructors -Wno-unused-parameter -Wno-global-constructors")
+                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-prototypes -Wno-reorder -Wno-undefined-var-template -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-c++11-extensions -Wno-float-equal -Wno-padded -Wno-padded -Wno-weak-vtables -Wno-duplicate-enum -Wno-exit-time-destructors -Wno-unused-parameter -Wno-global-constructors")
 		else ()
 			# very interesting option, but way too many warnings
 			#add_definitions(-Weffc++)
@@ -228,21 +253,42 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_C
 	endif ()
 endif ()
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	# usage:
+	# UBSAN_OPTIONS=print_stacktrace=1,suppressions=sanitizers/UBSanitizer.supp <command>
+	option(MYGUI_UB_SANITIZER "Compile with undefined behaviour sanitizer" FALSE)
+	if (MYGUI_UB_SANITIZER)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -fno-sanitize-recover=undefined")
+	endif()
+
+	# usage:
+	# ASAN_OPTIONS=alloc_dealloc_mismatch=0,check_initialization_order=1,detect_stack_use_after_return=1 LSAN_OPTIONS=suppressions=sanitizers/LeaksSanitizer.supp <command>
+	# alloc_dealloc_mismatch is here due to issues with Ogre and no clear way to suppress the issue
+	option(MYGUI_ADDRESS_SANITIZER "Compile with address sanitizer" FALSE)
+	if (MYGUI_ADDRESS_SANITIZER)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope")
+	endif()
+endif ()
+
 if (MSVC)
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS")
-	
+
 	# Use the highest warning level for visual studio.
 	if (MYGUI_HIGH_LEVEL_WARNINGS)
 		SET(WARNING_LEVEL "/W4")
-		# disable: warning C4100: '***' : unreferenced formal parameter
-		add_definitions(/wd4100)
-		# disable: warning C4127: conditional expression is constant
-		add_definitions(/wd4127)
-		# disable: warning C4512: '***' : assignment operator could not be generated
-		add_definitions(/wd4512)
 	else ()
 		SET(WARNING_LEVEL "/W3")
 	endif ()
+	# disable: warning C4100: '***' : unreferenced formal parameter
+	add_definitions(/wd4100)
+	# disable: warning C4127: conditional expression is constant
+	add_definitions(/wd4127)
+	# disable: warning C4512: '***' : assignment operator could not be generated
+	add_definitions(/wd4512)
+	# disable: warning C4275: non dll-interface class '***' used as base for dll-interface clas '***'
+	add_definitions(/wd4275)
 
 	if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
 		STRING(REGEX REPLACE "/W[0-4]" "${WARNING_LEVEL}" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -330,6 +376,6 @@ include(Packaging)
 # copy dlls required by SDL2 and SDL2_image
 if(WIN32)
     if(MYGUI_RENDERSYSTEM EQUAL 4)
-    
+
     endif(MYGUI_RENDERSYSTEM EQUAL 4)
 endif(WIN32)

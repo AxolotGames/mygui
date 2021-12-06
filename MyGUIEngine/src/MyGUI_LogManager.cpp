@@ -9,8 +9,7 @@
 #include "MyGUI_FileLogListener.h"
 #include "MyGUI_ConsoleLogListener.h"
 #include "MyGUI_LevelLogFilter.h"
-#include "MyGUI_LogSource.h"
-#include <time.h>
+#include <ctime>
 
 namespace MyGUI
 {
@@ -47,11 +46,7 @@ namespace MyGUI
 
 	LogManager& LogManager::getInstance()
 	{
-		if (msInstance == nullptr)
-		{
-			MYGUI_DBG_BREAK;
-			MYGUI_BASE_EXCEPT("Singleton instance LogManager was not created", "MyGUI");
-		}
+		MYGUI_ASSERT(nullptr != getInstancePtr(), "Singleton instance LogManager was not created");
 		return *msInstance;
 	}
 
@@ -90,17 +85,20 @@ namespace MyGUI
 
 	void LogManager::createDefaultSource(const std::string& _logname)
 	{
-		mConsole = new ConsoleLogListener();
-		mFile = new FileLogListener();
-		mFilter = new LevelLogFilter();
-
-		mFile->setFileName(_logname);
-		mConsole->setEnabled(mConsoleEnable);
-		mFilter->setLoggingLevel(mLevel);
-
 		mDefaultSource = new LogSource();
-		mDefaultSource->addLogListener(mFile);
+
+		mConsole = new ConsoleLogListener();
+		mConsole->setEnabled(mConsoleEnable);
 		mDefaultSource->addLogListener(mConsole);
+
+#ifndef EMSCRIPTEN
+		mFile = new FileLogListener();
+		mFile->setFileName(_logname);
+		mDefaultSource->addLogListener(mFile);
+#endif
+
+		mFilter = new LevelLogFilter();
+		mFilter->setLoggingLevel(mLevel);
 		mDefaultSource->setLogFilter(mFilter);
 
 		mDefaultSource->open();

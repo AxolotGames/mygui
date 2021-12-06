@@ -12,8 +12,8 @@
 namespace MyGUI
 {
 
-	typedef void (*DLL_START_PLUGIN)(void);
-	typedef void (*DLL_STOP_PLUGIN)(void);
+	using DLL_START_PLUGIN = void (*)();
+	using DLL_STOP_PLUGIN = void (*)();
 
 	template <> PluginManager* Singleton<PluginManager>::msInstance = nullptr;
 	template <> const char* Singleton<PluginManager>::mClassTypeName = "PluginManager";
@@ -49,6 +49,9 @@ namespace MyGUI
 
 	bool PluginManager::loadPlugin(const std::string& _file)
 	{
+#ifdef EMSCRIPTEN
+		return false;
+#endif
 		MYGUI_ASSERT(mIsInitialise, getClassTypeName() << " used but not initialised");
 
 		// Load plugin library

@@ -207,7 +207,7 @@ namespace sigslot
 	public:
 		multi_threaded_global()
 		{
-			pthread_mutex_init(get_mutex(), NULL);
+			pthread_mutex_init(get_mutex(), nullptr);
 		}
 
 		multi_threaded_global(const multi_threaded_global&)
@@ -241,12 +241,12 @@ namespace sigslot
 	public:
 		multi_threaded_local()
 		{
-			pthread_mutex_init(&m_mutex, NULL);
+			pthread_mutex_init(&m_mutex, nullptr);
 		}
 
 		multi_threaded_local(const multi_threaded_local&)
 		{
-			pthread_mutex_init(&m_mutex, NULL);
+			pthread_mutex_init(&m_mutex, nullptr);
 		}
 
 		virtual ~multi_threaded_local()
@@ -294,7 +294,9 @@ namespace sigslot
 	class _connection_base0
 	{
 	public:
-		virtual ~_connection_base0() { }
+		virtual ~_connection_base0() = default;
+		_connection_base0() = default;
+		_connection_base0(const _connection_base0& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit() = 0;
 		virtual bool exist(_connection_base0<mt_policy>* conn) = 0;
@@ -306,7 +308,9 @@ namespace sigslot
 	class _connection_base1
 	{
 	public:
-		virtual ~_connection_base1() { }
+		virtual ~_connection_base1() = default;
+		_connection_base1() = default;
+		_connection_base1(const _connection_base1& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit(arg1_type) = 0;
 		virtual bool exist(_connection_base1<arg1_type, mt_policy>* conn) = 0;
@@ -318,7 +322,9 @@ namespace sigslot
 	class _connection_base2
 	{
 	public:
-		virtual ~_connection_base2() { }
+		virtual ~_connection_base2() = default;
+		_connection_base2() = default;
+		_connection_base2(const _connection_base2& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit(arg1_type, arg2_type) = 0;
 		virtual bool exist(_connection_base2<arg1_type, arg2_type, mt_policy>* conn) = 0;
@@ -330,7 +336,9 @@ namespace sigslot
 	class _connection_base3
 	{
 	public:
-		virtual ~_connection_base3() { }
+		virtual ~_connection_base3() = default;
+		_connection_base3() = default;
+		_connection_base3(const _connection_base3& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit(arg1_type, arg2_type, arg3_type) = 0;
 		virtual bool exist(_connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>* conn) = 0;
@@ -342,7 +350,9 @@ namespace sigslot
 	class _connection_base4
 	{
 	public:
-		virtual ~_connection_base4() { }
+		virtual ~_connection_base4() = default;
+		_connection_base4() = default;
+		_connection_base4(const _connection_base4& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit(arg1_type, arg2_type, arg3_type, arg4_type) = 0;
 		virtual bool exist(_connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* conn) = 0;
@@ -354,7 +364,9 @@ namespace sigslot
 	class _connection_base5
 	{
 	public:
-		virtual ~_connection_base5() { }
+		virtual ~_connection_base5() = default;
+		_connection_base5() = default;
+		_connection_base5(const _connection_base5& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type) = 0;
 		virtual bool exist(_connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* conn) = 0;
@@ -366,7 +378,9 @@ namespace sigslot
 	class _connection_base6
 	{
 	public:
-		virtual ~_connection_base6() { }
+		virtual ~_connection_base6() = default;
+		_connection_base6() = default;
+		_connection_base6(const _connection_base6& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type) = 0;
 		virtual bool exist(_connection_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, mt_policy>* conn) = 0;
@@ -378,7 +392,9 @@ namespace sigslot
 	class _connection_base7
 	{
 	public:
-		virtual ~_connection_base7() { }
+		virtual ~_connection_base7() = default;
+		_connection_base7() = default;
+		_connection_base7(const _connection_base7& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type) = 0;
 		virtual bool exist(_connection_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, mt_policy>* conn) = 0;
@@ -390,7 +406,9 @@ namespace sigslot
 	class _connection_base8
 	{
 	public:
-		virtual ~_connection_base8() { }
+		virtual ~_connection_base8() = default;
+		_connection_base8() = default;
+		_connection_base8(const _connection_base8& other) = default;
 		virtual has_slots<mt_policy>* getdest() const = 0;
 		virtual void emit(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type) = 0;
 		virtual bool exist(_connection_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type, mt_policy>* conn) = 0;
@@ -1482,8 +1500,8 @@ namespace sigslot
 
 		_connection0()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection0(dest_type* pobject, void (dest_type::*pmemfun)())
@@ -1533,8 +1551,8 @@ namespace sigslot
 
 		_connection1()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection1(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type))
@@ -1584,8 +1602,8 @@ namespace sigslot
 
 		_connection2()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection2(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type,
@@ -1636,8 +1654,8 @@ namespace sigslot
 
 		_connection3()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection3(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type, arg2_type, arg3_type))
@@ -1687,8 +1705,8 @@ namespace sigslot
 
 		_connection4()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection4(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type))
@@ -1739,8 +1757,8 @@ namespace sigslot
 
 		_connection5()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection5(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type))
@@ -1790,8 +1808,8 @@ namespace sigslot
 
 		_connection6()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection6(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type))
@@ -1841,8 +1859,8 @@ namespace sigslot
 
 		_connection7()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection7(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type))
@@ -1892,8 +1910,8 @@ namespace sigslot
 
 		_connection8()
 		{
-			m_pobject = NULL;
-			m_pmemfun = NULL;
+			m_pobject = nullptr;
+			m_pmemfun = nullptr;
 		}
 
 		_connection8(dest_type* pobject, void (dest_type::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type))

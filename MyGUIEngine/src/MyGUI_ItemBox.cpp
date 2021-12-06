@@ -44,14 +44,12 @@ namespace MyGUI
 		if (isUserString("DragLayer"))
 			mDragLayer = getUserString("DragLayer");
 
-		///@wskin_child{ItemBox, Widget, Client} Клиентская зона.
-		assignWidget(mClient, "Client");
-		if (mClient != nullptr)
+		assignWidget(mScrollViewClient, "Client");
+		if (getClientWidget() != nullptr)
 		{
-			mClient->eventMouseWheel += newDelegate(this, &ItemBox::notifyMouseWheel);
-			mClient->eventMouseButtonPressed += newDelegate(this, &ItemBox::notifyMouseButtonPressed);
-			mClient->eventMouseButtonReleased += newDelegate(this, &ItemBox::notifyMouseButtonReleased);
-			setWidgetClient(mClient);
+			getClientWidget()->eventMouseWheel += newDelegate(this, &ItemBox::notifyMouseWheel);
+			getClientWidget()->eventMouseButtonPressed += newDelegate(this, &ItemBox::notifyMouseButtonPressed);
+			getClientWidget()->eventMouseButtonReleased += newDelegate(this, &ItemBox::notifyMouseButtonReleased);
 		}
 
 		///@wskin_child{ItemBox, ScrollBar, VScroll} Вертикальная полоса прокрутки.
@@ -69,8 +67,8 @@ namespace MyGUI
 		}
 
 		// подписываем клиент для драгэндропа
-		if (mClient != nullptr)
-			mClient->_setContainer(this);
+		if (getClientWidget() != nullptr)
+			getClientWidget()->_setContainer(this);
 
 		requestItemSize();
 
@@ -82,7 +80,6 @@ namespace MyGUI
 	{
 		mVScroll = nullptr;
 		mHScroll = nullptr;
-		mClient = nullptr;
 
 		Base::shutdownOverride();
 	}
@@ -258,7 +255,7 @@ namespace MyGUI
 		const IntPoint& point = InputManager::getInstance().getMousePositionByLayer();
 
 		// сначала проверяем клиентскую зону
-		const IntRect& rect = _getClientAbsoluteRect();
+		const IntRect& rect = _getClientWidget()->getAbsoluteRect();
 		if ((point.left < rect.left) || (point.left > rect.right) || (point.top < rect.top) || (point.top > rect.bottom))
 		{
 			return;
@@ -866,16 +863,6 @@ namespace MyGUI
 		return Align::Default;
 	}
 
-	IntRect ItemBox::_getClientAbsoluteRect()
-	{
-		return _getClientWidget()->getAbsoluteRect();
-	}
-
-	Widget* ItemBox::_getClientWidget()
-	{
-		return mClient == nullptr ? this : mClient;
-	}
-
 	size_t ItemBox::getItemCount() const
 	{
 		return mItemsInfo.size();
@@ -911,26 +898,41 @@ namespace MyGUI
 		return mItemDrag;
 	}
 
-	void ItemBox::setPosition(int _left, int _top)
+	void ItemBox::setVisibleVScroll(bool _value)
 	{
-		setPosition(IntPoint(_left, _top));
+		mVisibleVScroll = _value;
+		updateFromResize();
 	}
 
-	void ItemBox::setSize(int _width, int _height)
+	void ItemBox::setVisibleHScroll(bool _value)
 	{
-		setSize(IntSize(_width, _height));
+		mVisibleHScroll = _value;
+		updateFromResize();
 	}
 
-	void ItemBox::setCoord(int _left, int _top, int _width, int _height)
+	bool ItemBox::isVisibleVScroll() const
 	{
-		setCoord(IntCoord(_left, _top, _width, _height));
+		return mVisibleVScroll;
+	}
+
+	bool ItemBox::isVisibleHScroll() const
+	{
+		return mVisibleHScroll;
 	}
 
 	void ItemBox::setPropertyOverride(const std::string& _key, const std::string& _value)
 	{
-		/// @wproperty{ItemBox, VerticalAlignment, bool} Вертикальное выравнивание.
+		/// @wproperty{ItemBox, VerticalAlignment, bool} Vertical or horizontal alignment.
 		if (_key == "VerticalAlignment")
 			setVerticalAlignment(utility::parseValue<bool>(_value));
+
+		/// @wproperty{ItemBox, VisibleVScroll, bool} Vertical scroll bar visibility.
+		else if (_key == "VisibleVScroll")
+			setVisibleVScroll(utility::parseValue<bool>(_value));
+
+		/// @wproperty{ItemBox, VisibleHScroll, bool} Horizontal scroll bar visibility.
+		else if (_key == "VisibleHScroll")
+			setVisibleHScroll(utility::parseValue<bool>(_value));
 
 		else
 		{

@@ -20,10 +20,6 @@ namespace input
 	{
 	}
 
-	PointerManager::~PointerManager()
-	{
-	}
-
 	void PointerManager::createPointerManager(size_t _handle)
 	{
 		mHwnd = _handle;
@@ -72,7 +68,7 @@ namespace input
 	{
 		POINT point = { 0, 0 };
 		ClientToScreen((HWND)mHwnd, &point);
-		// x и y всегда 0
+		// x Рё y РІСЃРµРіРґР° 0
 		RECT client_rect = { 0, 0, 0, 0 };
 		GetClientRect((HWND)mHwnd, &client_rect);
 

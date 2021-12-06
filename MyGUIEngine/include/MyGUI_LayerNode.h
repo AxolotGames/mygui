@@ -26,52 +26,53 @@ namespace MyGUI
 
 	public:
 		explicit LayerNode(ILayer* _layer, ILayerNode* _parent = nullptr);
-		virtual ~LayerNode();
+		~LayerNode() override;
 
 		// леер, которому мы принадлежим
-		virtual ILayer* getLayer() const;
+		ILayer* getLayer() const override;
 
 		// возвращает отца или nullptr
-		virtual ILayerNode* getParent() const;
+		ILayerNode* getParent() const override;
 
 		// создаем дочерний нод
-		virtual ILayerNode* createChildItemNode();
+		ILayerNode* createChildItemNode() override;
 		// удаляем дочерний нод
-		virtual void destroyChildItemNode(ILayerNode* _node);
+		void destroyChildItemNode(ILayerNode* _node) override;
 
 		// поднимаем дочерний нод
-		virtual void upChildItemNode(ILayerNode* _node);
+		void upChildItemNode(ILayerNode* _node) override;
 
 		// список детей
-		virtual EnumeratorILayerNode getEnumerator() const;
+		EnumeratorILayerNode getEnumerator() const override;
 
-		virtual size_t getLayerNodeCount() const;
+		size_t getLayerNodeCount() const override;
 
-		virtual ILayerNode* getLayerNodeAt(size_t _index) const;
+		ILayerNode* getLayerNodeAt(size_t _index) const override;
 
 		// добавляем айтем к ноду
-		virtual void attachLayerItem(ILayerItem* _item);
+		void attachLayerItem(ILayerItem* _item) override;
 		// удаляем айтем из нода
-		virtual void detachLayerItem(ILayerItem* _item);
+		void detachLayerItem(ILayerItem* _item) override;
 
 		// добавляет саб айтем и возвращает рендер айтем
-		virtual RenderItem* addToRenderItem(ITexture* _texture, bool _firstQueue, bool _manualRender);
+		RenderItem* addToRenderItem(ITexture* _texture, bool _firstQueue, bool _manualRender) override;
 		// необходимо обновление нода
-		virtual void outOfDate(RenderItem* _item);
+		void outOfDate(RenderItem* _item) override;
 
 		// возвращает виджет по позиции
-		virtual ILayerItem* getLayerItemByPoint(int _left, int _top) const;
+		ILayerItem* getLayerItemByPoint(int _left, int _top) const override;
 
 		// рисует леер
-		virtual void renderToTarget(IRenderTarget* _target, bool _update);
+		void renderToTarget(IRenderTarget* _target, bool _update) override;
 
-		virtual void resizeView(const IntSize& _viewSize);
+		void resizeView(const IntSize& _viewSize) override;
 
-		virtual float getNodeDepth();
+		float getNodeDepth() override;
 
 		bool isOutOfDate() const;
 
 	protected:
+		// push all empty buffers to the end of buffers list
 		void updateCompression();
 		RenderItem* addToRenderItemFirstQueue(ITexture* _texture, bool _manualRender);
 		RenderItem* addToRenderItemSecondQueue(ITexture* _texture, bool _manualRender);
@@ -82,16 +83,18 @@ namespace MyGUI
 		VectorRenderItem mFirstRenderItems;
 		VectorRenderItem mSecondRenderItems;
 
-		// список всех рутовых виджетов
-		// у перекрывающегося слоя здесь только один
+		size_t mLastNotEmptyItem;
+
+		// root widgets list
+		// overlapping layers have only one item here
 		VectorLayerItem mLayerItems;
 
-		// список такиж как мы, для построения дерева
 		VectorILayerNode mChildItems;
 
 		ILayerNode* mParent;
 		ILayer* mLayer;
 		bool mOutOfDate;
+		bool mOutOfDateCompression;
 		float mDepth;
 	};
 

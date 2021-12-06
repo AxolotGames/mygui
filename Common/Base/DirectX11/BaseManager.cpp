@@ -77,10 +77,6 @@ namespace base
 	{
 	}
 
-	BaseManager::~BaseManager()
-	{
-	}
-
 	void BaseManager::_windowResized()
 	{
 		RECT rect = { 0, 0, 0, 0 };
@@ -91,7 +87,7 @@ namespace base
 		resizeRender(width, height);
 
 		if (mPlatform)
-			mPlatform->getRenderManagerPtr()->setViewSize(width, height);
+			MyGUI::RenderManager::getInstance().setViewSize(width, height);
 
 		setInputViewSize(width, height);
 	}
@@ -105,14 +101,14 @@ namespace base
 		// регистрируем класс окна
 		WNDCLASS wc =
 		{
-			0, (WNDPROC)DXWndProc, 0, 0, GetModuleHandle(NULL), LoadIcon(NULL, MAKEINTRESOURCE(1001)),
-			LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), NULL, TEXT(WND_CLASS_NAME),
+			0, (WNDPROC)DXWndProc, 0, 0, GetModuleHandle(nullptr), LoadIcon(nullptr, MAKEINTRESOURCE(1001)),
+			LoadCursor(nullptr, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), nullptr, TEXT(WND_CLASS_NAME),
 		};
 		RegisterClass(&wc);
 
 		// создаем главное окно
 		hWnd = CreateWindow(wc.lpszClassName, TEXT("Direct3D11 Render Window"), WS_POPUP,
-			0, 0, 0, 0, GetDesktopWindow(), NULL, wc.hInstance, this);
+			0, 0, 0, 0, GetDesktopWindow(), nullptr, wc.hInstance, this);
 		if (!hWnd)
 		{
 			//OutException("fatal error!", "failed create window");
@@ -143,9 +139,11 @@ namespace base
 
 		createPointerManager((size_t)hWnd);
 
-		createScene();
-
+		// this needs to be called before createScene() since some demos require
+		// screen size to properly position the widgets
 		_windowResized();
+
+		createScene();
 
 		return true;
 	}
@@ -155,7 +153,7 @@ namespace base
 		MSG msg;
 		while (true)
 		{
-			while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
@@ -212,8 +210,8 @@ namespace base
 			{
 				if (node->findAttribute("root") != "")
 				{
-					bool root = MyGUI::utility::parseBool(node->findAttribute("root"));
-					if (root)
+					bool rootAttribute = MyGUI::utility::parseBool(node->findAttribute("root"));
+					if (rootAttribute)
 						mRootMedia = node->getContent();
 				}
 				addResourceLocation(node->getContent(), false);
@@ -449,8 +447,7 @@ namespace base
 			vp.TopLeftY = 0.0f;
 			mDeviceContext->RSSetViewports( 1, &vp );
 
-			// Устанавливаем новый view size
-			mPlatform->getRenderManagerPtr()->setViewSize(_width, _height);
+			MyGUI::RenderManager::getInstance().setViewSize(_width, _height);
 		}
 	}
 
@@ -490,9 +487,9 @@ namespace base
 		HRESULT hr = S_OK;
 
 		// Пытаемся создать девайс
-		if ( FAILED (hr = D3D11CreateDeviceAndSwapChain( NULL,
+		if ( FAILED (hr = D3D11CreateDeviceAndSwapChain( nullptr,
 			D3D_DRIVER_TYPE_HARDWARE,
-			NULL,
+			nullptr,
 			0,
 			featureLevels,
 			numFeatureLevels,
@@ -513,7 +510,7 @@ namespace base
 		mDevice->CreateRenderTargetView( mBackBuffer, NULL, &mRenderTarget );
 
 		// Устанавливаем back buffer rt текущим
-		mDeviceContext->OMSetRenderTargets( 1, &mRenderTarget, NULL );
+		mDeviceContext->OMSetRenderTargets( 1, &mRenderTarget, nullptr );
 
 		// Устанавливаем вьюпорт
 		D3D11_VIEWPORT vp;
@@ -554,6 +551,10 @@ namespace base
 		{
 			mRenderTarget->Release();
 			mRenderTarget = nullptr;
+		}
+		if (mBackBuffer) {
+			mBackBuffer->Release();
+			mBackBuffer = nullptr;
 		}
 		if (mSwapChain)
 		{

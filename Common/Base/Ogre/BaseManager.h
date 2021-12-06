@@ -14,6 +14,8 @@
 #include "PointerManager.h"
 #include "MyGUI_LastHeader.h"
 
+#include <OgreWindowEventUtilities.h>
+
 namespace MyGUI
 {
 	class OgrePlatform;
@@ -30,7 +32,6 @@ namespace base
 	{
 	public:
 		BaseManager();
-		virtual ~BaseManager();
 
 		virtual void prepare();
 		bool create(int _width = 1024, int _height = 768);

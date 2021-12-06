@@ -15,11 +15,11 @@ namespace MyGUI
 {
 
 	Canvas::Canvas() :
-		mTexture( nullptr ),
+		mTexture(nullptr),
 		mTexResizeMode( TRM_PT_CONST_SIZE ),
-		mTexData( 0 ),
-		mTexManaged( true ),
-		mFrameAdvise( false ),
+		mTexData(nullptr),
+		mTexManaged(true),
+		mFrameAdvise(false),
 		mInvalidateData(false)
 	{
 		mGenTexName = utility::toString((size_t)this, "_Canvas");
@@ -314,16 +314,6 @@ namespace MyGUI
 	const std::string& Canvas::getTextureName() const
 	{
 		return mTexture->getName();
-	}
-
-	void Canvas::setSize(int _width, int _height)
-	{
-		setSize(IntSize(_width, _height));
-	}
-
-	void Canvas::setCoord(int _left, int _top, int _width, int _height)
-	{
-		setCoord(IntCoord(_left, _top, _width, _height));
 	}
 
 	Canvas::TextureResizeMode Canvas::getResizeMode() const

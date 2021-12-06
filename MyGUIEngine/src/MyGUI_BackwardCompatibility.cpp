@@ -912,10 +912,10 @@ namespace MyGUI
 				layer = node->findAttribute("layer");
 				pointer = node->findAttribute("default");
 
-				// ñîõðàíÿåì
+				// ÑÐ¾Ñ…Ñ€Ð°Ð½ÑÐµÐ¼
 				std::string shared_text = node->findAttribute("texture");
 
-				// áåðåì äåòåé è êðóòèìñÿ, îñíîâíîé öèêë
+				// Ð±ÐµÑ€ÐµÐ¼ Ð´ÐµÑ‚ÐµÐ¹ Ð¸ ÐºÑ€ÑƒÑ‚Ð¸Ð¼ÑÑ, Ð¾ÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ Ñ†Ð¸ÐºÐ»
 				xml::ElementEnumerator info = node->getElementEnumerator();
 				while (info.next("Info"))
 				{
@@ -1002,7 +1002,7 @@ namespace MyGUI
 	{
 		std::string resourceCategory = ResourceManager::getInstance().getCategoryName();
 
-		// áåðåì äåòåé è êðóòèìñÿ, îñíîâíîé öèêë ñî ñêèíàìè
+		// Ð±ÐµÑ€ÐµÐ¼ Ð´ÐµÑ‚ÐµÐ¹ Ð¸ ÐºÑ€ÑƒÑ‚Ð¸Ð¼ÑÑ, Ð¾ÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ Ñ†Ð¸ÐºÐ» ÑÐ¾ ÑÐºÐ¸Ð½Ð°Ð¼Ð¸
 		xml::ElementEnumerator skin = _node->getElementEnumerator();
 		while (skin.next(_tag))
 		{
@@ -1063,7 +1063,7 @@ namespace MyGUI
 		return coord.print();
 	}
 
-	typedef std::set<std::string> SetString;
+	using SetString = std::set<std::string>;
 	static MapString mPropertyRename;
 	static SetString mPropertyIgnore;
 	static MapString mSkinRename;

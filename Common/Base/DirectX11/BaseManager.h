@@ -21,6 +21,7 @@ struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11RenderTargetView;
 struct IDXGISwapChain;
+struct ID3D11Texture2D;
 
 struct ID3D11Texture2D;
 
@@ -38,7 +39,6 @@ namespace base
 	{
 	public:
 		BaseManager();
-		virtual ~BaseManager();
 
 		virtual void prepare(); // инициализация коммандной строки
 		bool create(int _width = 1024, int _height = 768); // создаем начальную точки каркаса приложения
@@ -97,6 +97,7 @@ namespace base
 		ID3D11Device* mDevice;
 		ID3D11DeviceContext* mDeviceContext;
 		IDXGISwapChain* mSwapChain;
+		ID3D11Texture2D* mBackBuffer;
 		ID3D11RenderTargetView* mRenderTarget;
 		HINSTANCE hInstance;
 

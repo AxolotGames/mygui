@@ -1,17 +1,17 @@
-/*!
-	@file
-	@author		Albert Semenov
-	@date		08/2008
-*/
-
 #ifndef BASE_MANAGER_H_
 #define BASE_MANAGER_H_
 
 #include <MyGUI.h>
 #include <MyGUI_OpenGLPlatform.h>
 
-#include "SDL_InputManager.h"
-#include "SDL_PointerManager.h"
+#include "InputManager.h"
+#include "PointerManager.h"
+
+#ifdef EMSCRIPTEN
+#include <SDL2/SDL.h>
+#else
+#include <SDL.h>
+#endif
 
 namespace base
 {
@@ -23,7 +23,6 @@ namespace base
 	{
 	public:
 		BaseManager();
-		virtual ~BaseManager();
 
 		virtual void prepare();
 		bool create(int _width = 1024, int _height = 768);
@@ -38,7 +37,7 @@ namespace base
 		void setResourceFilename(const std::string& _flename);
 		void addResourceLocation(const std::string& _name, bool _recursive = false);
 
-		MyGUI::MapString getStatistic() { return MyGUI::MapString(); }
+		MyGUI::MapString getStatistic();
 
 	/*internal:*/
 		void _windowResized(int w, int h);
@@ -84,9 +83,9 @@ namespace base
 		SDL_GLContext mContext;
 		std::string mRootMedia;
 		std::string mResourceFileName;
-		bool	mWindowOn;
+		bool mWindowOn;
 		SDL_Keycode	mKeyCode;
-		bool mTextUpdated;
+		int mFpsCounter;
 	};
 
 } // namespace base

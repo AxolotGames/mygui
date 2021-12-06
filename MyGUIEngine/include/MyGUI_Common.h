@@ -16,13 +16,7 @@
 #include <vector>
 #include <deque>
 #include <exception>
-#include <math.h>
-
-#ifdef MYGUI_CUSTOM_ALLOCATOR
-#    include "MyGUI_CustomAllocator.h"
-#else // MYGUI_CUSTOM_ALLOCATOR
-#    include "MyGUI_Allocator.h"
-#endif // MYGUI_CUSTOM_ALLOCATOR
+#include <cmath>
 
 // этот дефайн для того чтобы в самом гуе показывалось имя файла где вызывается new
 #if MYGUI_COMPILER == MYGUI_COMPILER_MSVC

@@ -105,15 +105,38 @@ namespace MyGUI
 
 		void* castUnsafe() const;
 
+		bool compare(const Any& other) const;
+
 	private:
 		class Placeholder
 		{
 		public:
-			virtual ~Placeholder() { }
+			virtual ~Placeholder() = default;
 
 		public:
 			virtual const std::type_info& getType() const = 0;
 			virtual Placeholder* clone() const = 0;
+			virtual bool compare(Placeholder* other) const = 0;
+		};
+
+		template<class T>
+		struct HasOperatorEqualImpl
+		{
+			template <typename U>
+			static auto test(U*) -> decltype(std::declval<U>() == std::declval<U>());
+			template <typename>
+			static auto test(...)->std::false_type;
+
+			using type = typename std::is_same<bool, decltype(test<T>(nullptr))>::type;
+			static constexpr bool value = type::value;
+		};
+
+		template<class T>
+		struct HasOperatorEqual : HasOperatorEqualImpl<T>::type {};
+		template<typename T1, typename T2>
+		struct HasOperatorEqual<std::pair<T1, T2>>
+		{
+			static constexpr bool value = HasOperatorEqualImpl<T1>::value && HasOperatorEqualImpl<T2>::value;
 		};
 
 		template<typename ValueType>
@@ -126,22 +149,38 @@ namespace MyGUI
 			{
 			}
 
+			Holder& operator=(const Holder&) = delete;
+
 		public:
-			virtual const std::type_info& getType() const
+			const std::type_info& getType() const override
 			{
 				return typeid(ValueType);
 			}
 
-			virtual Placeholder* clone() const
+			Placeholder* clone() const override
 			{
 				return new Holder(held);
 			}
 
+			bool compare(Placeholder* other) const override
+			{
+				return compareImpl(other);
+			}
+		private:
+			template<typename T = ValueType>
+			typename std::enable_if<HasOperatorEqual<T>::value == true, bool>::type compareImpl(Placeholder* other) const
+			{
+				return getType() == other->getType() && held == static_cast<Holder*>(other)->held;
+			}
+
+			template<typename T = ValueType>
+			typename std::enable_if<HasOperatorEqual<T>::value == false, bool>::type compareImpl(Placeholder* other) const
+			{
+				MYGUI_EXCEPT("Type '" << getType().name() << "' is not comparable");
+			}
+
 		public:
 			ValueType held;
-
-		private:
-			Holder& operator=(const Holder&);
 		};
 
 	private:

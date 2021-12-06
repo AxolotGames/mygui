@@ -7,18 +7,10 @@
 #include "MyGUI_Precompiled.h"
 #include "MyGUI_FileLogListener.h"
 #include <iomanip>
-#include <time.h>
+#include <ctime>
 
 namespace MyGUI
 {
-
-	FileLogListener::FileLogListener()
-	{
-	}
-
-	FileLogListener::~FileLogListener()
-	{
-	}
 
 	void FileLogListener::open()
 	{

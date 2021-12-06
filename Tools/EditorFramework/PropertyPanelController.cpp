@@ -21,10 +21,6 @@ namespace tools
 	{
 	}
 
-	PropertyPanelController::~PropertyPanelController()
-	{
-	}
-
 	void PropertyPanelController::setTarget(Control* _control)
 	{
 		mControl = _control->findControl<PropertyPanelControl>();
@@ -66,7 +62,7 @@ namespace tools
 		{
 			DataPtr selected = _data != nullptr ? _data->getChildSelected() : nullptr;
 
-			// âûäåëÿåì òîëüêî äàííûå ñ òèïîì ñêîïà
+			// Ð²Ñ‹Ð´ÐµÐ»ÑÐµÐ¼ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ñ Ñ‚Ð¸Ð¿Ð¾Ð¼ ÑÐºÐ¾Ð¿Ð°
 			if (selected != nullptr)
 			{
 				if (selected->getType()->getName() != ScopeManager::getInstance().getCurrentScope() &&

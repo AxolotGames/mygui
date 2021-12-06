@@ -72,13 +72,13 @@ namespace MyGUI
 		}
 
 		// подписываем дочерние классы на скролл
-		if (mClient != nullptr)
+		if (mScrollViewClient != nullptr)
 		{
-			mClient->eventMouseWheel += newDelegate(this, &ComboBox::notifyMouseWheel);
-			mClient->eventMouseButtonPressed += newDelegate(this, &ComboBox::notifyMousePressed);
+			mScrollViewClient->eventMouseWheel += newDelegate(this, &ComboBox::notifyMouseWheel);
+			mScrollViewClient->eventMouseButtonPressed += newDelegate(this, &ComboBox::notifyMousePressed);
 
-			mClient->setNeedToolTip(true);
-			mClient->eventToolTip += newDelegate(this, &ComboBox::notifyToolTip);
+			mScrollViewClient->setNeedToolTip(true);
+			mScrollViewClient->eventToolTip += newDelegate(this, &ComboBox::notifyToolTip);
 		}
 
 		// подписываемся на изменения текста
@@ -89,7 +89,6 @@ namespace MyGUI
 	{
 		mList = nullptr;
 		mButton = nullptr;
-		mClient = nullptr;
 
 		Base::shutdownOverride();
 	}
@@ -119,7 +118,7 @@ namespace MyGUI
 				return;
 
 			// в режиме дропа все окна учавствуют
-			if (mModeDrop && focus == mClient)
+			if (mModeDrop && focus == mScrollViewClient)
 				return;
 		}
 
@@ -269,6 +268,8 @@ namespace MyGUI
 		if (mList->getItemCount() == 0)
 			return;
 
+		if (mListShow)
+			return;
 		mListShow = true;
 
 		IntCoord coord = calculateListPosition();
@@ -295,6 +296,8 @@ namespace MyGUI
 
 	void ComboBox::hideList()
 	{
+		if (!mListShow)
+			return;
 		mListShow = false;
 
 		if (mShowSmooth)

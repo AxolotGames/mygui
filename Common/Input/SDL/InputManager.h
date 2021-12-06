@@ -8,7 +8,11 @@
 #define INPUT_MANAGER_H_
 
 #include <MyGUI.h>
+#ifdef EMSCRIPTEN
+#include <SDL2/SDL.h>
+#else
 #include <SDL.h>
+#endif
 
 namespace input
 {
@@ -16,13 +20,13 @@ namespace input
 	{
 	public:
 		InputManager();
-		virtual ~InputManager();
+		virtual ~InputManager() = default;
 
 		void createInput();
 		void destroyInput();
 		void captureInput();
 		void setInputViewSize(int _width, int _height);
-		
+
 		// following five methods are to be implemented in BaseManager class
 		virtual void injectMouseMove(int _absx, int _absy, int _absz){}
 		virtual void injectMousePress(int _absx, int _absy, MyGUI::MouseButton _id){}
@@ -31,7 +35,7 @@ namespace input
 		virtual void injectKeyRelease(MyGUI::KeyCode _key){}
 
 		virtual void onFileDrop(const std::wstring& _filename) { }
-		virtual bool onWinodwClose(size_t _handle) { return true; }
+		virtual bool onWindowClose(size_t _handle) { return true; }
 
 		void setMousePosition(int _x, int _y);
 		void updateCursorPosition();

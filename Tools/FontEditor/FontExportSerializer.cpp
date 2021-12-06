@@ -18,14 +18,6 @@ namespace tools
 
 	FACTORY_ITEM_ATTRIBUTE(FontExportSerializer)
 
-	FontExportSerializer::FontExportSerializer()
-	{
-	}
-
-	FontExportSerializer::~FontExportSerializer()
-	{
-	}
-
 	void FontExportSerializer::serialization(pugi::xml_document& _doc)
 	{
 		pugi::xml_node root = _doc.append_child("MyGUI");
@@ -292,7 +284,7 @@ namespace tools
 		for (size_t index = 0; index < values.size(); index ++)
 		{
 			MyGUI::IntSize size = MyGUI::IntSize::parse(values[index]);
-			font->addCodePointRange(size.width, size.height); // о да
+			font->addCodePointRange(size.width, size.height); // Рѕ РґР°
 		}
 
 		font->initialise();

@@ -25,8 +25,7 @@ namespace MyGUI
 		mLastRedrawLine(0),
 		mIndexSelect(ITEM_NONE),
 		mLineActive(ITEM_NONE),
-		mNeedVisibleScroll(true),
-		mClient(nullptr)
+		mNeedVisibleScroll(true)
 	{
 	}
 
@@ -47,15 +46,12 @@ namespace MyGUI
 		if (mHeightLine < 1)
 			mHeightLine = 1;
 
-		///@wskin_child{ListBox, Widget, Client} Клиентская зона.
-		assignWidget(mClient, "Client");
-		if (mClient != nullptr)
+		if (getClientWidget() != nullptr)
 		{
-			mClient->eventMouseButtonPressed += newDelegate(this, &ListBox::notifyMousePressed);
-			mClient->eventMouseButtonReleased += newDelegate(this, &ListBox::notifyMouseButtonReleased);
-			mClient->eventKeyButtonPressed += newDelegate(this, &ListBox::notifyKeyButtonPressed);
-			mClient->eventKeyButtonReleased += newDelegate(this, &ListBox::notifyKeyButtonReleased);
-			setWidgetClient(mClient);
+			getClientWidget()->eventMouseButtonPressed += newDelegate(this, &ListBox::notifyMousePressed);
+			getClientWidget()->eventMouseButtonReleased += newDelegate(this, &ListBox::notifyMouseButtonReleased);
+			getClientWidget()->eventKeyButtonPressed += newDelegate(this, &ListBox::notifyKeyButtonPressed);
+			getClientWidget()->eventKeyButtonReleased += newDelegate(this, &ListBox::notifyKeyButtonReleased);
 		}
 
 		///@wskin_child{ListBox, ScrollBar, VScroll} Вертикальная полоса прокрутки.
@@ -64,7 +60,6 @@ namespace MyGUI
 		{
 			mWidgetScroll->eventScrollChangePosition += newDelegate(this, &ListBox::notifyScrollChangePosition);
 			mWidgetScroll->setScrollPage((size_t)mHeightLine);
-			mWidgetScroll->setScrollViewPage((size_t)mHeightLine);
 		}
 
 		updateScroll();
@@ -74,7 +69,6 @@ namespace MyGUI
 	void ListBox::shutdownOverride()
 	{
 		mWidgetScroll = nullptr;
-		mClient = nullptr;
 
 		Base::shutdownOverride();
 	}
@@ -292,18 +286,19 @@ namespace MyGUI
 			{
 				mWidgetScroll->setVisible(false);
 				// увеличиваем клиентскую зону на ширину скрола
-				if (mClient != nullptr)
-					mClient->setSize(mClient->getWidth() + mWidgetScroll->getWidth(), mClient->getHeight());
+				if (getClientWidget() != nullptr)
+					getClientWidget()->setSize(getClientWidget()->getWidth() + mWidgetScroll->getWidth(), getClientWidget()->getHeight());
 			}
 		}
 		else if (!mWidgetScroll->getVisible())
 		{
-			if (mClient != nullptr)
-				mClient->setSize(mClient->getWidth() - mWidgetScroll->getWidth(), mClient->getHeight());
+			if (getClientWidget() != nullptr)
+				getClientWidget()->setSize(getClientWidget()->getWidth() - mWidgetScroll->getWidth(), getClientWidget()->getHeight());
 			mWidgetScroll->setVisible(true);
 		}
 
 		mWidgetScroll->setScrollRange(mRangeIndex + 1);
+		mWidgetScroll->setScrollViewPage(_getClientWidget()->getHeight());
 		if (!mItemsInfo.empty())
 			mWidgetScroll->setTrackSize(mWidgetScroll->getLineSize() * _getClientWidget()->getHeight() / mHeightLine / (int)mItemsInfo.size());
 	}
@@ -716,7 +711,7 @@ namespace MyGUI
 			return false;
 
 		// если мы внизу и нам нужен целый
-		if ((_getClientWidget()->getHeight() < (offset + mHeightLine)) && (_fill))
+		if (_getClientWidget()->getHeight() < (offset + mHeightLine) && _fill)
 			return false;
 
 		return true;
@@ -914,11 +909,6 @@ namespace MyGUI
 		return (int)((mCoord.height - _getClientWidget()->getHeight()) + (mItemsInfo.size() * mHeightLine));
 	}
 
-	Widget* ListBox::_getClientWidget()
-	{
-		return mClient == nullptr ? this : mClient;
-	}
-
 	size_t ListBox::getItemCount() const
 	{
 		return mItemsInfo.size();
@@ -965,21 +955,6 @@ namespace MyGUI
 	bool ListBox::isItemSelectedVisible(bool _fill)
 	{
 		return isItemVisibleAt(mIndexSelect, _fill);
-	}
-
-	void ListBox::setPosition(int _left, int _top)
-	{
-		setPosition(IntPoint(_left, _top));
-	}
-
-	void ListBox::setSize(int _width, int _height)
-	{
-		setSize(IntSize(_width, _height));
-	}
-
-	void ListBox::setCoord(int _left, int _top, int _width, int _height)
-	{
-		setCoord(IntCoord(_left, _top, _width, _height));
 	}
 
 	size_t ListBox::_getItemIndex(Widget* _item)
@@ -1088,7 +1063,7 @@ namespace MyGUI
 
 	size_t ListBox::getIndexByWidget(Widget* _widget)
 	{
-		if (_widget == mClient)
+		if (_widget == getClientWidget())
 			return ITEM_NONE;
 		return *_widget->_getInternalData<size_t>() + mTopIndex;
 	}

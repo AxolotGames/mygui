@@ -66,7 +66,7 @@ namespace MyGUI
 		FloatRect uvRect;
 	};
 
-	typedef std::vector<GlyphInfo> VectorGlyphInfo;
+	using VectorGlyphInfo = std::vector<GlyphInfo>;
 
 } // namespace MyGUI
 

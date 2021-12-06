@@ -78,10 +78,6 @@ namespace base
 	{
 	}
 
-	BaseManager::~BaseManager()
-	{
-	}
-
 	void BaseManager::_windowResized()
 	{
 		RECT rect = { 0, 0, 0, 0 };
@@ -92,7 +88,7 @@ namespace base
 		resizeRender(width, height);
 
 		if (mPlatform)
-			mPlatform->getRenderManagerPtr()->setViewSize(width, height);
+			MyGUI::RenderManager::getInstance().setViewSize(width, height);
 
 		setInputViewSize(width, height);
 	}
@@ -106,14 +102,14 @@ namespace base
 		// регистрируем класс окна
 		WNDCLASS wc =
 		{
-			0, (WNDPROC)DXWndProc, 0, 0, GetModuleHandle(NULL), LoadIcon(NULL, MAKEINTRESOURCE(1001)),
-			LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), NULL, TEXT(WND_CLASS_NAME),
+			0, (WNDPROC)DXWndProc, 0, 0, GetModuleHandle(nullptr), LoadIcon(nullptr, MAKEINTRESOURCE(1001)),
+			LoadCursor(nullptr, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), nullptr, TEXT(WND_CLASS_NAME),
 		};
 		RegisterClass(&wc);
 
 		// создаем главное окно
 		hWnd = CreateWindow(wc.lpszClassName, TEXT("Direct3D9 Render Window"), WS_POPUP,
-			0, 0, 0, 0, GetDesktopWindow(), NULL, wc.hInstance, this);
+			0, 0, 0, 0, GetDesktopWindow(), nullptr, wc.hInstance, this);
 		if (!hWnd)
 		{
 			//OutException("fatal error!", "failed create window");
@@ -144,9 +140,11 @@ namespace base
 
 		createPointerManager((size_t)hWnd);
 
-		createScene();
-
+		// this needs to be called before createScene() since some demos require
+		// screen size to properly position the widgets
 		_windowResized();
+
+		createScene();
 
 		return true;
 	}
@@ -156,7 +154,7 @@ namespace base
 		MSG msg;
 		while (true)
 		{
-			while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
@@ -213,8 +211,8 @@ namespace base
 			{
 				if (node->findAttribute("root") != "")
 				{
-					bool root = MyGUI::utility::parseBool(node->findAttribute("root"));
-					if (root)
+					bool rootAttribute = MyGUI::utility::parseBool(node->findAttribute("root"));
+					if (rootAttribute)
 						mRootMedia = node->getContent();
 				}
 				addResourceLocation(node->getContent(), false);
@@ -432,7 +430,7 @@ namespace base
 
 			if (hr == D3DERR_INVALIDCALL)
 			{
-				MessageBox( NULL, "Call to Reset() failed with D3DERR_INVALIDCALL! ",
+				MessageBox( nullptr, "Call to Reset() failed with D3DERR_INVALIDCALL! ",
 					"ERROR", MB_OK | MB_ICONEXCLAMATION );
 			}
 
@@ -473,7 +471,7 @@ namespace base
 
 	void BaseManager::drawOneFrame()
 	{
-		if (mIsDeviceLost == true)
+		if (mIsDeviceLost)
 		{
 			Sleep( 100 );
 
@@ -505,12 +503,12 @@ namespace base
 
 		if (SUCCEEDED(mDevice->BeginScene()))
 		{
-			mDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x001589FF, 1.0f, 0);
+			mDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x001589FF, 1.0f, 0);
 			mPlatform->getRenderManagerPtr()->drawOneFrame();
 			mDevice->EndScene();
 		}
 
-		if (mDevice->Present(NULL, NULL, 0, NULL) == D3DERR_DEVICELOST)
+		if (mDevice->Present(nullptr, nullptr, 0, nullptr) == D3DERR_DEVICELOST)
 			mIsDeviceLost = true;
 	}
 

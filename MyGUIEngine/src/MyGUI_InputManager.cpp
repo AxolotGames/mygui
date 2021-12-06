@@ -45,9 +45,9 @@ namespace MyGUI
 		MYGUI_ASSERT(!mIsInitialise, getClassTypeName() << " initialised twice");
 		MYGUI_LOG(Info, "* Initialise: " << getClassTypeName());
 
-		mWidgetMouseFocus = 0;
-		mWidgetKeyFocus = 0;
-		mLayerMouseFocus = 0;
+		mWidgetMouseFocus = nullptr;
+		mWidgetKeyFocus = nullptr;
+		mLayerMouseFocus = nullptr;
 		for (int i = MouseButton::Button0; i < MouseButton::MAX; ++i)
 		{
 			mMouseCapture[i] = false;
@@ -393,51 +393,50 @@ namespace MyGUI
 		if (_widget == mWidgetKeyFocus)
 			return;
 
-		//-------------------------------------------------------------------------------------//
-		// новый вид рутового фокуса
-		Widget* save_widget = nullptr;
+		Widget* oldKeyFocus = mWidgetKeyFocus;
+		mWidgetKeyFocus = nullptr;
 
-		// спускаемся по новому виджету и устанавливаем рутовый фокус
-		Widget* root_focus = _widget;
-		while (root_focus != nullptr)
+		Widget* sharedRootFocus = nullptr; // possible shared parent for both old and new widget
+
+		// recursively set root key focus
+		Widget* rootFocus = _widget;
+		while (rootFocus != nullptr)
 		{
-			if (root_focus->getRootKeyFocus())
+			if (rootFocus->getRootKeyFocus())
 			{
-				save_widget = root_focus;
+				sharedRootFocus = rootFocus;
 				break;
 			}
 
-			root_focus->_setRootKeyFocus(true);
-			root_focus->_riseKeyChangeRootFocus(true);
-			root_focus = root_focus->getParent();
+			rootFocus->_setRootKeyFocus(true);
+			rootFocus->_riseKeyChangeRootFocus(true);
+			rootFocus = rootFocus->getParent();
 		}
 
-		// спускаемся по старому виджету и сбрасываем фокус
-		root_focus = mWidgetKeyFocus;
-		while (root_focus != nullptr)
+		// recursively reset root key focus
+		rootFocus = oldKeyFocus;
+		while (rootFocus != nullptr)
 		{
-			if (root_focus == save_widget)
+			if (rootFocus == sharedRootFocus)
 				break;
 
-			root_focus->_setRootKeyFocus(false);
-			root_focus->_riseKeyChangeRootFocus(false);
-			root_focus = root_focus->getParent();
+			rootFocus->_setRootKeyFocus(false);
+			rootFocus->_riseKeyChangeRootFocus(false);
+			rootFocus = rootFocus->getParent();
 		}
 		//-------------------------------------------------------------------------------------//
 
-		// сбрасываем старый
-		if (mWidgetKeyFocus)
+		mWidgetKeyFocus = _widget;
+
+		if (oldKeyFocus)
 		{
-			mWidgetKeyFocus->_riseKeyLostFocus(_widget);
+			oldKeyFocus->_riseKeyLostFocus(_widget);
 		}
 
-		// устанавливаем новый
-		if (_widget && _widget->getNeedKeyFocus())
+		if (_widget)
 		{
 			_widget->_riseKeySetFocus(mWidgetKeyFocus);
 		}
-
-		mWidgetKeyFocus = _widget;
 
 		eventChangeKeyFocus(mWidgetKeyFocus);
 	}
@@ -447,7 +446,7 @@ namespace MyGUI
 		Widget* mouseFocus = mWidgetMouseFocus;
 		mWidgetMouseFocus = nullptr;
 
-		// спускаемся по старому виджету и сбрасываем фокус
+		// recursively reset old widget focus
 		Widget* root_focus = mouseFocus;
 		while (root_focus != nullptr)
 		{
@@ -484,9 +483,7 @@ namespace MyGUI
 			_resetMouseFocusWidget();
 
 		if (_widget == mWidgetKeyFocus)
-		{
-			mWidgetKeyFocus = nullptr;
-		}
+			resetKeyFocusWidget();
 
 		// ручками сбрасываем, чтобы не менять фокусы
 		for (VectorWidgetPtr::iterator iter = mVectorModalRootWidget.begin(); iter != mVectorModalRootWidget.end(); ++iter)

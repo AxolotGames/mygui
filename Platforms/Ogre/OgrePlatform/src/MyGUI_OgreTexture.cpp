@@ -71,7 +71,7 @@ namespace MyGUI
 
 		if (!mTexture.isNull())
 		{
-			Ogre::TextureManager::getSingleton().remove(mTexture->getName());
+			Ogre::TextureManager::getSingleton().remove(mTexture->getHandle());
 			mTexture.setNull();
 		}
 	}

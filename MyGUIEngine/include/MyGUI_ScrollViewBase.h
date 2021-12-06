@@ -17,7 +17,7 @@ namespace MyGUI
 	{
 	protected:
 		ScrollViewBase();
-		virtual ~ScrollViewBase();
+		virtual ~ScrollViewBase() = default;
 
 		void updateScrollSize();
 		void updateScrollPosition();
@@ -43,7 +43,7 @@ namespace MyGUI
 	protected:
 		ScrollBar* mVScroll;
 		ScrollBar* mHScroll;
-		Widget* mClient;
+		Widget* mScrollViewClient;
 
 		bool mVisibleHScroll;
 		bool mVisibleVScroll;

@@ -35,25 +35,10 @@ namespace MyGUI
 		updateContent();
 	}
 
-	void ScrollViewPanel::setPosition(int _left, int _top)
-	{
-		setPosition(IntPoint(_left, _top));
-	}
-
-	void ScrollViewPanel::setSize(int _width, int _height)
-	{
-		setSize(IntSize(_width, _height));
-	}
-
-	void ScrollViewPanel::setCoord(int _left, int _top, int _width, int _height)
-	{
-		setCoord(IntCoord(_left, _top, _width, _height));
-	}
-
 	void ScrollViewPanel::updateContent()
 	{
-		// размер клиента с полосами
-		IntSize viewSize = mClient->getSize();
+		// СЂР°Р·РјРµСЂ РєР»РёРµРЅС‚Р° СЃ РїРѕР»РѕСЃР°РјРё
+		IntSize viewSize = mScrollViewClient->getSize();
 		if (!getVScroll()->getVisible())
 			viewSize.width -= getVScroll()->getWidth();
 
@@ -64,10 +49,10 @@ namespace MyGUI
 		Panel::updateMeasure(getChildAt(0), IntSize(viewSize.width, (std::numeric_limits<int>::max)()));
 		IntSize resultSize = Panel::getDesiredSize(getChildAt(0));
 
-		// содержимое влазиет по высоте, вертикального скрола не будет
+		// СЃРѕРґРµСЂР¶РёРјРѕРµ РІР»Р°Р·РёРµС‚ РїРѕ РІС‹СЃРѕС‚Рµ, РІРµСЂС‚РёРєР°Р»СЊРЅРѕРіРѕ СЃРєСЂРѕР»Р° РЅРµ Р±СѓРґРµС‚
 		if (viewSize.height >= resultSize.height)
 		{
-			viewSize = mClient->getSize();
+			viewSize = mScrollViewClient->getSize();
 			if (getVScroll()->getVisible())
 				viewSize.width += getVScroll()->getWidth();
 
@@ -77,7 +62,7 @@ namespace MyGUI
 			Panel::updateArrange(getChildAt(0), IntCoord(0, 0, viewSize.width, resultSize.height));
 			setCanvasSize(IntSize(viewSize.width, resultSize.height));
 		}
-		// содержимое больше, будет виден вертикальный скрол
+		// СЃРѕРґРµСЂР¶РёРјРѕРµ Р±РѕР»СЊС€Рµ, Р±СѓРґРµС‚ РІРёРґРµРЅ РІРµСЂС‚РёРєР°Р»СЊРЅС‹Р№ СЃРєСЂРѕР»
 		else
 		{
 			Panel::updateArrange(getChildAt(0), IntCoord(0, 0, viewSize.width, resultSize.height));

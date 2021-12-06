@@ -18,15 +18,13 @@
 namespace MyGUI
 {
 
-	const size_t VERTEX_IN_QUAD = 6;
-	const size_t SIMPLETEXT_COUNT_VERTEX = 32 * VERTEX_IN_QUAD;
+	const size_t SIMPLETEXT_COUNT_VERTEX = 32 * VertexQuad::VertexCount;
 
 	EditText::EditText() :
 		ISubWidgetText(),
 		mEmptyView(false),
-		mCurrentColourNative(0x00FFFFFF),
-		mInverseColourNative(0x00000000),
-		mCurrentAlphaNative(0xFF000000),
+		mCurrentColourNative(0xFFFFFFFF),
+		mInverseColourNative(0xFF000000),
 		mShadowColourNative(0x00000000),
 		mTextOutDate(false),
 		mTextAlign(Align::Default),
@@ -53,17 +51,6 @@ namespace MyGUI
 		mOldWidth(0)
 	{
 		mVertexFormat = RenderManager::getInstance().getVertexFormat();
-
-		mCurrentColourNative = texture_utility::toColourARGB(mColour);
-		texture_utility::convertColour(mCurrentColourNative, mVertexFormat);
-
-		mCurrentColourNative = (mCurrentColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
-		mShadowColourNative =  (mShadowColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
-		mInverseColourNative = mCurrentColourNative ^ 0x00FFFFFF;
-	}
-
-	EditText::~EditText()
-	{
 	}
 
 	void EditText::setVisible(bool _visible)
@@ -199,13 +186,18 @@ namespace MyGUI
 	void EditText::checkVertexSize()
 	{
 		// если вершин не хватит, делаем реалок, с учетом выделения * 2 и курсора
-		size_t need = (mCaption.size() * (mShadow ? 3 : 2) + 2) * VERTEX_IN_QUAD;
+		size_t need = (mCaption.size() * (mShadow ? 3 : 2) + 2) * VertexQuad::VertexCount;
 		if (mCountVertex < need)
 		{
 			mCountVertex = need + SIMPLETEXT_COUNT_VERTEX;
 			if (nullptr != mRenderItem)
 				mRenderItem->reallockDrawItem(this, mCountVertex);
 		}
+	}
+
+	unsigned int EditText::getMixedNativeAlpha(float secondAlpha)
+	{
+		return (uint8)(mAlpha * secondAlpha * 255) << 24;
 	}
 
 	const UString& EditText::getCaption() const
@@ -229,7 +221,7 @@ namespace MyGUI
 
 		texture_utility::convertColour(mCurrentColourNative, mVertexFormat);
 
-		mCurrentColourNative = (mCurrentColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
+		mCurrentColourNative = (mCurrentColourNative & 0x00FFFFFF) | getMixedNativeAlpha(mColour.alpha);
 		mInverseColourNative = mCurrentColourNative ^ 0x00FFFFFF;
 
 		if (nullptr != mNode)
@@ -247,23 +239,17 @@ namespace MyGUI
 			return;
 		mAlpha = _value;
 
-		mCurrentAlphaNative = ((uint8)(mAlpha * 255) << 24);
-		mCurrentColourNative = (mCurrentColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
-		mShadowColourNative = (mShadowColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
+		mCurrentColourNative = (mCurrentColourNative & 0x00FFFFFF) | getMixedNativeAlpha(mColour.alpha);
+		mShadowColourNative = (mShadowColourNative & 0x00FFFFFF) | getMixedNativeAlpha(mShadowColour.alpha);
 		mInverseColourNative = mCurrentColourNative ^ 0x00FFFFFF;
 
 		if (nullptr != mNode)
 			mNode->outOfDate(mRenderItem);
 	}
 
-	float EditText::getAlpha() const
-	{
-		return mAlpha;
-	}
-
 	void EditText::setFontName(const std::string& _value)
 	{
-		mTexture = 0;
+		mTexture = nullptr;
 		mFont = FontManager::getInstance().getByName(_value);
 		if (mFont != nullptr)
 		{
@@ -668,7 +654,7 @@ namespace MyGUI
 
 		texture_utility::convertColour(mShadowColourNative, mVertexFormat);
 
-		mShadowColourNative = (mShadowColourNative & 0x00FFFFFF) | (mCurrentAlphaNative & 0xFF000000);
+		mShadowColourNative = (mShadowColourNative & 0x00FFFFFF) | getMixedNativeAlpha(mShadowColour.alpha);
 
 		if (nullptr != mNode)
 			mNode->outOfDate(mRenderItem);
@@ -729,8 +715,8 @@ namespace MyGUI
 		_vertex[4].u = _textureRect.right;
 		_vertex[4].v = _textureRect.bottom;
 
-		_vertex += VERTEX_IN_QUAD;
-		_vertexCount += VERTEX_IN_QUAD;
+		_vertex += VertexQuad::VertexCount;
+		_vertexCount += VertexQuad::VertexCount;
 	}
 
 	void EditText::drawGlyph(

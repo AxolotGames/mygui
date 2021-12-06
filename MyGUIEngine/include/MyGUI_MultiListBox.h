@@ -24,7 +24,9 @@ namespace MyGUI
 	typedef delegates::CMultiDelegate5<Widget*, size_t, const UString&, const UString&, bool&> EventHandle_WidgetIntUTFStringUTFStringBool;
 
 	typedef delegates::CDelegate5<MultiListBox*, size_t, const UString&, const UString&, bool&> EventHandle_MultiListPtrSizeTCUTFStringRefCUTFStringRefBoolRef;
+	typedef delegates::CDelegate5<MultiListBox*, size_t, size_t, size_t, bool&> EventHandle_MultiListPtrSizeTSizeTSizeTBoolRef;
 	typedef delegates::CMultiDelegate2<MultiListBox*, size_t> EventHandle_MultiListPtrSizeT;
+	typedef delegates::CMultiDelegate2<MultiListBox*, const IBNotifyItemData&> EventHandle_MultiListPtrCIBNotifyCellDataRef;
 
 	/** \brief @wpage{MultiListBox}
 		MultiListBox widget description should be here.
@@ -41,18 +43,15 @@ namespace MyGUI
 		MultiListBox();
 
 		//! @copydoc Widget::setPosition(const IntPoint& _value)
-		virtual void setPosition(const IntPoint& _value);
+		void setPosition(const IntPoint& _value) override;
 		//! @copydoc Widget::setSize(const IntSize& _value)
-		virtual void setSize(const IntSize& _value);
+		void setSize(const IntSize& _value) override;
 		//! @copydoc Widget::setCoord(const IntCoord& _value)
-		virtual void setCoord(const IntCoord& _value);
+		void setCoord(const IntCoord& _value) override;
 
-		/** @copydoc Widget::setPosition(int _left, int _top) */
-		void setPosition(int _left, int _top);
-		/** @copydoc Widget::setSize(int _width, int _height) */
-		void setSize(int _width, int _height);
-		/** @copydoc Widget::setCoord(int _left, int _top, int _width, int _height) */
-		void setCoord(int _left, int _top, int _width, int _height);
+		using Widget::setPosition;
+		using Widget::setSize;
+		using Widget::setCoord;
 
 		//------------------------------------------------------------------------------//
 		// Methods for work with columns (RU:методы для работы со столбцами)
@@ -278,30 +277,37 @@ namespace MyGUI
 		EventPair<EventHandle_WidgetSizeT, EventHandle_MultiListPtrSizeT> eventListChangePosition;
 
 		/** Event : Less than operator for sort multilist by columns.\n
-			signature : void method(MyGUI::MultiListBox* _sender, size_t _column, const MyGUI::UString& _firstItem, const MyGUI::UString& _secondItem, bool& _less)\n
+			signature : void method(MyGUI::MultiListBox* _sender, size_t _column, size_t _index1, size_t _index2, bool& _less)\n
 			@param _sender widget that called this event
 			@param _column Index of column
-			@param _firstItem Strings for compare
-			@param _secondItem Strings for compare
+			@param _index1 Index of row for compare
+			@param _index2 Index of row for compare
 			@param _less Comparsion result (write your value here)
 		*/
-		EventHandle_MultiListPtrSizeTCUTFStringRefCUTFStringRefBoolRef requestOperatorLess;
+		EventPair<EventHandle_MultiListPtrSizeTCUTFStringRefCUTFStringRefBoolRef, EventHandle_MultiListPtrSizeTSizeTSizeTBoolRef> requestOperatorLess;
+
+		/** Event : Notify about event in item widget.\n
+		signature : void method(MyGUI::MultiList* _sender, const MyGUI::IBNotifyItemData& _info)
+		@param _sender widget that called this event
+		@param _info info about item notify
+		*/
+		EventHandle_MultiListPtrCIBNotifyCellDataRef eventNotifyItem;
 
 		/*internal:*/
 		// IItemContainer impl
-		virtual size_t _getItemCount();
-		virtual void _addItem(const MyGUI::UString& _name);
-		virtual void _removeItemAt(size_t _index);
-		virtual Widget* _getItemAt(size_t _index);
-		virtual void _setItemNameAt(size_t _index, const UString& _name);
-		virtual const UString& _getItemNameAt(size_t _index);
+		size_t _getItemCount() override;
+		void _addItem(const MyGUI::UString& _name) override;
+		void _removeItemAt(size_t _index) override;
+		Widget* _getItemAt(size_t _index) override;
+		void _setItemNameAt(size_t _index, const UString& _name) override;
+		const UString& _getItemNameAt(size_t _index) override;
 
 	protected:
-		virtual void initialiseOverride();
-		virtual void shutdownOverride();
+		void initialiseOverride() override;
+		void shutdownOverride() override;
 
-		virtual void onWidgetCreated(Widget* _widget);
-		virtual void onWidgetDestroy(Widget* _widget);
+		void onWidgetCreated(Widget* _widget) override;
+		void onWidgetDestroy(Widget* _widget) override;
 
 	private:
 		void notifyListChangePosition(ListBox* _sender, size_t _position);
@@ -309,6 +315,7 @@ namespace MyGUI
 		void notifyListChangeScrollPosition(ListBox* _sender, size_t _position);
 		void notifyButtonClick(Widget* _sender);
 		void notifyListSelectAccept(ListBox* _sender, size_t _position);
+		void notifyListNotifyItem(ListBox* _sender, const MyGUI::IBNotifyItemData& _info);
 
 		void updateColumns();
 		void redrawButtons();
@@ -372,7 +379,6 @@ namespace MyGUI
 		size_t mItemSelected;
 
 		bool mFrameAdvise;
-		Widget* mClient;
 		Widget* mHeaderPlace;
 	};
 

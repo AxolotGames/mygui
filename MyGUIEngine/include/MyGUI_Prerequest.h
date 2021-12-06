@@ -18,12 +18,6 @@
 
 #define MYGUI_DEFINE_VERSION(major, minor, patch) ((major << 16) | (minor << 8) | patch)
 
-#ifndef MYGUI_DONT_REPLACE_NULLPTR
-#	if __cplusplus < 201103L && !defined(_NATIVE_NULLPTR_SUPPORTED)
-#		define nullptr 0
-#	endif
-#endif
-
 namespace MyGUI
 {
 	class Gui;
@@ -71,8 +65,8 @@ namespace MyGUI
 
 	// Define version
 #define MYGUI_VERSION_MAJOR 3
-#define MYGUI_VERSION_MINOR 2
-#define MYGUI_VERSION_PATCH 3
+#define MYGUI_VERSION_MINOR 4
+#define MYGUI_VERSION_PATCH 0
 
 #define MYGUI_VERSION    MYGUI_DEFINE_VERSION(MYGUI_VERSION_MAJOR, MYGUI_VERSION_MINOR, MYGUI_VERSION_PATCH)
 

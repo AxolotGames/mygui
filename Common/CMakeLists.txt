@@ -6,45 +6,24 @@ function(mygui_add_base_manager_source PLATFORM)
 		Base/${PLATFORM}/BaseManager.h
 		Base/${PLATFORM}/BaseManager.cpp
 	)
-	if(${PLATFORM} EQUAL OpenGL)
-		include_directories(${SDL2_INCLUDE_DIRS})
-		link_directories(${SDL2_LIBRARY_DIRS})
-	endif(${PLATFORM} EQUAL OpenGL)
 endfunction(mygui_add_base_manager_source)
 
 function(mygui_add_input_source PLATFORM)
 	include_directories(Input/${PLATFORM})
-	if("${PLATFORM}" STREQUAL "SDL")
-		set (HEADER_FILES ${HEADER_FILES}
-			Input/${PLATFORM}/SDL_InputManager.h
-			Input/${PLATFORM}/SDL_PointerManager.h
-			PARENT_SCOPE)
-		set (SOURCE_FILES ${SOURCE_FILES}
-			Input/${PLATFORM}/SDL_InputManager.cpp
-			Input/${PLATFORM}/SDL_PointerManager.cpp
-			PARENT_SCOPE)
-		SOURCE_GROUP("Base" FILES
-			Input/${PLATFORM}/SDL_InputManager.h
-			Input/${PLATFORM}/SDL_InputManager.cpp
-			Input/${PLATFORM}/SDL_PointerManager.h
-			Input/${PLATFORM}/SDL_PointerManager.cpp
-		)
-	else("${PLATFORM}" STREQUAL "SDL")
-		set (HEADER_FILES ${HEADER_FILES}
-			Input/${PLATFORM}/InputManager.h
-			Input/${PLATFORM}/PointerManager.h
-			PARENT_SCOPE)
-		set (SOURCE_FILES ${SOURCE_FILES}
-			Input/${PLATFORM}/InputManager.cpp
-			Input/${PLATFORM}/PointerManager.cpp
-			PARENT_SCOPE)
-		SOURCE_GROUP("Base" FILES
-			Input/${PLATFORM}/InputManager.h
-			Input/${PLATFORM}/InputManager.cpp
-			Input/${PLATFORM}/PointerManager.h
-			Input/${PLATFORM}/PointerManager.cpp
-		)
-	endif("${PLATFORM}" STREQUAL "SDL")
+	set (HEADER_FILES ${HEADER_FILES}
+		Input/${PLATFORM}/InputManager.h
+		Input/${PLATFORM}/PointerManager.h
+		PARENT_SCOPE)
+	set (SOURCE_FILES ${SOURCE_FILES}
+		Input/${PLATFORM}/InputManager.cpp
+		Input/${PLATFORM}/PointerManager.cpp
+		PARENT_SCOPE)
+	SOURCE_GROUP("Base" FILES
+		Input/${PLATFORM}/InputManager.h
+		Input/${PLATFORM}/InputManager.cpp
+		Input/${PLATFORM}/PointerManager.h
+		Input/${PLATFORM}/PointerManager.cpp
+	)
 endfunction(mygui_add_input_source)
 
 set (PROJECTNAME Common)
@@ -107,8 +86,24 @@ elseif(MYGUI_RENDERSYSTEM EQUAL 7)
 	include_directories(
 		${MYGUI_SOURCE_DIR}/Platforms/OpenGL3/OpenGL3Platform/include
 		${OPENGL_INCLUDE_DIR}
+		${SDL2_INCLUDE_DIRS}
+		${SDL2_IMAGE_INCLUDE_DIRS}
 	)
 	link_directories(${OPENGL_LIB_DIR})
+	link_directories(${SDL2_LIB_DIR})
+	link_directories(${SDL2_IMAGE_LIB_DIR})
+elseif(MYGUI_RENDERSYSTEM EQUAL 8)
+	mygui_add_base_manager_source(OpenGLES)
+	add_definitions("-DMYGUI_OPENGLES_PLATFORM")
+	include_directories(
+			${MYGUI_SOURCE_DIR}/Platforms/OpenGLES/OpenGLESPlatform/include
+			${OPENGL_INCLUDE_DIR}
+			${SDL2_INCLUDE_DIRS}
+			${SDL2_IMAGE_INCLUDE_DIRS}
+	)
+	link_directories(${OPENGL_LIB_DIR})
+	link_directories(${SDL2_LIB_DIR})
+	link_directories(${SDL2_IMAGE_LIB_DIR})
 endif()
 
 if(MYGUI_SAMPLES_INPUT EQUAL 1)
@@ -145,6 +140,9 @@ elseif(MYGUI_RENDERSYSTEM EQUAL 6)
 elseif(MYGUI_RENDERSYSTEM EQUAL 7)
 	add_dependencies(${PROJECTNAME} MyGUI.OpenGL3Platform)
 	target_link_libraries(${PROJECTNAME} MyGUI.OpenGL3Platform)
+elseif(MYGUI_RENDERSYSTEM EQUAL 8)
+	add_dependencies(${PROJECTNAME} MyGUI.OpenGLESPlatform)
+	target_link_libraries(${PROJECTNAME} MyGUI.OpenGLESPlatform)
 endif()
 
 add_dependencies(${PROJECTNAME} MyGUIEngine)
@@ -170,7 +168,7 @@ endif()
 if(NOT WIN32)
 	if(UNIX AND NOT APPLE)
 		find_package(X11)
-		target_link_libraries(${PROJECTNAME} X11)
+		target_link_libraries(${PROJECTNAME} ${X11_LIBRARIES})
 		include_directories(${X11_INCLUDE_DIR})
 	endif(UNIX AND NOT APPLE)
 endif()

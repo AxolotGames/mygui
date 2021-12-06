@@ -25,10 +25,6 @@ namespace tools
 	{
 	}
 
-	GroupTextureController::~GroupTextureController()
-	{
-	}
-
 	void GroupTextureController::setTarget(Control* _control)
 	{
 		mControl = _control->findControl<ScopeTextureControl>();
@@ -129,7 +125,7 @@ namespace tools
 				DataSelectorManager::getInstance().getEvent(mParentTypeName)->disconnect(this);
 				mParentData = nullptr;
 
-				// ìû åùå âëàäåëüöû êîíòðîëà ñáðàñûâàåì åãî
+				// Ð¼Ñ‹ ÐµÑ‰Ðµ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñ‹ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð° ÑÐ±Ñ€Ð°ÑÑ‹Ð²Ð°ÐµÐ¼ ÐµÐ³Ð¾
 				std::string value = mControl->getRoot()->getUserString("CurrentScopeController");
 				if (value == mScopeName)
 				{

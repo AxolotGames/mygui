@@ -8,9 +8,9 @@
 #define _dd541c2d_6b2d_440f_a2b3_a08454979c7b_
 
 #include "pugixml.hpp"
+#include <memory>
 #include <vector>
 #include "DataTypeProperty.h"
-#include "SharedPtr.h"
 
 namespace tools
 {
@@ -18,9 +18,6 @@ namespace tools
 	class MYGUI_EXPORT_DLL DataType
 	{
 	public:
-		DataType();
-		~DataType();
-
 		void deserialization(pugi::xml_node _node);
 
 		const std::string& getName() const;
@@ -41,7 +38,7 @@ namespace tools
 		VectorProperty mProperties;
 	};
 
-	typedef shared_ptr<DataType> DataTypePtr;
+	typedef std::shared_ptr<DataType> DataTypePtr;
 
 }
 

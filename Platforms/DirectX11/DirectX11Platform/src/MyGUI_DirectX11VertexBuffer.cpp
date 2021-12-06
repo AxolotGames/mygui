@@ -6,7 +6,6 @@
 
 #include <d3d11.h>
 #include "MyGUI_DirectX11VertexBuffer.h"
-#include "MyGUI_VertexData.h"
 #include "MyGUI_DirectX11Diagnostic.h"
 
 namespace MyGUI
@@ -14,10 +13,11 @@ namespace MyGUI
 
 	const size_t VERTEX_IN_QUAD = 6;
 	const size_t RENDER_ITEM_STEEP_REALLOCK = 5 * VERTEX_IN_QUAD;
+	const size_t VERTEX_BUFFER_REALLOCK_STEP = 5 * VertexQuad::VertexCount;
 
 	DirectX11VertexBuffer::DirectX11VertexBuffer(DirectX11RenderManager* _pRenderManager) :
 		mNeedVertexCount(0),
-		mVertexCount(RENDER_ITEM_STEEP_REALLOCK),
+		mVertexCount( RENDER_ITEM_STEEP_REALLOCK ),
 		mBuffer(nullptr),
 		mManager(_pRenderManager)
 	{
@@ -41,8 +41,9 @@ namespace MyGUI
 
 	Vertex* DirectX11VertexBuffer::lock()
 	{
-		if (mNeedVertexCount > mVertexCount) resize();
-		
+		if (mNeedVertexCount > mVertexCount || mVertexCount == 0)
+			resize();
+
 		D3D11_MAPPED_SUBRESOURCE map;
 		memset(&map, 0, sizeof(map));
 		mManager->mpD3DContext->Map(mBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
@@ -54,18 +55,17 @@ namespace MyGUI
 		if (mBuffer) mManager->mpD3DContext->Unmap(mBuffer, 0);
 	}
 
-	bool DirectX11VertexBuffer::create()
+	void DirectX11VertexBuffer::create()
 	{
 		D3D11_BUFFER_DESC desc;
 		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		desc.MiscFlags = 0;
 		desc.StructureByteStride = 0;
-		desc.ByteWidth = sizeof(Vertex) * (mVertexCount);
+		desc.ByteWidth = mVertexCount * sizeof(Vertex);
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		HRESULT hr = mManager->mpD3DDevice->CreateBuffer(&desc, 0, &mBuffer);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Create Buffer failed!");
-		return hr == S_OK ? true : false;
 	}
 
 	void DirectX11VertexBuffer::destroy()
@@ -73,13 +73,13 @@ namespace MyGUI
 		if (mBuffer)
 		{
 			mBuffer->Release();
-			mBuffer = 0;
+			mBuffer = nullptr;
 		}
 	}
 
 	void DirectX11VertexBuffer::resize()
 	{
-		mVertexCount = mNeedVertexCount + RENDER_ITEM_STEEP_REALLOCK;
+		mVertexCount = mNeedVertexCount + VERTEX_BUFFER_REALLOCK_STEP;
 		destroy();
 		create();
 	}

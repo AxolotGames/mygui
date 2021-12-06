@@ -13,7 +13,7 @@ namespace MyGUI
 	//--------------------------------------------------------------------------
 	UString::_base_iterator::_base_iterator()
 	{
-		mString = 0;
+		mString = nullptr;
 	}
 	//--------------------------------------------------------------------------
 	void UString::_base_iterator::_seekFwd( size_type c )
@@ -100,14 +100,17 @@ namespace MyGUI
 	//--------------------------------------------------------------------------
 	//--------------------------------------------------------------------------
 	//--------------------------------------------------------------------------
-	UString::_fwd_iterator::_fwd_iterator()
-	{
-
-	}
+	UString::_fwd_iterator::_fwd_iterator() = default;
 	//--------------------------------------------------------------------------
 	UString::_fwd_iterator::_fwd_iterator( const _fwd_iterator& i )
 	{
 		_become( i );
+	}
+	//--------------------------------------------------------------------------
+	UString::_fwd_iterator& UString::_fwd_iterator::operator=( const _fwd_iterator& i )
+	{
+		_become( i );
+		return *this;
 	}
 	//--------------------------------------------------------------------------
 	UString::_fwd_iterator& UString::_fwd_iterator::operator++()
@@ -211,14 +214,17 @@ namespace MyGUI
 	//--------------------------------------------------------------------------
 	//--------------------------------------------------------------------------
 	//--------------------------------------------------------------------------
-	UString::_const_fwd_iterator::_const_fwd_iterator()
-	{
-
-	}
+	UString::_const_fwd_iterator::_const_fwd_iterator() = default;
 	//--------------------------------------------------------------------------
 	UString::_const_fwd_iterator::_const_fwd_iterator( const _const_fwd_iterator& i )
 	{
 		_become( i );
+	}
+	//--------------------------------------------------------------------------
+	UString::_const_fwd_iterator& UString::_const_fwd_iterator::operator=( const _const_fwd_iterator& i )
+	{
+		_become( i );
+		return *this;
 	}
 	//--------------------------------------------------------------------------
 	UString::_const_fwd_iterator::_const_fwd_iterator( const _fwd_iterator& i )
@@ -322,10 +328,7 @@ namespace MyGUI
 	//--------------------------------------------------------------------------
 	//--------------------------------------------------------------------------
 	//--------------------------------------------------------------------------
-	UString::_rev_iterator::_rev_iterator()
-	{
-
-	}
+	UString::_rev_iterator::_rev_iterator() = default;
 	//--------------------------------------------------------------------------
 	UString::_rev_iterator::_rev_iterator( const _rev_iterator& i )
 	{
@@ -411,10 +414,7 @@ namespace MyGUI
 	//--------------------------------------------------------------------------
 	//--------------------------------------------------------------------------
 	//--------------------------------------------------------------------------
-	UString::_const_rev_iterator::_const_rev_iterator()
-	{
-
-	}
+	UString::_const_rev_iterator::_const_rev_iterator() = default;
 	//--------------------------------------------------------------------------
 	UString::_const_rev_iterator::_const_rev_iterator( const _const_rev_iterator& i )
 	{
@@ -1914,14 +1914,14 @@ namespace MyGUI
 
 	void UString::_init()
 	{
-		m_buffer.mVoidBuffer = 0;
+		m_buffer.mVoidBuffer = nullptr;
 		m_bufferType = bt_none;
 		m_bufferSize = 0;
 	}
 
 	void UString::_cleanBuffer() const
 	{
-		if ( m_buffer.mVoidBuffer != 0 ) {
+		if ( m_buffer.mVoidBuffer != nullptr ) {
 			switch ( m_bufferType ) {
 				case bt_string:
 					delete m_buffer.mStrBuffer;
@@ -1939,7 +1939,7 @@ namespace MyGUI
 						"don't know the type");
 					break;
 			}
-			m_buffer.mVoidBuffer = 0;
+			m_buffer.mVoidBuffer = nullptr;
 			m_bufferSize = 0;
 			m_bufferType = bt_none;
 		}

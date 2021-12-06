@@ -21,7 +21,7 @@ namespace attribute
 		template <typename Type>
 		static Type* convert(BaseValueType* _value)
 		{
-			return _value == 0 ? 0 : _value->castType<Type>(false);
+			return _value == nullptr ? nullptr : _value->castType<Type>(false);
 		}
 	};
 
@@ -29,12 +29,6 @@ namespace attribute
 
 #define ATTRIBUTE_FIELD_WIDGET_NAME(_class, _field, _value) \
 	ATTRIBUTE_FIELD(AttributeFieldWidgetName, _class, _field, _value)
-
-
-	DECLARE_ATTRIBUTE_CLASS(AttributeSize, MyGUI::IntSize);
-
-#define ATTRIBUTE_CLASS_SIZE(_class, _value) \
-	ATTRIBUTE_CLASS(AttributeSize, _class, _value)
 
 
 	DECLARE_ATTRIBUTE_CLASS(AttributeLayout, std::string);

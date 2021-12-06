@@ -12,26 +12,14 @@
 
 
 #if MYGUI_PLATFORM == MYGUI_PLATFORM_WIN32
-#    define MYGUI_DYNLIB_HANDLE hInstance
-#    define MYGUI_DYNLIB_LOAD( a ) LoadLibrary( a )
-#    define MYGUI_DYNLIB_GETSYM( a, b ) GetProcAddress( a, b )
-#    define MYGUI_DYNLIB_UNLOAD( a ) !FreeLibrary( a )
-
+#	define MYGUI_DYNLIB_HANDLE hInstance
 struct HINSTANCE__;
 typedef struct HINSTANCE__* hInstance;
-
 #elif MYGUI_PLATFORM == MYGUI_PLATFORM_LINUX
-#    define MYGUI_DYNLIB_HANDLE void*
-#    define MYGUI_DYNLIB_LOAD( a ) dlopen( a, RTLD_LAZY | RTLD_GLOBAL)
-#    define MYGUI_DYNLIB_GETSYM( a, b ) dlsym( a, b )
-#    define MYGUI_DYNLIB_UNLOAD( a ) dlclose( a )
-
+#	define MYGUI_DYNLIB_HANDLE void*
 #elif MYGUI_PLATFORM == MYGUI_PLATFORM_APPLE
-#    include <CoreFoundation/CFBundle.h>
-#    define MYGUI_DYNLIB_HANDLE CFBundleRef
-#    define MYGUI_DYNLIB_LOAD( a ) mac_loadExeBundle( a )
-#    define MYGUI_DYNLIB_GETSYM( a, b ) mac_getBundleSym( a, b )
-#    define MYGUI_DYNLIB_UNLOAD( a ) mac_unloadExeBundle( a )
+#	include <CoreFoundation/CFBundle.h>
+#	define MYGUI_DYNLIB_HANDLE CFBundleRef
 #endif
 
 namespace MyGUI
@@ -49,8 +37,6 @@ namespace MyGUI
 
 	protected:
 		DynLib(const std::string& name);
-
-		~DynLib();
 
 	public:
 
@@ -73,7 +59,7 @@ namespace MyGUI
 				If the function succeeds, the returned value is a handle to the symbol.
 				If the function fails, the returned value is <b>nullptr</b>.
 		*/
-		void* getSymbol( const std::string& strName ) const throw();
+		void* getSymbol( const std::string& strName ) const noexcept;
 
 	protected:
 		//! Gets the last loading error

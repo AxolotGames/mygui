@@ -19,7 +19,7 @@ namespace input
 	InputManager* InputManager::msInputManager = 0;
 
 	// старая процедура, которую мы заменили
-	LRESULT InputManager::msOldWindowProc = NULL;
+	LRESULT InputManager::msOldWindowProc = 0;
 
 	bool InputManager::msSkipMove = false;
 
@@ -43,7 +43,7 @@ namespace input
 		{
 			HDROP hDrop = (HDROP)wParam;
 			wchar_t buff[MAX_PATH] = { 0 };
-			UINT fcount = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
+			UINT fcount = DragQueryFileW(hDrop, 0xFFFFFFFF, nullptr, 0);
 
 			for (UINT index = 0; index < fcount; ++index)
 			{
@@ -57,7 +57,7 @@ namespace input
 		// нас пытаются закрыть
 		else if (WM_CLOSE == uMsg)
 		{
-			if (!msInputManager->onWinodwClose((size_t)hWnd))
+			if (!msInputManager->onWindowClose((size_t)hWnd))
 				return 0;
 		}
 		else if ((uMsg >= WM_MOUSEFIRST) && (uMsg <= __WM_REALMOUSELAST))
