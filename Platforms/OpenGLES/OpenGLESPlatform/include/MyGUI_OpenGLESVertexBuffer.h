@@ -1,11 +1,7 @@
-#ifndef MYGUI_OPENGLES_VERTEX_BUFFER_H__
-#define MYGUI_OPENGLES_VERTEX_BUFFER_H__
+#pragma once
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_IVertexBuffer.h"
-
-#include <GLES3/gl3.h>
-#include <GLES3/gl2ext.h>
 
 namespace MyGUI
 {
@@ -17,7 +13,7 @@ namespace MyGUI
 		~OpenGLESVertexBuffer() override;
 
 		void setVertexCount(size_t _count) override;
-		size_t getVertexCount() override;
+		size_t getVertexCount() const override;
 
 		Vertex* lock() override;
 		void unlock() override;
@@ -25,14 +21,16 @@ namespace MyGUI
 	/*internal:*/
 		unsigned int getBufferID() const
 		{
-			return mBufferID;
+			return mVAOID;
 		}
+
 	private:
 		void create();
 		void destroy();
 		void resize();
 
 	private:
+		unsigned int mVAOID;
 		unsigned int mBufferID;
 		size_t mVertexCount;
 		size_t mNeedVertexCount;
@@ -40,5 +38,3 @@ namespace MyGUI
 	};
 
 } // namespace MyGUI
-
-#endif // MYGUI_OPENGLES_VERTEX_BUFFER_H__

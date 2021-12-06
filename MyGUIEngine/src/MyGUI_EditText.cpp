@@ -82,55 +82,43 @@ namespace MyGUI
 			}
 		}
 
-		// необходимо разобраться
-		bool need_update = true;//_update;
-
 		// первоначальное выравнивание
 		if (mAlign.isHStretch())
 		{
 			// растягиваем
 			mCoord.width = mCoord.width + (mCroppedParent->getWidth() - _oldsize.width);
-			need_update = true;
 			mIsMargin = true; // при изменении размеров все пересчитывать
 		}
 		else if (mAlign.isRight())
 		{
 			// двигаем по правому краю
 			mCoord.left = mCoord.left + (mCroppedParent->getWidth() - _oldsize.width);
-			need_update = true;
 		}
 		else if (mAlign.isHCenter())
 		{
 			// выравнивание по горизонтали без растяжения
 			mCoord.left = (mCroppedParent->getWidth() - mCoord.width) / 2;
-			need_update = true;
 		}
 
 		if (mAlign.isVStretch())
 		{
 			// растягиваем
 			mCoord.height = mCoord.height + (mCroppedParent->getHeight() - _oldsize.height);
-			need_update = true;
 			mIsMargin = true; // при изменении размеров все пересчитывать
 		}
 		else if (mAlign.isBottom())
 		{
 			// двигаем по нижнему краю
 			mCoord.top = mCoord.top + (mCroppedParent->getHeight() - _oldsize.height);
-			need_update = true;
 		}
 		else if (mAlign.isVCenter())
 		{
 			// выравнивание по вертикали без растяжения
 			mCoord.top = (mCroppedParent->getHeight() - mCoord.height) / 2;
-			need_update = true;
 		}
 
-		if (need_update)
-		{
-			mCurrentCoord = mCoord;
-			_updateView();
-		}
+        mCurrentCoord = mCoord;
+        _updateView();
 	}
 
 	void EditText::_updateView()
@@ -175,6 +163,7 @@ namespace MyGUI
 	void EditText::setCaption(const UString& _value)
 	{
 		mCaption = _value;
+		mUtf32Caption = mCaption.asUTF32();
 		mTextOutDate = true;
 
 		checkVertexSize();
@@ -185,8 +174,8 @@ namespace MyGUI
 
 	void EditText::checkVertexSize()
 	{
-		// если вершин не хватит, делаем реалок, с учетом выделения * 2 и курсора
-		size_t need = (mCaption.size() * (mShadow ? 3 : 2) + 2) * VertexQuad::VertexCount;
+		// reallocate if we need more vertices (extra vertices for selection * 2 and cursor)
+		size_t need = (mUtf32Caption.size() * (mShadow ? 3 : 2) + 2) * VertexQuad::VertexCount;
 		if (mCountVertex < need)
 		{
 			mCountVertex = need + SIMPLETEXT_COUNT_VERTEX;
@@ -195,7 +184,7 @@ namespace MyGUI
 		}
 	}
 
-	unsigned int EditText::getMixedNativeAlpha(float secondAlpha)
+	unsigned int EditText::getMixedNativeAlpha(float secondAlpha) const
 	{
 		return (uint8)(mAlpha * secondAlpha * 255) << 24;
 	}
@@ -401,7 +390,7 @@ namespace MyGUI
 		return mTextAlign;
 	}
 
-	IntSize EditText::getTextSize()
+	IntSize EditText::getTextSize() const
 	{
 		// если нуно обновить, или изменились пропорции экрана
 		if (mTextOutDate)
@@ -440,7 +429,7 @@ namespace MyGUI
 		return mViewOffset;
 	}
 
-	size_t EditText::getCursorPosition(const IntPoint& _point)
+	size_t EditText::getCursorPosition(const IntPoint& _point) const
 	{
 		if (nullptr == mFont)
 			return 0;
@@ -456,7 +445,7 @@ namespace MyGUI
 		return mTextView.getCursorPosition(point);
 	}
 
-	IntCoord EditText::getCursorCoord(size_t _position)
+	IntCoord EditText::getCursorCoord(size_t _position) const
 	{
 		if (nullptr == mFont)
 			return IntCoord();
@@ -491,7 +480,7 @@ namespace MyGUI
 			mNode->outOfDate(mRenderItem);
 	}
 
-	void EditText::updateRawData()
+	void EditText::updateRawData() const
 	{
 		if (nullptr == mFont)
 			return;
@@ -507,7 +496,7 @@ namespace MyGUI
 				width -= 2;
 		}
 
-		mTextView.update(mCaption, mFont, mFontHeight, mTextAlign, mVertexFormat, width);
+		mTextView.update(mUtf32Caption, mFont, mFontHeight, mTextAlign, mVertexFormat, width);
 	}
 
 	void EditText::setStateData(IStateInfo* _data)
@@ -552,7 +541,7 @@ namespace MyGUI
 		{
 			float left = (float)(line->offset - mViewOffset.left + mCoord.left);
 
-			for (VectorCharInfo::const_iterator sim = line->simbols.begin(); sim != line->simbols.end(); ++sim)
+			for (VectorCharInfo::const_iterator sim = line->symbols.begin(); sim != line->symbols.end(); ++sim)
 			{
 				if (sim->isColour())
 				{
@@ -606,7 +595,7 @@ namespace MyGUI
 		if (mVisibleCursor)
 		{
 			IntPoint point = mTextView.getCursorPoint(mCursorPosition) - mViewOffset + mCoord.point();
-			GlyphInfo* cursorGlyph = mFont->getGlyphInfo(static_cast<Char>(FontCodeType::Cursor));
+			const GlyphInfo* cursorGlyph = mFont->getGlyphInfo(static_cast<Char>(FontCodeType::Cursor));
 			vertexRect.set((float)point.left, (float)point.top, (float)point.left + cursorGlyph->width, (float)(point.top + mFontHeight));
 
 			drawGlyph(renderTargetInfo, vertex, vertexCount, vertexRect, cursorGlyph->uvRect, mCurrentColourNative | 0x00FFFFFF);

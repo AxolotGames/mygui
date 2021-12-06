@@ -9,14 +9,13 @@
 #include "SettingsManager.h"
 #include "FactoryManager.h"
 
-template <> tools::ExportManager* MyGUI::Singleton<tools::ExportManager>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::ExportManager>::mClassTypeName = "ExportManager";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(ExportManager);
 
 	ExportManager::ExportManager() :
-		mExportSerializer(nullptr)
+		mExportSerializer(nullptr),
+		mSingletonHolder(this)
 	{
 	}
 

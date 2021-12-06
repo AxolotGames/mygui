@@ -97,6 +97,18 @@ namespace tools
 		}
 		data->setPropertyValue("FontCodeRanges", value);
 
+		value = _node.select_single_node("Property[@key=\"MsdfMode\"]/@value").attribute().value();
+		if (!value.empty())
+			data->setPropertyValue("MsdfMode", MyGUI::utility::parseValue<bool>(value));
+
+		value = _node.select_single_node("Property[@key=\"MsdfRange\"]/@value").attribute().value();
+		if (!value.empty())
+			data->setPropertyValue("MsdfRange", MyGUI::utility::parseValue<int>(value));
+
+		value = _node.select_single_node("Property[@key=\"Shader\"]/@value").attribute().value();
+		if (!value.empty())
+			data->setPropertyValue("Shader", value);
+
 		DataManager::getInstance().getRoot()->addChild(data);
 	}
 
@@ -148,6 +160,20 @@ namespace tools
 		std::vector<std::string> values = MyGUI::utility::split(value, "|");
 		for (size_t index = 0; index < values.size(); index ++)
 			nodeCodes.append_child("Code").append_attribute("range").set_value(values[index].c_str());
+
+		value = MyGUI::utility::toString(MyGUI::utility::parseValue<bool>(_data->getPropertyValue("MsdfMode")));
+		nodeProperty = node.append_child("Property");
+		nodeProperty.append_attribute("key").set_value("MsdfMode");
+		nodeProperty.append_attribute("value").set_value(value.c_str());
+
+		nodeProperty = node.append_child("Property");
+		nodeProperty.append_attribute("key").set_value("MsdfRange");
+		nodeProperty.append_attribute("value").set_value(_data->getPropertyValue("MsdfRange").c_str());
+
+		nodeProperty = node.append_child("Property");
+		nodeProperty.append_attribute("key").set_value("Shader");
+		nodeProperty.append_attribute("value").set_value(_data->getPropertyValue("Shader").c_str());
+
 	}
 
 	bool FontExportSerializer::exportData(const MyGUI::UString& _folderName, const MyGUI::UString& _fileName)
@@ -206,7 +232,7 @@ namespace tools
 			codeNode->addAttribute("index", "substitute");
 		}
 
-		MyGUI::GlyphInfo* info = _font->getGlyphInfo(_code);
+		const MyGUI::GlyphInfo* info = _font->getGlyphInfo(_code);
 		MyGUI::ITexture* texture = _font->getTextureFont();
 		MyGUI::FloatCoord coord(info->uvRect.left * (float)texture->getWidth(), info->uvRect.top * (float)texture->getHeight(), info->width, info->height);
 
@@ -238,7 +264,7 @@ namespace tools
 			node->addAttribute("name", _data->getPropertyValue("Name"));
 
 			addProperty(node, "Source", textureName);
-			addProperty(node, "SourceSize", MyGUI::IntSize(texture->getWidth(), texture->getHeight()));
+			addProperty(node, "Shader", _data->getPropertyValue("Shader"));
 			addProperty(node, "DefaultHeight", font->getDefaultHeight());
 
 			MyGUI::xml::Element* codes = node->createChild("Codes");
@@ -278,13 +304,16 @@ namespace tools
 		font->setOffsetHeight(_data->getPropertyValue<int>("OffsetHeight"));
 		font->setSubstituteCode(_data->getPropertyValue<int>("SubstituteCode"));
 		font->setDistance(_data->getPropertyValue<int>("Distance"));
+		font->setMsdfMode(_data->getPropertyValue<bool>("MsdfMode"));
+		font->setMsdfRange(_data->getPropertyValue<int>("MsdfRange"));
+		font->setShader(_data->getPropertyValue("Shader"));
 
 		std::string ranges = _data->getPropertyValue("FontCodeRanges");
 		std::vector<std::string> values = MyGUI::utility::split(ranges, "|");
 		for (size_t index = 0; index < values.size(); index ++)
 		{
 			MyGUI::IntSize size = MyGUI::IntSize::parse(values[index]);
-			font->addCodePointRange(size.width, size.height); // о да
+			font->addCodePointRange(size.width, size.height);
 		}
 
 		font->initialise();

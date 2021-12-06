@@ -4,6 +4,7 @@
 	@date		09/2011
 */
 #include <d3d11.h>
+
 #include <D3Dcompiler.h>
 #include "MyGUI_DirectX11RenderManager.h"
 #include "MyGUI_DirectX11Texture.h"
@@ -11,6 +12,7 @@
 #include "MyGUI_DirectX11Diagnostic.h"
 #include "MyGUI_Gui.h"
 #include "MyGUI_Timer.h"
+#include "MyGUI_DataManager.h"
 
 namespace MyGUI
 {
@@ -62,9 +64,9 @@ namespace MyGUI
 
 	static const D3D11_INPUT_ELEMENT_DESC vertexLayout[] =
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",    0, DXGI_FORMAT_R8G8B8A8_UNORM,  0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR",    0, DXGI_FORMAT_R8G8B8A8_UNORM,  0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
 	DirectX11RenderManager::DirectX11RenderManager() :
@@ -96,36 +98,35 @@ namespace MyGUI
 
 		mVertexFormat = VertexColourType::ColourABGR;
 
-		std::string vertexProfile, pixelProfile;
-		if ( mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_11_0 )
+		if (mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_11_0)
 		{
-			vertexProfile = "vs_5_0";
-			pixelProfile = "ps_5_0";
+			mVertexProfile = "vs_5_0";
+			mPixelProfile = "ps_5_0";
 		}
-		else if ( mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_10_1 )
+		else if (mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_10_1)
 		{
-			vertexProfile = "vs_4_1";
-			pixelProfile = "ps_4_1";
+			mVertexProfile = "vs_4_1";
+			mPixelProfile = "ps_4_1";
 		}
-		else if ( mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_10_0 )
+		else if (mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_10_0)
 		{
-			vertexProfile = "vs_4_0";
-			pixelProfile = "ps_4_0";
+			mVertexProfile = "vs_4_0";
+			mPixelProfile = "ps_4_0";
 		}
-		else if ( mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_9_3 )
+		else if (mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_9_3)
 		{
-			vertexProfile = "vs_4_0_level_9_3";
-			pixelProfile = "ps_4_0_level_9_3";
+			mVertexProfile = "vs_4_0_level_9_3";
+			mPixelProfile = "ps_4_0_level_9_3";
 		}
-		else if ( mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_9_2 )
+		else if (mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_9_2)
 		{
-			vertexProfile = "vs_4_0_level_9_1";
-			pixelProfile = "ps_4_0_level_9_1";
+			mVertexProfile = "vs_4_0_level_9_1";
+			mPixelProfile = "ps_4_0_level_9_1";
 		}
-		else if ( mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_9_1 )
+		else if (mpD3DDevice->GetFeatureLevel() == D3D_FEATURE_LEVEL_9_1)
 		{
-			vertexProfile = "vs_4_0_level_9_1";
-			pixelProfile = "ps_4_0_level_9_1";
+			mVertexProfile = "vs_4_0_level_9_1";
+			mPixelProfile = "ps_4_0_level_9_1";
 		}
 
 		// Get Current viewports
@@ -142,7 +143,7 @@ namespace MyGUI
 
 		// Build Flat Vertex Shader
 		ID3DBlob* bytecode = nullptr, *errors = 0, *signature0 = 0, *signature1 = 0;
-		HRESULT hr = D3DCompile(vsSource, strlen(vsSource), "VertexShader0", 0, 0, "main", vertexProfile.c_str(), flags, 0, &bytecode, &errors);
+		HRESULT hr = D3DCompile(vsSource, strlen(vsSource), "VertexShader0", 0, 0, "main", mVertexProfile.c_str(), flags, 0, &bytecode, &errors);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Vertex Shader Compilation failed, unknown errors!"));
 
 		hr = D3DGetInputSignatureBlob(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), &signature0);
@@ -157,7 +158,7 @@ namespace MyGUI
 		// Build Textured Vertex Shader
 		bytecode = 0;
 		errors = 0;
-		hr = D3DCompile(vsTexturedSource, strlen(vsTexturedSource), "VertexShader1", 0, 0, "main", vertexProfile.c_str(), flags, 0, &bytecode, &errors);
+		hr = D3DCompile(vsTexturedSource, strlen(vsTexturedSource), "VertexShader1", 0, 0, "main", mVertexProfile.c_str(), flags, 0, &bytecode, &errors);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Vertex Shader Compilation failed, unknown errors!"));
 
 		hr = D3DGetInputSignatureBlob(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), &signature1);
@@ -172,7 +173,7 @@ namespace MyGUI
 		// Build Flat Pixel Shader
 		bytecode = 0;
 		errors = 0;
-		hr = D3DCompile(psSource, strlen(psSource), "PixelShader0", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors);
+		hr = D3DCompile(psSource, strlen(psSource), "PixelShader0", 0, 0, "main", mPixelProfile.c_str(), flags, 0, &bytecode, &errors);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Compilation failed, unknown errors!"));
 
 		hr = mpD3DDevice->CreatePixelShader(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), 0, &mPixelShader0);
@@ -184,7 +185,7 @@ namespace MyGUI
 		// Build Textured Pixel Shader
 		bytecode = 0;
 		errors = 0;
-		hr = D3DCompile(psTexturedSource, strlen(psTexturedSource), "PixelShader1", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors);
+		hr = D3DCompile(psTexturedSource, strlen(psTexturedSource), "PixelShader1", 0, 0, "main", mPixelProfile.c_str(), flags, 0, &bytecode, &errors);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Compilation failed, unknown errors!"));
 
 		hr = mpD3DDevice->CreatePixelShader(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), 0, &mPixelShader1);
@@ -196,7 +197,7 @@ namespace MyGUI
 		// Build Textured L8 Pixel Shader
 		bytecode = 0;
 		errors = 0;
-		hr = D3DCompile(psTexturedSourceL8, strlen( psTexturedSourceL8 ), "PixelShader2", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors);
+		hr = D3DCompile(psTexturedSourceL8, strlen( psTexturedSourceL8 ), "PixelShader2", 0, 0, "main", mPixelProfile.c_str(), flags, 0, &bytecode, &errors);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Compilation failed, unknown errors!"));
 
 		hr = mpD3DDevice->CreatePixelShader(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), 0, &mPixelShaderL8);
@@ -208,7 +209,7 @@ namespace MyGUI
 		// Build Textured L8A8 Pixel Shader
 		bytecode = 0;
 		errors = 0;
-		hr = D3DCompile(psTexturedSourceL8A8, strlen( psTexturedSourceL8A8 ), "PixelShader3", 0, 0, "main", pixelProfile.c_str(), flags, 0, &bytecode, &errors);
+		hr = D3DCompile(psTexturedSourceL8A8, strlen( psTexturedSourceL8A8 ), "PixelShader3", 0, 0, "main", mPixelProfile.c_str(), flags, 0, &bytecode, &errors);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Compilation failed, unknown errors!"));
 
 		hr = mpD3DDevice->CreatePixelShader(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), 0, &mPixelShaderL8A8);
@@ -262,29 +263,32 @@ namespace MyGUI
 
 		// Create Rasterizer State
 		D3D11_RASTERIZER_DESC rastDesc;
-		rastDesc.FillMode              = D3D11_FILL_SOLID;
-		rastDesc.CullMode              = D3D11_CULL_NONE;
+		rastDesc.FillMode = D3D11_FILL_SOLID;
+		rastDesc.CullMode = D3D11_CULL_NONE;
 		rastDesc.FrontCounterClockwise = FALSE;
-		rastDesc.DepthBias             = 0;
-		rastDesc.DepthBiasClamp        = 0;
-		rastDesc.SlopeScaledDepthBias  = 0;
-		rastDesc.ScissorEnable         = FALSE;
-		rastDesc.MultisampleEnable     = FALSE;
+		rastDesc.DepthBias = 0;
+		rastDesc.DepthBiasClamp = 0;
+		rastDesc.SlopeScaledDepthBias = 0;
+		rastDesc.ScissorEnable = FALSE;
+		rastDesc.MultisampleEnable = FALSE;
 		rastDesc.AntialiasedLineEnable = FALSE;
 		hr = mpD3DDevice->CreateRasterizerState(&rastDesc, &mRasterizerState);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Rasterizer State Create failed!");
 
+		//registerShader("Default", "MyGUI_DirectX11_VP.hlsl", "MyGUI_DirectX11_FP.hlsl");
+
 		// Create Input Layout
-		hr = mpD3DDevice->CreateInputLayout(vertexLayout, 3, signature0->GetBufferPointer(), signature0->GetBufferSize(), &mInputLayout0);
-		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Input Layout Create failed!");
+		hr = mpD3DDevice->CreateInputLayout( vertexLayout, 3, signature0->GetBufferPointer(), signature0->GetBufferSize(), &mInputLayout0 );
+		MYGUI_PLATFORM_ASSERT( hr == S_OK, "Input Layout Create failed!" );
 
 		signature0->Release();
 
 		// Create Input Layout
-		hr = mpD3DDevice->CreateInputLayout(vertexLayout, 3, signature1->GetBufferPointer(), signature1->GetBufferSize(), &mInputLayout1);
-		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Input Layout Create failed!");
+		hr = mpD3DDevice->CreateInputLayout( vertexLayout, 3, signature1->GetBufferPointer(), signature1->GetBufferSize(), &mInputLayout1 );
+		MYGUI_PLATFORM_ASSERT( hr == S_OK, "Input Layout Create failed!" );
 
 		signature1->Release();
+
 
 		mUpdate = false;
 
@@ -334,35 +338,35 @@ namespace MyGUI
 		DirectX11Texture* texture = static_cast<DirectX11Texture*>(_texture);
 		if ( texture == 0 || texture->mResourceView == 0 )
 		{
-			DirectX11VertexBuffer* buffer = static_cast<DirectX11VertexBuffer*>(_buffer);
+		DirectX11VertexBuffer* buffer = static_cast<DirectX11VertexBuffer*>(_buffer);
 			mpD3DContext->PSSetShader(mPixelShader0, 0, 0);
 			mpD3DContext->VSSetShader(mVertexShader0, 0, 0);
 
-			UINT stride = sizeof(Vertex), offset = 0;
-			mpD3DContext->IASetVertexBuffers(0, 1, &buffer->mBuffer, &stride, &offset);
+		UINT stride = sizeof(Vertex), offset = 0;
+		mpD3DContext->IASetVertexBuffers(0, 1, &buffer->mBuffer, &stride, &offset);
 			mpD3DContext->IASetInputLayout(mInputLayout0);
 			mpD3DContext->Draw(_count, 0);
 		}
 		else
 		{
-			DirectX11VertexBuffer* buffer = static_cast<DirectX11VertexBuffer*>(_buffer);
+			DirectX11VertexBuffer* buffer = static_cast<DirectX11VertexBuffer*>( _buffer );
 
-			mpD3DContext->VSSetShader(mVertexShader1, 0, 0);
+			mpD3DContext->VSSetShader( mVertexShader1, 0, 0 );
 			if( texture->getFormat() == PixelFormat::L8 )
 			{
-				mpD3DContext->PSSetShader(mPixelShaderL8, 0, 0);
+				mpD3DContext->PSSetShader( mPixelShaderL8, 0, 0 );
 			}
 			else if( texture->getFormat() == PixelFormat::L8A8 )
 			{
-				mpD3DContext->PSSetShader(mPixelShaderL8A8, 0, 0);
+				mpD3DContext->PSSetShader( mPixelShaderL8A8, 0, 0 );
 			}
 			else
 			{
-				mpD3DContext->PSSetShader(mPixelShader1, 0, 0);
+				mpD3DContext->PSSetShader( mPixelShader1, 0, 0 );
 			}
-			
-			mpD3DContext->PSSetSamplers(0, 1, &mSamplerState);
-			mpD3DContext->PSSetShaderResources(0, 1, &texture->mResourceView);
+
+			mpD3DContext->PSSetSamplers( 0, 1, &mSamplerState );
+			mpD3DContext->PSSetShaderResources( 0, 1, &texture->mResourceView );
 
 			UINT stride = sizeof(Vertex), offset = 0;
 			mpD3DContext->IASetVertexBuffers(0, 1, &buffer->mBuffer, &stride, &offset);
@@ -382,7 +386,7 @@ namespace MyGUI
 		unsigned long now_time = timer.getMilliseconds();
 		unsigned long time = now_time - last_time;
 
-		onFrameEvent((float)((double)(time) / (double)1000));
+		onFrameEvent(time / 1000.0f);
 
 		last_time = now_time;
 
@@ -393,12 +397,25 @@ namespace MyGUI
 		mUpdate = false;
 	}
 
+	DirectX11ShaderInfo* DirectX11RenderManager::getShaderInfo(const std::string& _shaderName) const
+	{
+		auto iter = mRegisteredShaders.find(_shaderName);
+		if (iter != mRegisteredShaders.end())
+			return iter->second;
+		MYGUI_PLATFORM_LOG(Error, "Failed to get shader info for shader '" << _shaderName << "'. Did you forgot to register shader?");
+		return nullptr;
+	}
+
 	void DirectX11RenderManager::begin()
 	{
-		mpD3DContext->OMSetBlendState(mBlendState, 0, 0xffffffff);
+		mpD3DContext->OMSetBlendState(mBlendState, nullptr, 0xffffffff);
 		mpD3DContext->RSSetState(mRasterizerState);
 		mpD3DContext->OMSetDepthStencilState(mDepthStencilState, 0);
 		mpD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		//mpD3DContext->PSSetShader(mDefaultShader->pixelShader, nullptr, 0);
+		//mpD3DContext->VSSetShader(mDefaultShader->vertexShader, nullptr, 0);
+		//mpD3DContext->IASetInputLayout(mDefaultShader->inputLayout);
 	}
 
 	void DirectX11RenderManager::end()
@@ -447,6 +464,12 @@ namespace MyGUI
 			delete item->second;
 		}
 		mTextures.clear();
+
+		for (const auto& shaderInfo : mRegisteredShaders)
+		{
+			destroyShader(shaderInfo.second);
+		}
+		mRegisteredShaders.clear();
 	}
 
 	void DirectX11RenderManager::setViewSize(int _width, int _height)
@@ -469,4 +492,148 @@ namespace MyGUI
 
 		mUpdate = true;
 	}
+
+	void DirectX11RenderManager::registerShader(
+		const std::string& _shaderName,
+		const std::string& _vertexProgramFile,
+		const std::string& _fragmentProgramFile)
+	{
+		auto iter = mRegisteredShaders.find(_shaderName);
+		if (iter != mRegisteredShaders.end())
+			destroyShader(iter->second);
+		mRegisteredShaders[_shaderName] = createShader(_shaderName, _vertexProgramFile, _fragmentProgramFile);
+		if (_shaderName == "Default")
+			mDefaultShader = mRegisteredShaders[_shaderName];
+	}
+
+	std::string DirectX11RenderManager::loadFileContent(const std::string& _file)
+	{
+		const std::string& fullPath = DataManager::getInstance().getDataPath(_file);
+		if (fullPath.empty())
+		{
+			MYGUI_PLATFORM_LOG(Error, "Failed to load file content '" << _file << "'.");
+			return {};
+		}
+		std::ifstream fileStream(DataManager::getInstance().getDataPath(_file));
+		std::stringstream buffer;
+		buffer << fileStream.rdbuf();
+		return buffer.str();
+	}
+
+	DirectX11ShaderInfo* DirectX11RenderManager::createShader(
+		const std::string& _shaderName,
+		const std::string& _vertexProgramFile,
+		const std::string& _fragmentProgramFile)
+	{
+		DirectX11ShaderInfo* shaderInfo = new DirectX11ShaderInfo();
+
+		// Build Textured Vertex Shader
+		ID3DBlob* bytecode = nullptr;
+		ID3DBlob* errors = nullptr;
+		ID3DBlob* signature = nullptr;
+
+		UINT flags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3;
+
+		std::string vertexShaderSource = loadFileContent(_vertexProgramFile);
+		HRESULT hr = D3DCompile(
+			vertexShaderSource.c_str(),
+			vertexShaderSource.size(),
+			(_shaderName + "VertexShader").c_str(),
+			nullptr,
+			nullptr,
+			"main",
+			mVertexProfile.c_str(),
+			flags,
+			0,
+			&bytecode,
+			&errors);
+		MYGUI_PLATFORM_ASSERT(
+			hr == S_OK,
+			(errors ? (char*)errors->GetBufferPointer() : "Vertex Shader Compilation failed, unknown errors!"));
+
+		hr = D3DGetInputSignatureBlob(bytecode->GetBufferPointer(), bytecode->GetBufferSize(), &signature);
+		MYGUI_PLATFORM_ASSERT(
+			hr == S_OK,
+			(errors ? (char*)errors->GetBufferPointer() : "Vertex Shader Compilation failed, failed to get input signature!"));
+
+		hr = mpD3DDevice->CreateVertexShader(
+			bytecode->GetBufferPointer(),
+			bytecode->GetBufferSize(),
+			nullptr,
+			&shaderInfo->vertexShader);
+		MYGUI_PLATFORM_ASSERT(
+			hr == S_OK,
+			(errors ? (char*)errors->GetBufferPointer() : "Vertex Shader Create failed!"));
+
+		if (bytecode) bytecode->Release();
+		if (errors) errors->Release();
+
+
+		// Build Textured Pixel Shader
+		bytecode = nullptr;
+		errors = nullptr;
+		std::string pixelShaderSource = loadFileContent(_fragmentProgramFile);
+		hr = D3DCompile(
+			pixelShaderSource.c_str(),
+			pixelShaderSource.size(),
+			(_shaderName + "PixelShader").c_str(),
+			nullptr,
+			nullptr,
+			"main",
+			mPixelProfile.c_str(),
+			flags,
+			0,
+			&bytecode,
+			&errors);
+		MYGUI_PLATFORM_ASSERT(
+			hr == S_OK,
+			(errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Compilation failed, unknown errors!"));
+
+		hr = mpD3DDevice->CreatePixelShader(
+			bytecode->GetBufferPointer(),
+			bytecode->GetBufferSize(),
+			nullptr,
+			&shaderInfo->pixelShader);
+		MYGUI_PLATFORM_ASSERT(hr == S_OK, (errors ? (char*)errors->GetBufferPointer() : "Pixel Shader Create failed!"));
+
+		if (bytecode) bytecode->Release();
+		if (errors) errors->Release();
+
+		// Create Sampler State
+		D3D11_SAMPLER_DESC samplerDesc;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.BorderColor[0] = samplerDesc.BorderColor[1] = samplerDesc.BorderColor[2] = samplerDesc.BorderColor[3] = 0.0f;
+		samplerDesc.ComparisonFunc = (D3D11_COMPARISON_FUNC)0;
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDesc.MaxAnisotropy = 1;
+		samplerDesc.MaxLOD = 0;
+		samplerDesc.MinLOD = 0;
+		samplerDesc.MipLODBias = 0.0f;
+		hr = mpD3DDevice->CreateSamplerState(&samplerDesc, &mSamplerState);
+		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Sampler State Create failed!");
+
+		// Create Input Layout
+		hr = mpD3DDevice->CreateInputLayout(
+			vertexLayout,
+			3,
+			signature->GetBufferPointer(),
+			signature->GetBufferSize(),
+			&shaderInfo->inputLayout);
+		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Input Layout Create failed!");
+
+		signature->Release();
+
+		return shaderInfo;
+	}
+
+	void DirectX11RenderManager::destroyShader(DirectX11ShaderInfo* shaderInfo)
+	{
+		shaderInfo->vertexShader->Release();
+		shaderInfo->pixelShader->Release();
+		shaderInfo->inputLayout->Release();
+		delete shaderInfo;
+	}
+
 } // namespace MyGUI

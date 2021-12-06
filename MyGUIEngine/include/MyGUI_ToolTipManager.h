@@ -15,9 +15,9 @@ namespace MyGUI
 {
 
 	class MYGUI_EXPORT ToolTipManager :
-		public Singleton<ToolTipManager>,
 		public IUnlinkWidget
 	{
+		MYGUI_SINGLETON_DECLARATION(ToolTipManager);
 	public:
 		ToolTipManager();
 
@@ -28,7 +28,7 @@ namespace MyGUI
 		float getDelayVisible() const;
 
 		/*internal:*/
-		void _unlinkWidget(Widget* _widget);
+		void _unlinkWidget(Widget* _widget) override;
 
 	private:
 		void notifyEventFrameStart(float _time);

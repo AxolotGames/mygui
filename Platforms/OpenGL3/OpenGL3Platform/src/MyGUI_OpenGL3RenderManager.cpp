@@ -11,8 +11,9 @@
 #include "MyGUI_VertexData.h"
 #include "MyGUI_Gui.h"
 #include "MyGUI_Timer.h"
+#include "MyGUI_DataManager.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 namespace MyGUI
 {
@@ -35,10 +36,11 @@ namespace MyGUI
 	{
 	}
 
-	GLuint buildShader(const char* text, GLenum type)
+	GLuint buildShader(const std::string& text, GLenum type)
 	{
 		GLuint id = glCreateShader(type);
-		glShaderSource(id, 1, &text, nullptr);
+		const char *c_str = text.c_str();
+		glShaderSource(id, 1, &c_str, nullptr);
 		glCompileShader(id);
 
 		GLint success;
@@ -60,40 +62,24 @@ namespace MyGUI
 		return id;
 	}
 
-	GLuint OpenGL3RenderManager::createShaderProgram(void)
+	std::string OpenGL3RenderManager::loadFileContent(const std::string& _file)
 	{
-		const char vertexShader[] = R"(
-			#version 130
-			out vec4 Color;
-			out vec2 TexCoord;
-			in vec3 VertexPosition;
-			in vec4 VertexColor;
-			in vec2 VertexTexCoord;
-			uniform float YScale;
-			void main()
-			{
-				TexCoord = VertexTexCoord;
-				Color = VertexColor;
-				vec4 vpos = vec4(VertexPosition,1.0);
-				vpos.y *= YScale;
-				gl_Position = vpos;
-			}
-			)";
+		const std::string& fullPath = DataManager::getInstance().getDataPath(_file);
+		if (fullPath.empty())
+		{
+			MYGUI_PLATFORM_LOG(Error, "Failed to load file content '" << _file << "'.");
+			return {};
+		}
+		std::ifstream fileStream(DataManager::getInstance().getDataPath(_file));
+		std::stringstream buffer;
+		buffer << fileStream.rdbuf();
+		return buffer.str();
+	}
 
-		const char fragmentShader[] = R"(
-			#version 130
-			in vec4 Color;
-			in vec2 TexCoord;
-			out vec4 FragColor;
-			uniform sampler2D Texture;
-			void main(void)
-			{
-				FragColor = texture2D(Texture, TexCoord) * Color;
-			}
-			)";
-
-		GLuint vsID = buildShader(vertexShader, GL_VERTEX_SHADER);
-		GLuint fsID = buildShader(fragmentShader, GL_FRAGMENT_SHADER);
+	GLuint OpenGL3RenderManager::createShaderProgram(const std::string& _vertexProgramFile, const std::string& _fragmentProgramFile)
+	{
+		GLuint vsID = buildShader(loadFileContent(_vertexProgramFile), GL_VERTEX_SHADER);
+		GLuint fsID = buildShader(loadFileContent(_fragmentProgramFile), GL_FRAGMENT_SHADER);
 
 		GLuint progID = glCreateProgram();
 		glAttachShader(progID, vsID);
@@ -103,7 +89,6 @@ namespace MyGUI
 		glBindAttribLocation(progID, 0, "VertexPosition");
 		glBindAttribLocation(progID, 1, "VertexColor");
 		glBindAttribLocation(progID, 2, "VertexTexCoord");
-		glBindFragDataLocation(progID, 0, "FragColor");
 
 		glLinkProgram(progID);
 
@@ -153,18 +138,19 @@ namespace MyGUI
 		mUpdate = false;
 		mImageLoader = _loader;
 
-    mReferenceCount = 0;
+		mReferenceCount = 0;
 
 		glewInit();
 
-    if (!(GLEW_VERSION_3_0)) {
-      const char *version = (const char *) glGetString(GL_VERSION);
-      MYGUI_PLATFORM_EXCEPT(std::string("OpenGL 3.0 or newer not available, current version is ") + version);
-    }
+		if (!(GLEW_VERSION_3_0))
+		{
+			const char* version = (const char*)glGetString(GL_VERSION);
+			MYGUI_PLATFORM_EXCEPT(std::string("OpenGL 3.0 or newer not available, current version is ") + version);
+		}
 
 		mPboIsSupported = glewIsExtensionSupported("GL_EXT_pixel_buffer_object") != 0;
 
-    mProgramID = createShaderProgram();
+		registerShader("Default", "MyGUI_OpenGL3_VP.glsl", "MyGUI_OpenGL3_FP.glsl");
 
 		MYGUI_PLATFORM_LOG(Info, getClassTypeName() << " successfully initialized");
 		mIsInitialise = true;
@@ -191,16 +177,16 @@ namespace MyGUI
 		delete _buffer;
 	}
 
-  void OpenGL3RenderManager::doRenderRtt(IVertexBuffer* _buffer, ITexture* _texture, size_t _count)
-  {
-    glUniform1f(mYScaleUniformLocation, -1.0f);
-    doRender(_buffer, _texture, _count);
-    glUniform1f(mYScaleUniformLocation, 1.0f);
-  }
+	void OpenGL3RenderManager::doRenderRtt(IVertexBuffer* _buffer, ITexture* _texture, size_t _count)
+	{
+		glUniform1f(mYScaleUniformLocation, -1.0f);
+		doRender(_buffer, _texture, _count);
+		glUniform1f(mYScaleUniformLocation, 1.0f);
+	}
 
 	void OpenGL3RenderManager::doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count)
 	{
-    OpenGL3VertexBuffer* buffer = static_cast<OpenGL3VertexBuffer*>(_buffer);
+		OpenGL3VertexBuffer* buffer = static_cast<OpenGL3VertexBuffer*>(_buffer);
 		unsigned int buffer_id = buffer->getBufferID();
 		MYGUI_PLATFORM_ASSERT(buffer_id, "Vertex buffer is not created");
 
@@ -208,39 +194,48 @@ namespace MyGUI
 		if (_texture)
 		{
 			OpenGL3Texture* texture = static_cast<OpenGL3Texture*>(_texture);
-			texture_id = texture->getTextureID();
+			texture_id = texture->getTextureId();
 			//MYGUI_PLATFORM_ASSERT(texture_id, "Texture is not created");
+			if (texture->getShaderId())
+			{
+				glUseProgram(texture->getShaderId());
+			}
 		}
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 
-    glBindVertexArray(buffer_id);
-    glDrawArrays(GL_TRIANGLES, 0, _count);
-    glBindVertexArray(0);
+		glBindVertexArray(buffer_id);
+		glDrawArrays(GL_TRIANGLES, 0, _count);
+		glBindVertexArray(0);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		if (_texture && static_cast<OpenGL3Texture*>(_texture)->getShaderId())
+		{
+			glUseProgram(mDefaultProgramId);
+		}
 	}
 
 	void OpenGL3RenderManager::begin()
 	{
-    ++mReferenceCount;
+		++mReferenceCount;
 
-    glUseProgram(mProgramID);
-    glActiveTexture(GL_TEXTURE0);
-  
-    glEnable(GL_BLEND);
+		glUseProgram(mDefaultProgramId);
+		glActiveTexture(GL_TEXTURE0);
+
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  }
+	}
 
 	void OpenGL3RenderManager::end()
 	{
-    if (--mReferenceCount == 0) {
-      glDisable(GL_BLEND);
-      glUseProgram(0);
-    }
-  }
+		if (--mReferenceCount == 0)
+		{
+			glDisable(GL_BLEND);
+			glUseProgram(0);
+		}
+	}
 
-	const RenderTargetInfo& OpenGL3RenderManager::getInfo()
+	const RenderTargetInfo& OpenGL3RenderManager::getInfo() const
 	{
 		return mInfo;
 	}
@@ -250,19 +245,19 @@ namespace MyGUI
 		return mViewSize;
 	}
 
-	VertexColourType OpenGL3RenderManager::getVertexFormat()
+	VertexColourType OpenGL3RenderManager::getVertexFormat() const
 	{
 		return mVertexFormat;
 	}
 
 	bool OpenGL3RenderManager::isFormatSupported(PixelFormat _format, TextureUsage _usage)
 	{
-    if (_format == PixelFormat::R8G8B8 ||
-        _format == PixelFormat::R8G8B8A8) 
-        return true;
+		if (_format == PixelFormat::R8G8B8 ||
+			_format == PixelFormat::R8G8B8A8)
+			return true;
 
-    return false;
-  }
+		return false;
+	}
 
 	void OpenGL3RenderManager::drawOneFrame()
 	{
@@ -275,7 +270,7 @@ namespace MyGUI
 		unsigned long now_time = timer.getMilliseconds();
 		unsigned long time = now_time - last_time;
 
-		onFrameEvent((float)((double)(time) / (double)1000));
+		onFrameEvent(time / 1000.0f);
 
 		last_time = now_time;
 
@@ -308,9 +303,31 @@ namespace MyGUI
 		mUpdate = true;
 	}
 
+	void OpenGL3RenderManager::registerShader(
+		const std::string& _shaderName,
+		const std::string& _vertexProgramFile,
+		const std::string& _fragmentProgramFile)
+	{
+		auto iter = mRegisteredShaders.find(_shaderName);
+		if (iter != mRegisteredShaders.end())
+			glDeleteProgram(iter->second);
+		mRegisteredShaders[_shaderName] = createShaderProgram(_vertexProgramFile, _fragmentProgramFile);
+		if (_shaderName == "Default")
+			mDefaultProgramId = mRegisteredShaders[_shaderName];
+	}
+
 	bool OpenGL3RenderManager::isPixelBufferObjectSupported() const
 	{
 		return mPboIsSupported;
+	}
+
+	unsigned int OpenGL3RenderManager::getShaderProgramId(const std::string& _shaderName) const
+	{
+		auto iter = mRegisteredShaders.find(_shaderName);
+		if (iter != mRegisteredShaders.end())
+			return iter->second;
+		MYGUI_PLATFORM_LOG(Error, "Failed to get program ID for shader '" << _shaderName << "'. Did you forgot to register shader?");
+		return 0;
 	}
 
 	ITexture* OpenGL3RenderManager::createTexture(const std::string& _name)
@@ -351,10 +368,12 @@ namespace MyGUI
 		}
 		mTextures.clear();
 
-    if (mProgramID) {
-      glDeleteProgram(mProgramID);
-      mProgramID = 0;
-    }
-  }
+		for (const auto& programId : mRegisteredShaders)
+		{
+			glDeleteProgram(programId.second);
+		}
+		mRegisteredShaders.clear();
+		mDefaultProgramId = 0;
+	}
 
 } // namespace MyGUI

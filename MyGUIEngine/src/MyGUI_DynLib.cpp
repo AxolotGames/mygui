@@ -19,9 +19,9 @@
 #	define MYGUI_DYNLIB_GETSYM( a, b ) dlsym( a, b )
 #	define MYGUI_DYNLIB_UNLOAD( a ) dlclose( a )
 #elif MYGUI_PLATFORM == MYGUI_PLATFORM_APPLE
-#	define MYGUI_DYNLIB_LOAD( a ) mac_loadExeBundle( a )
-#	define MYGUI_DYNLIB_GETSYM( a, b ) mac_getBundleSym( a, b )
-#	define MYGUI_DYNLIB_UNLOAD( a ) mac_unloadExeBundle( a )
+//#	define MYGUI_DYNLIB_LOAD( a ) mac_loadExeBundle( a )
+//#	define MYGUI_DYNLIB_GETSYM( a, b ) mac_getBundleSym( a, b )
+//#	define MYGUI_DYNLIB_UNLOAD( a ) mac_unloadExeBundle( a )
 #endif
 #endif
 
@@ -50,7 +50,7 @@ namespace MyGUI
 		const std::string extension = "";
 #endif
 
-		if (!extension.empty() && name.find(extension) == std::string::npos)
+		if (name.find(extension) == std::string::npos)
 			name += extension;
 
 #if MYGUI_PLATFORM == MYGUI_PLATFORM_APPLE

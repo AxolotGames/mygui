@@ -11,14 +11,12 @@
 #include "ControllerSmoothProgress.h"
 #include "ControllerSmoothCaption.h"
 #include "ResourceDevice.h"
+#ifdef MYGUI_OGRE_PLATFORM
+#include <Ogre.h>
+#endif
 
 namespace demo
 {
-
-#ifdef MYGUI_OGRE_PLATFORM
-	float gAngleH = 0;
-	float gAngleV = -30;
-#endif
 
 	DemoKeeper::DemoKeeper() :
 		mKeyboardPanel(nullptr),
@@ -112,11 +110,11 @@ namespace demo
 	{
 #ifdef MYGUI_OGRE_PLATFORM
 		Ogre::MeshManager::getSingleton().createPlane(
-			"FloorPlane", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+			"FloorPlane", MyGuiResourceGroup,
 			Ogre::Plane(Ogre::Vector3::UNIT_Y, 0), 200, 200, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
 
-		Ogre::Entity* entity = getSceneManager()->createEntity("FloorPlane", "FloorPlane");
-		entity->setMaterialName("Ground");
+		Ogre::Entity* entity = getSceneManager()->createEntity("FloorPlane", "FloorPlane", MyGuiResourceGroup);
+		entity->setMaterialName("Ground", MyGuiResourceGroup);
 		Ogre::SceneNode* node = getSceneManager()->getRootSceneNode()->createChildSceneNode();
 		node->attachObject(entity);
 #endif
@@ -125,7 +123,7 @@ namespace demo
 	void DemoKeeper::createObject()
 	{
 #ifdef MYGUI_OGRE_PLATFORM
-		Ogre::Entity* entity = getSceneManager()->createEntity("ControlPanel", "ControlPanel.mesh");
+		Ogre::Entity* entity = getSceneManager()->createEntity("ControlPanel", "ControlPanel.mesh", MyGuiResourceGroup);
 		Ogre::SceneNode* node = getSceneManager()->getRootSceneNode()->createChildSceneNode();
 		node->attachObject(entity);
 #endif
@@ -197,13 +195,16 @@ namespace demo
 	void DemoKeeper::setupCamera()
 	{
 		updateCamera(0, 0);
-		//getCamera()->setPosition(0, 60, 60);
-		//getCamera()->lookAt(0, 28, 0);
+		//getCameraNode()->setPosition(0, 60, 60);
+		//getCameraNode()->lookAt(0, 28, 0);
 	}
 
 	void DemoKeeper::updateCamera(int _x, int _y)
 	{
 #ifdef MYGUI_OGRE_PLATFORM
+		static float gAngleH = 0;
+		static float gAngleV = -30;
+
 		gAngleH += (float)_x * -0.1f;
 
 		Ogre::Quaternion quatH(Ogre::Radian(Ogre::Degree(gAngleH)), Ogre::Vector3::UNIT_Y);
@@ -215,8 +216,8 @@ namespace demo
 
 		vec.y += 30;
 
-		getCamera()->setPosition(vec);
-		getCamera()->setOrientation(quatH);
+		getCameraNode()->setPosition(vec);
+		getCameraNode()->setOrientation(quatH);
 #endif
 	}
 

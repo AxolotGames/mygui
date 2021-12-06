@@ -18,9 +18,9 @@ namespace MyGUI
 {
 
 	class MYGUI_EXPORT ControllerManager :
-		public Singleton<ControllerManager>,
 		public IUnlinkWidget
 	{
+		MYGUI_SINGLETON_DECLARATION(ControllerManager);
 	public:
 		ControllerManager();
 
@@ -49,7 +49,7 @@ namespace MyGUI
 		const std::string& getCategoryName() const;
 
 	private:
-		void _unlinkWidget(Widget* _widget);
+		void _unlinkWidget(Widget* _widget) override;
 		void frameEntered(float _time);
 		void clear();
 

@@ -9,9 +9,7 @@
 
 #ifdef MYGUI_OGRE_PLATFORM
 
-#include <Ogre.h>
-
-#include "MyGUI_LastHeader.h"
+#include <OgrePrerequisites.h>
 
 namespace demo
 {

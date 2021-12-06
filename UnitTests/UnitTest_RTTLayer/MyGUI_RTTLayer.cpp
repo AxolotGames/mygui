@@ -18,7 +18,7 @@ namespace MyGUI
 
 	RTTLayer::RTTLayer() :
 		mTexture(nullptr),
-		mOutOfDate(false)
+		mOutOfDateRtt(false)
 	{
 	}
 
@@ -49,7 +49,7 @@ namespace MyGUI
 
 	void RTTLayer::renderToTarget(IRenderTarget* _target, bool _update)
 	{
-		bool outOfDate = mOutOfDate || isOutOfDate();
+		bool outOfDate = mOutOfDateRtt || isOutOfDate();
 
 		if (outOfDate || _update)
 		{
@@ -65,7 +65,7 @@ namespace MyGUI
 			}
 		}
 
-		mOutOfDate = false;
+		mOutOfDateRtt = false;
 	}
 
 	void RTTLayer::setTextureSize(const IntSize& _size)
@@ -80,12 +80,12 @@ namespace MyGUI
 			mTexture = nullptr;
 		}
 
-		MYGUI_ASSERT(mTextureSize.width * mTextureSize.height, "RTTLayer texture size must have non-zero width and height");
+		MYGUI_ASSERT(mTextureSize.width && mTextureSize.height, "RTTLayer texture size must have non-zero width and height");
 		std::string name = mTextureName.empty() ? MyGUI::utility::toString((size_t)this, getClassTypeName()) : mTextureName;
 		mTexture = MyGUI::RenderManager::getInstance().createTexture(name);
 		mTexture->createManual(mTextureSize.width, mTextureSize.height, MyGUI::TextureUsage::RenderTarget, MyGUI::PixelFormat::R8G8B8A8);
 
-		mOutOfDate = true;
+		mOutOfDateRtt = true;
 	}
 
 	void RTTLayer::setTextureName(const std::string& _name)
@@ -99,7 +99,7 @@ namespace MyGUI
 			setTextureSize(size);
 		}
 
-		mOutOfDate = true;
+		mOutOfDateRtt = true;
 	}
 
 } // namespace MyGUI

@@ -36,37 +36,6 @@
 #include <string>
 #include <stdexcept>
 
-#if MYGUI_COMPILER == MYGUI_COMPILER_MSVC
-// disable: warning C4275: non dll-interface class '***' used as base for dll-interface clas '***'
-#	pragma warning (push)
-#	pragma warning (disable : 4275)
-#endif
-
-// Workaround for VC7:
-//      when build with /MD or /MDd, VC7 have both std::basic_string<unsigned short> and
-// basic_string<__wchar_t> instantiated in msvcprt[d].lib/MSVCP71[D].dll, but the header
-// files tells compiler that only one of them is over there (based on /Zc:wchar_t compile
-// option). And since this file used both of them, causing compiler instantiating another
-// one in user object code, which lead to duplicate symbols with msvcprt.lib/MSVCP71[D].dll.
-//
-#if MYGUI_COMPILER == MYGUI_COMPILER_MSVC && (1300 <= MYGUI_COMP_VER && MYGUI_COMP_VER <= 1310)
-
-# if defined(_DLL_CPPLIB)
-
-namespace std
-{
-    template class _CRTIMP2 basic_string<unsigned short, char_traits<unsigned short>,
-	    allocator<unsigned short> >;
-
-    template class _CRTIMP2 basic_string<__wchar_t, char_traits<__wchar_t>,
-	    allocator<__wchar_t> >;
-}
-
-# endif // defined(_DLL_CPPLIB)
-
-#endif  // MYGUI_COMPILER == MYGUI_COMPILER_MSVC && MYGUI_COMP_VER == 1300
-
-
 namespace MyGUI
 {
 
@@ -110,11 +79,9 @@ namespace MyGUI
 #if defined( __WIN32__ ) || defined( _WIN32 )
 #define WCHAR_UTF16 // All currently known Windows platforms utilize UTF-16 encoding in wchar_t
 #else // #if defined( __WIN32__ ) || defined( _WIN32 )
-#if MYGUI_COMPILER != MYGUI_COMPILER_GCCE
 #if WCHAR_MAX <= 0xFFFF // this is a last resort fall back test; WCHAR_MAX is defined in <wchar.h>
 #define WCHAR_UTF16 // best we can tell, wchar_t is not larger than 16-bit
 #endif // #if WCHAR_MAX <= 0xFFFF
-#endif
 #endif // #if defined( __WIN32__ ) || defined( _WIN32 )
 #endif // #ifdef __STDC_ISO_10646__
 
@@ -138,6 +105,13 @@ namespace MyGUI
 #   define MYGUI_IS_NATIVE_WCHAR_T     1
 
 #endif  // MYGUI_COMPILER == MYGUI_COMPILER_MSVC
+
+
+#if MYGUI_COMPILER == MYGUI_COMPILER_MSVC
+ // disable: warning C4275: non dll-interface class '***' used as base for dll-interface clas '***'
+#	pragma warning (push)
+#	pragma warning (disable : 4275)
+#endif
 
 	//! A UTF-16 string with implicit conversion to/from std::string and std::wstring
 	/*! This class provides a complete 1 to 1 map of most std::string functions (at least to my
@@ -470,6 +444,8 @@ namespace MyGUI
 		//! duplicate of \a str (UTF-8 encoding)
 		UString( const std::string& str );
 
+		explicit UString( const utf32string & str );
+
 		//! destructor
 		~UString();
 		//@}
@@ -615,6 +591,8 @@ namespace MyGUI
 #endif
 		//! assign \a str to the current string (\a str is treated as a UTF-8 stream)
 		UString& assign( const std::string& str );
+
+		UString& assign( const utf32string & str );
 		//! assign \a c_str to the current string (\a c_str is treated as a UTF-8 stream)
 		UString& assign( const char* c_str );
 		//! assign the first \a num characters of \a c_str to the current string (\a c_str is treated as a UTF-8 stream)
@@ -1101,10 +1079,10 @@ namespace MyGUI
 		return os << s.asWStr();
 	}
 
-} // namespace MyGUI
-
 #if MYGUI_COMPILER == MYGUI_COMPILER_MSVC
 #	pragma warning (pop)
 #endif
+
+} // namespace MyGUI
 
 #endif  // __MYGUI_U_STRING_H__

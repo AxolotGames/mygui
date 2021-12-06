@@ -51,7 +51,6 @@ namespace demo
 		MyGUI::Window* window = MyGUI::Gui::getInstance().createWidget<MyGUI::Window>("WindowCS", MyGUI::IntCoord(10, size.height - 10 - 230, 300, 230), MyGUI::Align::Default, "Overlapped");
 		window->setCaption("Camera view");
 		window->setMinSize(MyGUI::IntSize(100, 100));
-		MyGUI::Canvas* canvas = window->createWidget<MyGUI::Canvas>("Canvas", MyGUI::IntCoord(0, 0, window->getClientCoord().width, window->getClientCoord().height), MyGUI::Align::Stretch);
 
 		MyGUI::Window* window2 = MyGUI::Gui::getInstance().createWidget<MyGUI::Window>("WindowCS", MyGUI::IntCoord(size.width - 10 - 300, 10, 300, 230), MyGUI::Align::Default, "Overlapped");
 		window2->setCaption("Model view");
@@ -60,6 +59,7 @@ namespace demo
 		canvas2->setPointer("hand");
 
 #ifdef MYGUI_OGRE_PLATFORM
+        MyGUI::Canvas* canvas = window->createWidget<MyGUI::Canvas>("Canvas", MyGUI::IntCoord(0, 0, window->getClientCoord().width, window->getClientCoord().height), MyGUI::Align::Stretch);
 
 		gRenderBox.setCanvas(canvas);
 		gRenderBox.setViewport(getCamera());
@@ -69,9 +69,9 @@ namespace demo
 		gRenderBoxScene.injectObject("Robot.mesh");
 		gRenderBoxScene.setAutoRotation(true);
 		gRenderBoxScene.setMouseRotation(true);
+#endif // MYGUI_OGRE_PLATFORM
 
 		MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate(this, &DemoKeeper::notifyFrameStart);
-#endif // MYGUI_OGRE_PLATFORM
 	}
 
 	void DemoKeeper::destroyScene()
@@ -90,7 +90,7 @@ namespace demo
 #ifdef MYGUI_OGRE_PLATFORM
 		try
 		{
-			Ogre::Entity* entity = getSceneManager()->createEntity("Mikki.mesh", "Mikki.mesh");
+			Ogre::Entity* entity = getSceneManager()->createEntity("Mikki.mesh", "Mikki.mesh", MyGuiResourceGroup);
 			mNode = getSceneManager()->getRootSceneNode()->createChildSceneNode();
 			mNode->attachObject(entity);
 		}
@@ -102,11 +102,11 @@ namespace demo
 		try
 		{
 			Ogre::MeshManager::getSingleton().createPlane(
-				"FloorPlane", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+				"FloorPlane", MyGuiResourceGroup,
 				Ogre::Plane(Ogre::Vector3::UNIT_Y, 0), 1000, 1000, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
 
-			Ogre::Entity* entity = getSceneManager()->createEntity("FloorPlane", "FloorPlane");
-			entity->setMaterialName("Ground");
+			Ogre::Entity* entity = getSceneManager()->createEntity("FloorPlane", "FloorPlane", MyGuiResourceGroup);
+			entity->setMaterialName("Ground", MyGuiResourceGroup);
 			mNode->attachObject(entity);
 		}
 		catch (Ogre::FileNotFoundException&)

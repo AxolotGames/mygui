@@ -7,7 +7,7 @@
 #include "MyGUI_OpenGL3VertexBuffer.h"
 #include "MyGUI_OpenGL3Diagnostic.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 namespace MyGUI
 {
@@ -33,7 +33,7 @@ namespace MyGUI
 		mNeedVertexCount = _count;
 	}
 
-	size_t OpenGL3VertexBuffer::getVertexCount()
+	size_t OpenGL3VertexBuffer::getVertexCount() const
 	{
 		return mNeedVertexCount;
 	}
@@ -50,7 +50,6 @@ namespace MyGUI
 
 		// Discard the buffer
 		glBufferData(GL_ARRAY_BUFFER, mSizeInBytes, nullptr, GL_STREAM_DRAW);
-
 
 		Vertex* pBuffer = reinterpret_cast<Vertex*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
 
@@ -101,12 +100,6 @@ namespace MyGUI
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLubyte*)nullptr);
 		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (GLubyte*)offsetof(struct Vertex, colour));
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLubyte*)offsetof(struct Vertex, u));
-
-		//glVertexPointer(3, GL_FLOAT, sizeof(Vertex), (void*)offset);
-		//offset += (sizeof(float) * 3);
-		//glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), (void*)offset);
-		//offset += (4);
-		//glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), (void*)offset);
 
 		glBindVertexArray(0);
 

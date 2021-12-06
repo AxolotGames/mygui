@@ -20,8 +20,7 @@ namespace MyGUI
 	const float INPUT_DELAY_FIRST_KEY = 0.4f;
 	const float INPUT_INTERVAL_KEY = 0.05f;
 
-	template <> InputManager* Singleton<InputManager>::msInstance = nullptr;
-	template <> const char* Singleton<InputManager>::mClassTypeName = "InputManager";
+	MYGUI_SINGLETON_DEFINITION(InputManager);
 
 	InputManager::InputManager() :
 		mWidgetMouseFocus(nullptr),
@@ -35,7 +34,8 @@ namespace MyGUI
 		mFirstPressKey(false),
 		mTimerKey(0.0f),
 		mOldAbsZ(0),
-		mIsInitialise(false)
+		mIsInitialise(false),
+		mSingletonHolder(this)
 	{
 		resetMouseCaptureWidget();
 	}
@@ -99,7 +99,8 @@ namespace MyGUI
 
 		if (isCaptureMouse())
 		{
-			if (isFocusMouse())
+			bool isFocus = isFocusMouse();
+			if (isFocus)
 			{
 				if (mLayerMouseFocus != nullptr)
 				{
@@ -111,12 +112,8 @@ namespace MyGUI
 					}
 				}
 			}
-			else
-			{
-				resetMouseCaptureWidget();
-			}
 
-			return true;
+			return isFocus;
 		}
 
 		Widget* old_mouse_focus = mWidgetMouseFocus;
@@ -224,6 +221,12 @@ namespace MyGUI
 	{
 		injectMouseMove(_absx, _absy, mOldAbsZ);
 
+		if (MouseButton::None != _id && MouseButton::MAX != _id)
+		{
+			// start capture
+			mMouseCapture[_id.getValue()] = true;
+		}
+
 		// если мы щелкнули не на гуй
 		if (!isFocusMouse())
 		{
@@ -239,8 +242,6 @@ namespace MyGUI
 
 		if (MouseButton::None != _id && MouseButton::MAX != _id)
 		{
-			// start capture
-			mMouseCapture[_id.getValue()] = true;
 			// remember last pressed position
 			if (mLayerMouseFocus != nullptr)
 			{
@@ -291,20 +292,20 @@ namespace MyGUI
 
 	bool InputManager::injectMouseRelease(int _absx, int _absy, MouseButton _id)
 	{
+		if (_id != MouseButton::None && _id != MouseButton::MAX)
+		{
+			if (mMouseCapture[_id.getValue()])
+			{
+				// drop capture
+				mMouseCapture[_id.getValue()] = false;
+			}
+		}
+
 		if (isFocusMouse())
 		{
 			// если активный элемент заблокирован
 			if (!mWidgetMouseFocus->getInheritedEnabled())
 				return true;
-
-			if (_id != MouseButton::None && _id != MouseButton::MAX)
-			{
-				if (mMouseCapture[_id.getValue()])
-				{
-					// drop capture
-					mMouseCapture[_id.getValue()] = false;
-				}
-			}
 
 			IntPoint point (_absx, _absy);
 			if (mLayerMouseFocus != nullptr)
@@ -460,7 +461,10 @@ namespace MyGUI
 			if (mMouseCapture[i])
 			{
 				mMouseCapture[i] = false;
-				mouseFocus->_riseMouseButtonReleased(mLastPressed[i].left, mLastPressed[i].top, MouseButton::Enum(i));
+				if (nullptr != mouseFocus)
+				{
+					mouseFocus->_riseMouseButtonReleased(mLastPressed[i].left, mLastPressed[i].top, MouseButton::Enum(i));
+				}
 			}
 		}
 
@@ -599,7 +603,7 @@ namespace MyGUI
 			setKeyFocusWidget(nullptr);
 	}
 
-	IntPoint InputManager::getMousePositionByLayer()
+	IntPoint InputManager::getMousePositionByLayer() const
 	{
 		if (mLayerMouseFocus != nullptr)
 			return mLayerMouseFocus->getPosition(mMousePosition.left, mMousePosition.top);

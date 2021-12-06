@@ -7,11 +7,9 @@
 #include "Precompiled.h"
 #include "MessageBoxManager.h"
 
-template <> tools::MessageBoxManager* MyGUI::Singleton<tools::MessageBoxManager>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::MessageBoxManager>::mClassTypeName = "MessageBoxManager";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(MessageBoxManager);
 
 	void MessageBoxManager::initialise()
 	{

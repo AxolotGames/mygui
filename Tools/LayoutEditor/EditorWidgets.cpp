@@ -7,17 +7,16 @@
 #include "WidgetSelectorManager.h"
 #include "SettingsManager.h"
 
-template <> tools::EditorWidgets* MyGUI::Singleton<tools::EditorWidgets>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::EditorWidgets>::mClassTypeName = "EditorWidgets";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(EditorWidgets);
 
 	const std::string LogSection = "LayoutEditor";
 	const std::string CodeGeneratorSettingsNodeName = "CodeGeneratorSettings";
 
 	EditorWidgets::EditorWidgets() :
-		mWidgetsChanged(false)
+		mWidgetsChanged(false),
+		mSingletonHolder(this)
 	{
 	}
 
@@ -560,7 +559,7 @@ namespace tools
 
 				container->mController.push_back(controllerInfo);
 			}
-		};
+		}
 	}
 
 	bool EditorWidgets::tryToApplyProperty(MyGUI::Widget* _widget, const std::string& _key, const std::string& _value, bool _testMode)

@@ -26,9 +26,9 @@ namespace demo
 			mNeedPosition(0)
 		{ }
 
-		virtual bool addTime(MyGUI::Widget* _widget, float _time)
+		bool addTime(MyGUI::Widget* _widget, float _time) override
 		{
-			const float slice = 0.04;
+			const float slice = 0.04f;
 			mTime += _time;
 			if (mTime > slice)
 			{
@@ -39,7 +39,7 @@ namespace demo
 			return true;
 		}
 
-		virtual void prepareItem(MyGUI::Widget* _widget)
+		void prepareItem(MyGUI::Widget* _widget) override
 		{
 			mTime = 0;
 			mCurrentPosition = 0;

@@ -46,7 +46,7 @@ namespace MyGUI
 
 		// возвращает текст с тегами
 		/** Get _count characters with tags from _start position */
-		UString getTextInterval(size_t _start, size_t _count);
+		UString getTextInterval(size_t _start, size_t _count) const;
 
 		/** Set selected text interval
 			@param _start of interval
@@ -58,7 +58,7 @@ namespace MyGUI
 		void deleteTextSelection();
 
 		/** Get selected text */
-		UString getTextSelection();
+		UString getTextSelection() const;
 
 		/** Is any text selected */
 		bool isTextSelection() const;
@@ -73,14 +73,14 @@ namespace MyGUI
 
 
 		/** Set edit text applying tags */
-		virtual void setCaption(const UString& _value);
+		void setCaption(const UString& _value) override;
 		/** Get edit text with tags */
-		const UString& getCaption() override;
+		const UString& getCaption() const override;
 
 		/** Set edit text without tags */
 		void setOnlyText(const UString& _value);
 		/** Get edit text without tags */
-		UString getOnlyText();
+		UString getOnlyText() const;
 
 		/** Get text length excluding tags
 			For example "Hello" length is 5
@@ -164,7 +164,7 @@ namespace MyGUI
 		bool getTabPrinting() const;
 
 		/** Get invert selected text color property */
-		bool getInvertSelected();
+		bool getInvertSelected() const;
 		/** Enable or disable inverting color of selected text\n
 			Enabled (true) by default
 		*/
@@ -193,7 +193,7 @@ namespace MyGUI
 		*/
 		size_t getVScrollRange() const;
 		/** Get current position of vertical scroll (or 0 if no scroll) */
-		size_t getVScrollPosition();
+		size_t getVScrollPosition() const;
 		/** Set current position of vertical scroll */
 		void setVScrollPosition(size_t _index);
 
@@ -208,7 +208,7 @@ namespace MyGUI
 		*/
 		size_t getHScrollRange() const;
 		/** Get current position of horizontal scroll (or 0 if no scroll) */
-		size_t getHScrollPosition();
+		size_t getHScrollPosition() const;
 		/** Set current position of horizontal scroll */
 		void setHScrollPosition(size_t _index);
 
@@ -217,6 +217,8 @@ namespace MyGUI
 		void setFontName(const std::string& _value) override;
 		//! @copydoc TextBox::setFontHeight
 		void setFontHeight(int _value) override;
+		//! @copydoc TextBox::getFontHeight
+		int getFontHeight() const override;
 
 		//! @copydoc TextBox::setTextAlign
 		void setTextAlign(Align _value) override;
@@ -224,10 +226,10 @@ namespace MyGUI
 		void setTextColour(const Colour& _value) override;
 
 		//! @copydoc TextBox::getTextRegion
-		IntCoord getTextRegion() override;
+		IntCoord getTextRegion() const override;
 
 		//! @copydoc TextBox::getTextSize
-		IntSize getTextSize() override;
+		IntSize getTextSize() const override;
 
 		//! @copydoc TextBox::setTextShadowColour
 		void setTextShadowColour(const Colour& _value) override;
@@ -317,24 +319,24 @@ namespace MyGUI
 		void commandCopy();
 		void commandPast();
 
-		const UString& getRealString();
+		const UString& getRealString() const;
 
 		void setRealString(const UString& _caption);
 
 		void updateCursorPosition();
 
 		// размер данных
-		IntSize getContentSize() override;
+		IntSize getContentSize() const override;
 		// смещение данных
-		IntPoint getContentPosition() override;
+		IntPoint getContentPosition() const override;
 		void setContentPosition(const IntPoint& _point) override;
 		// размер окна, через которые видно данные
-		IntSize getViewSize() override;
+		IntSize getViewSize() const override;
 		// размер на который прокручиваются данные при щелчке по скролу
-		size_t getVScrollPage() override;
-		size_t getHScrollPage() override;
+		size_t getVScrollPage() const override;
+		size_t getHScrollPage() const override;
 
-		Align getContentAlign() override;
+		Align getContentAlign() const override;
 
 	protected:
 		// нажата ли кнопка

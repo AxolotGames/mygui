@@ -20,9 +20,9 @@ namespace MyGUI
 	{
 	}
 
-	GlyphInfo* ResourceManualFont::getGlyphInfo(Char _id)
+	const GlyphInfo* ResourceManualFont::getGlyphInfo(Char _id) const
 	{
-		CharMap::iterator iter = mCharMap.find(_id);
+		CharMap::const_iterator iter = mCharMap.find(_id);
 
 		if (iter != mCharMap.end())
 			return &iter->second;
@@ -58,6 +58,7 @@ namespace MyGUI
 				const std::string& value = node->findAttribute("value");
 				if (key == "Source") mSource = value;
 				else if (key == "DefaultHeight") mDefaultHeight = utility::parseInt(value);
+				else if (key == "Shader") mShader = value;
 			}
 		}
 
@@ -65,6 +66,8 @@ namespace MyGUI
 
 		if (mTexture != nullptr)
 		{
+			if (!mShader.empty())
+				mTexture->setShader(mShader);
 			int textureWidth = mTexture->getWidth();
 			int textureHeight = mTexture->getHeight();
 
@@ -132,12 +135,12 @@ namespace MyGUI
 		}
 	}
 
-	ITexture* ResourceManualFont::getTextureFont()
+	ITexture* ResourceManualFont::getTextureFont() const
 	{
 		return mTexture;
 	}
 
-	int ResourceManualFont::getDefaultHeight()
+	int ResourceManualFont::getDefaultHeight() const
 	{
 		return mDefaultHeight;
 	}
@@ -147,6 +150,13 @@ namespace MyGUI
 		mTexture = nullptr;
 		mSource = value;
 		loadTexture();
+	}
+
+	void ResourceManualFont::setShader(const std::string& value)
+	{
+		mShader = value;
+		if (mTexture != nullptr)
+			mTexture->setShader(mShader);
 	}
 
 	void ResourceManualFont::setTexture(ITexture *texture)

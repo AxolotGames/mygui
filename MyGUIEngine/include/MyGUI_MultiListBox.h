@@ -113,19 +113,19 @@ namespace MyGUI
 		void setColumnWidth(MultiListItem* _item, int _width);
 
 		/** Get _column name */
-		const UString& getColumnNameAt(size_t _column);
+		const UString& getColumnNameAt(size_t _column) const;
 
 		/** Get _column name */
-		const UString& getColumnName(MultiListItem* _item);
+		const UString& getColumnName(const MultiListItem* _item) const;
 
 		/** Get _column width */
-		int getColumnWidthAt(size_t _column);
+		int getColumnWidthAt(size_t _column) const;
 
 		/** Sort multilist by column */
 		void sortByColumn(size_t _column, bool _backward = false);
 
 		//! Get column index
-		size_t getColumnIndex(MultiListItem* _item);
+		size_t getColumnIndex(const MultiListItem* _item) const;
 
 		/** Set resizing policy of column. \sa ResizingPolicy
 			@param _item Pointer to column
@@ -191,7 +191,7 @@ namespace MyGUI
 		void setItemNameAt(size_t _index, const UString& _name);
 
 		//! Get item name from specified position
-		const UString& getItemNameAt(size_t _index);
+		const UString& getItemNameAt(size_t _index) const;
 
 
 		//------------------------------------------------------------------------------//
@@ -237,7 +237,7 @@ namespace MyGUI
 		void setSubItemNameAt(size_t _column, size_t _index, const UString& _name);
 
 		/** Get sub item name*/
-		const UString& getSubItemNameAt(size_t _column, size_t _index);
+		const UString& getSubItemNameAt(size_t _column, size_t _index) const;
 
 		/** Search item in specified _column, returns index of the first occurrence in column or ITEM_NONE if item not found */
 		size_t findSubItemWith(size_t _column, const UString& _name);
@@ -295,12 +295,12 @@ namespace MyGUI
 
 		/*internal:*/
 		// IItemContainer impl
-		size_t _getItemCount() override;
+		size_t _getItemCount() const override;
 		void _addItem(const MyGUI::UString& _name) override;
 		void _removeItemAt(size_t _index) override;
-		Widget* _getItemAt(size_t _index) override;
+		Widget* _getItemAt(size_t _index) const override;
 		void _setItemNameAt(size_t _index, const UString& _name) override;
-		const UString& _getItemNameAt(size_t _index) override;
+		const UString& _getItemNameAt(size_t _index) const override;
 
 	protected:
 		void initialiseOverride() override;
@@ -325,7 +325,7 @@ namespace MyGUI
 		void sortList();
 		void flipList();
 
-		Widget* getSeparator(size_t _index);
+		Widget* getOrCreateSeparator(size_t _index);
 
 		void updateBackSelected(size_t _index);
 
@@ -346,7 +346,7 @@ namespace MyGUI
 		void frameEntered(float _frame);
 		void frameAdvise(bool _advise);
 
-		ListBox* getSubItemAt(size_t _column);
+		ListBox* getSubItemAt(size_t _column) const;
 		int getButtonHeight() const;
 
 		void _wrapItem(MultiListItem* _item);
@@ -354,7 +354,7 @@ namespace MyGUI
 		void _swapColumnsAt(size_t _index1, size_t _index2);
 
 		int getColumnWidth(size_t _index, int _freeSpace, size_t _countStars, size_t _lastIndexStar, int _starWidth) const;
-		bool getUpdateByResize();
+		bool getUpdateByResize() const;
 		int updateWidthColumns(size_t& _countStars, size_t& _lastIndexStar);
 
 	private:

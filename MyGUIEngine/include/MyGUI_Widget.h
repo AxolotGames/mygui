@@ -194,10 +194,10 @@ namespace MyGUI
 		EnumeratorWidgetPtr getEnumerator() const;
 
 		/** Get child count */
-		size_t getChildCount();
+		size_t getChildCount() const;
 
 		/** Get child by index (index from 0 to child_count - 1) */
-		Widget* getChildAt(size_t _index);
+		Widget* getChildAt(size_t _index) const;
 
 		/** Find widget by name.
 			Search recursively through all childs starting from this widget.
@@ -221,7 +221,7 @@ namespace MyGUI
 		bool getInheritedEnabled() const;
 
 		/** Get rectangle where child widgets placed */
-		IntCoord getClientCoord();
+		IntCoord getClientCoord() const;
 
 		/** Get client area widget or nullptr if widget don't have client */
 		Widget* getClientWidget();
@@ -272,9 +272,15 @@ namespace MyGUI
 		*/
 		EventHandle_WidgetVoid eventChangeCoord;
 
+        /** Event : Widget is about to be destroyed, but its content is valid at this point.\n
+            signature : void method(MyGUI::Widget* _sender)
+            @param _sender widget that called this event
+        */
+        EventHandle_WidgetVoid eventWidgetDestroyed;
+
 		/*internal:*/
 		// метод для запроса номера айтема и контейнера
-		virtual size_t _getItemIndex(Widget* _item);
+		virtual size_t _getItemIndex(Widget* _item) const;
 
 		// дает приоритет виджету при пиккинге
 		void _forcePick(Widget* _widget);
@@ -286,7 +292,7 @@ namespace MyGUI
 		void _destroyChildWidget(Widget* _widget);
 
 		void _setContainer(Widget* _value);
-		Widget* _getContainer();
+		Widget* _getContainer() const;
 
 		void _setAlign(const IntSize& _oldsize, const IntSize& _newSize);
 		bool _checkPoint(int _left, int _top) const;
@@ -317,7 +323,7 @@ namespace MyGUI
 		void _destroyAllChildWidget();
 
 		// запрашиваем у конейтера айтем по позиции мыши
-		virtual size_t _getContainerIndex(const IntPoint& _point);
+		virtual size_t _getContainerIndex(const IntPoint& _point) const;
 
 		virtual void baseUpdateEnable();
 
@@ -340,9 +346,7 @@ namespace MyGUI
 			}
 		}
 
-		VectorWidgetPtr getSkinWidgetsByName(const std::string& _name);
-
-		void destroySkinWidget(Widget* _widget);
+		VectorWidgetPtr getSkinWidgetsByName(const std::string& _name) const;
 
 		virtual void onWidgetCreated(Widget* _widget);
 		virtual void onWidgetDestroy(Widget* _widget);
@@ -350,6 +354,7 @@ namespace MyGUI
 		void setWidgetClient(Widget* _widget);
 		/// If there is client widget return it, otherwise return this
 		Widget* _getClientWidget();
+		const Widget* _getClientWidget() const;
 
 		virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
@@ -394,28 +399,26 @@ namespace MyGUI
 		// вектор детей скина
 		VectorWidgetPtr mWidgetChildSkin;
 
-		// доступен ли на виджет
+		// availability for mouse/keyboard
 		bool mEnabled;
-		bool mInheritsEnabled;
-		// для иерархического скрытия
-		bool mInheritsVisible;
-		// прозрачность и флаг наследования альфы нашего оверлея
+		bool mInheritedEnabled;
+		// visibility on screen and for mouse
+        bool mVisible;
+		bool mInheritedVisible;
+		// transparency and transparency inheritance
 		float mAlpha;
 		float mRealAlpha;
 		bool mInheritsAlpha;
-		// имя виджета
 		std::string mName;
 
-		// наш отец в иерархии виджетов
+		// parent in widgets hierarchy
 		Widget* mParent;
 
-		// поведение виджета, перекрывающийся дочерний или всплывающий
 		WidgetStyle mWidgetStyle;
 
 		Widget* mContainer;
 
 		Align mAlign;
-		bool mVisible;
 		int mDepth;
 	};
 

@@ -1,36 +1,40 @@
-set (PROJECTNAME MyGUI.OpenGL3Platform)
+set(PROJECTNAME MyGUI.OpenGL3Platform)
 
 include_directories(
- include
- ${MYGUI_SOURCE_DIR}/MyGUIEngine/include
- ${OPENGL_INCLUDE_DIR}
- ${MYGUI_SOURCE_DIR}/Common
+	include
+	${MYGUI_SOURCE_DIR}/MyGUIEngine/include
+	${OPENGL_INCLUDE_DIR}
+	${MYGUI_SOURCE_DIR}/Common
 )
 
-include(${PROJECTNAME}.list)
-if(NOT MYGUI_USE_SYSTEM_GLEW)
-	set (SOURCE_FILES ${SOURCE_FILES} include/GL/glew.c)
-endif()
+include_directories(SYSTEM include/GL)
 
-if(NOT MYGUI_USE_SYSTEM_GLEW)
+include(${PROJECTNAME}.list)
+if (NOT MYGUI_USE_SYSTEM_GLEW)
+	set(SOURCE_FILES ${SOURCE_FILES} include/GL/glew.c)
+endif ()
+
+if (NOT MYGUI_USE_SYSTEM_GLEW)
 	add_definitions(-DGLEW_STATIC)
-endif()
+endif ()
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 
 add_library(${PROJECTNAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 add_dependencies(${PROJECTNAME} MyGUIEngine)
 
-target_link_libraries(${PROJECTNAME} ${OPENGL_gl_LIBRARY} ${PNG_LIBRARIES} ${ZLIB_LIBRARIES} MyGUIEngine)
-if(MYGUI_USE_SYSTEM_GLEW)
+target_link_libraries(${PROJECTNAME} ${OPENGL_opengl_LIBRARY} MyGUIEngine)
+if (MYGUI_USE_SYSTEM_GLEW)
 	target_link_libraries(${PROJECTNAME} ${GLEW_LIBRARIES})
-endif()
+else ()
+	target_link_libraries(${PROJECTNAME} ${OPENGL_glx_LIBRARY})
+endif ()
 
-link_directories(${OPENGL_LIB_DIR} ${PNG_LIBRARY})
+link_directories(${OPENGL_LIB_DIR})
 
 # installation rules
 install(FILES ${HEADER_FILES}
-        DESTINATION include/MYGUI
+	DESTINATION include/MYGUI
 )
 mygui_install_target(${PROJECTNAME} "")
 

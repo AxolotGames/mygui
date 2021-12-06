@@ -56,7 +56,7 @@ namespace MyGUI
 		{
 			OgreTexture* texture = static_cast<OgreTexture*>(_texture);
 			Ogre::TexturePtr texture_ptr = texture->getOgreTexture();
-			if (!texture_ptr.isNull())
+			if (texture_ptr)
 			{
 				OgreRenderManager::getInstancePtr()->getRenderSystem()->_setTexture(0, true, texture_ptr);
 				OgreRenderManager::getInstancePtr()->getRenderSystem()->_setTextureUnitFiltering(0, Ogre::FO_NONE, Ogre::FO_NONE, Ogre::FO_NONE);
@@ -75,7 +75,7 @@ namespace MyGUI
 #elif defined(MYGUI_DIRECTX11_PLATFORM)
 		DirectX11RenderManager::getInstancePtr()->doRender(_buffer, _texture, _count);
 #elif defined(MYGUI_OPENGL3_PLATFORM)
-	OpenGL3RenderManager::getInstancePtr()->doRender(_buffer, _texture, _count);
+		OpenGL3RenderManager::getInstancePtr()->doRender(_buffer, _texture, _count);
 #endif
 	}
 

@@ -21,31 +21,32 @@ namespace MyGUI
 	{
 	public:
 		OpenGLTexture(const std::string& _name, OpenGLImageLoader* _loader);
-		virtual ~OpenGLTexture();
+		~OpenGLTexture() override;
 
-		virtual const std::string& getName() const;
+		const std::string& getName() const override;
 
-		virtual void createManual(int _width, int _height, TextureUsage _usage, PixelFormat _format);
-		virtual void loadFromFile(const std::string& _filename);
-		virtual void saveToFile(const std::string& _filename);
+		void createManual(int _width, int _height, TextureUsage _usage, PixelFormat _format) override;
+		void loadFromFile(const std::string& _filename) override;
+		void saveToFile(const std::string& _filename) override;
+		void setShader(const std::string& _shaderName) override;
 
-		virtual void destroy();
+		void destroy() override;
 
-		virtual int getWidth();
-		virtual int getHeight();
+		int getWidth() const override;
+		int getHeight() const override;
 
-		virtual void* lock(TextureUsage _access);
-		virtual void unlock();
-		virtual bool isLocked();
+		void* lock(TextureUsage _access) override;
+		void unlock() override;
+		bool isLocked() const override;
 
-		virtual PixelFormat getFormat();
-		virtual TextureUsage getUsage();
-		virtual size_t getNumElemBytes();
+		PixelFormat getFormat() const override;
+		TextureUsage getUsage() const override;
+		size_t getNumElemBytes() const override;
 
-		virtual IRenderTarget* getRenderTarget();
+		IRenderTarget* getRenderTarget() override;
 
 	/*internal:*/
-		unsigned int getTextureID() const;
+		unsigned int getTextureId() const;
 		void setUsage(TextureUsage _usage);
 		void createManual(int _width, int _height, TextureUsage _usage, PixelFormat _format, void* _data);
 
@@ -62,7 +63,7 @@ namespace MyGUI
 		int mAccess;
 		size_t mNumElemBytes;
 		size_t mDataSize;
-		unsigned int mTextureID;
+		unsigned int mTextureId;
 		unsigned int mPboID;
 		bool mLock;
 		void* mBuffer;

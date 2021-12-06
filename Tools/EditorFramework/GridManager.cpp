@@ -8,14 +8,13 @@
 #include "GridManager.h"
 #include "SettingsManager.h"
 
-template <> tools::GridManager* MyGUI::Singleton<tools::GridManager>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::GridManager>::mClassTypeName = "GridManager";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(GridManager);
 
 	GridManager::GridManager() :
-		mGridStep(0)
+		mGridStep(0),
+		mSingletonHolder(this)
 	{
 	}
 

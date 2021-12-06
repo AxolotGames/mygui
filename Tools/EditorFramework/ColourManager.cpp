@@ -9,14 +9,13 @@
 #include "CommandManager.h"
 #include "SettingsManager.h"
 
-template <> tools::ColourManager* MyGUI::Singleton<tools::ColourManager>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::ColourManager>::mClassTypeName = "ColourManager";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(ColourManager);
 
 	ColourManager::ColourManager() :
-		mColourPanel(nullptr)
+		mColourPanel(nullptr),
+		mSingletonHolder(this)
 	{
 		CommandManager::getInstance().getEvent("Command_ChangeColourBackground")->connect(this, &ColourManager::commandChangeColourBackground);
 		CommandManager::getInstance().getEvent("Command_ChangeColourSelector")->connect(this, &ColourManager::commandChangeColourSelector);

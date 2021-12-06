@@ -1,11 +1,9 @@
 #include "Precompiled.h"
 #include "WidgetTypes.h"
 
-template <> tools::WidgetTypes* MyGUI::Singleton<tools::WidgetTypes>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::WidgetTypes>::mClassTypeName = "WidgetTypes";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(WidgetTypes);
 
 	const std::string DEFAULT_GOROUP_NAME = "Default";
 	const std::string LogSection = "LayoutEditor";
@@ -155,21 +153,17 @@ namespace tools
 
 	PossibleValue* WidgetTypes::getPossibleValue(const std::string& _name)
 	{
-		PossibleValue* possible_value = nullptr;
-		for (VectorPossibleValue::iterator iter = mPossibleValues.begin(); iter != mPossibleValues.end(); ++iter)
+		for (const auto& value : mPossibleValues)
 		{
-			if ((*iter)->name == _name)
+			if (value->name == _name)
 			{
-				return (*iter);
+				return value;
 			}
 		}
 
-		if (possible_value == nullptr)
-		{
-			possible_value = new PossibleValue();
-			possible_value->name = _name;
-			mPossibleValues.push_back(possible_value);
-		}
+        PossibleValue* possible_value = new PossibleValue();
+        possible_value->name = _name;
+        mPossibleValues.push_back(possible_value);
 
 		return possible_value;
 	}

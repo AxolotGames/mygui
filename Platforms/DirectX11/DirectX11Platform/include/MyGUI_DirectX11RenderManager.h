@@ -25,6 +25,13 @@ struct ID3D11ShaderResourceView;
 namespace MyGUI
 {
 
+	struct DirectX11ShaderInfo
+	{
+		ID3D11VertexShader* vertexShader = nullptr;
+		ID3D11PixelShader* pixelShader = nullptr;
+		ID3D11InputLayout* inputLayout = nullptr;
+	};
+
 	class DirectX11RenderManager :
 		public RenderManager,
 		public IRenderTarget
@@ -45,42 +52,42 @@ namespace MyGUI
 		}
 
 		/** @see RenderManager::getViewSize */
-		virtual const IntSize& getViewSize() const
+		const IntSize& getViewSize() const override
 		{
 			return mViewSize;
 		}
 
 		/** @see RenderManager::getVertexFormat */
-		virtual VertexColourType getVertexFormat()
+		VertexColourType getVertexFormat() const override
 		{
 			return mVertexFormat;
 		}
 
 		/** @see RenderManager::createVertexBuffer */
-		virtual IVertexBuffer* createVertexBuffer();
+		IVertexBuffer* createVertexBuffer() override;
 		/** @see RenderManager::destroyVertexBuffer */
-		virtual void destroyVertexBuffer(IVertexBuffer* _buffer);
+		void destroyVertexBuffer(IVertexBuffer* _buffer) override;
 
 		/** @see RenderManager::createTexture */
-		virtual ITexture* createTexture(const std::string& _name);
+		ITexture* createTexture(const std::string& _name) override;
 		/** @see RenderManager::destroyTexture */
-		virtual void destroyTexture(ITexture* _texture);
+		void destroyTexture(ITexture* _texture) override;
 		/** @see RenderManager::getTexture */
-		virtual ITexture* getTexture(const std::string& _name);
+		ITexture* getTexture(const std::string& _name) override;
 
 		/** @see RenderManager::isFormatSupported */
-		virtual bool isFormatSupported(PixelFormat _format, TextureUsage _usage);
+		bool isFormatSupported(PixelFormat _format, TextureUsage _usage) override;
 
 		/** @see IRenderTarget::begin */
-		virtual void begin();
+		void begin() override;
 		/** @see IRenderTarget::end */
-		virtual void end();
+		void end() override;
 
 		/** @see IRenderTarget::doRender */
-		virtual void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count);
+		void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count) override;
 
 		/** @see IRenderTarget::getInfo */
-		virtual const RenderTargetInfo& getInfo()
+		const RenderTargetInfo& getInfo() const override
 		{
 			return mInfo;
 		}
@@ -88,11 +95,24 @@ namespace MyGUI
 		/** @see RenderManager::setViewSize */
 		void setViewSize(int _width, int _height) override;
 
+		/** @see RenderManager::registerShader */
+		void registerShader(
+			const std::string& _shaderName,
+			const std::string& _vertexProgramFile,
+			const std::string& _fragmentProgramFile) override;
+
 		/*internal:*/
 		void drawOneFrame();
+		DirectX11ShaderInfo* getShaderInfo(const std::string& _shaderName) const;
 
 	private:
 		void destroyAllResources();
+		std::string loadFileContent(const std::string& _file);
+		DirectX11ShaderInfo* createShader(
+			const std::string& _shaderName,
+			const std::string& _vertexProgramFile,
+			const std::string& _fragmentProgramFile);
+		void destroyShader(DirectX11ShaderInfo* shaderInfo);
 
 	public:
 		ID3D11Device*            mpD3DDevice;
@@ -103,18 +123,24 @@ namespace MyGUI
 		ID3D11BlendState*        mBlendState;
 		ID3D11RasterizerState*   mRasterizerState;
 		ID3D11DepthStencilState* mDepthStencilState;
-		ID3D11InputLayout*       mInputLayout0, *mInputLayout1;
+		ID3D11InputLayout*		 mInputLayout0;
+		ID3D11InputLayout*		 mInputLayout1;
+
+		DirectX11ShaderInfo* mDefaultShader = nullptr;
+		std::map<std::string, DirectX11ShaderInfo*> mRegisteredShaders;
 
 	private:
-		IntSize                  mViewSize;
-		VertexColourType         mVertexFormat;
-		RenderTargetInfo         mInfo;
-		bool                     mUpdate;
+		IntSize mViewSize;
+		VertexColourType mVertexFormat;
+		std::string mVertexProfile;
+		std::string mPixelProfile;
+		RenderTargetInfo mInfo;
+		bool mUpdate;
 
 		typedef std::map<std::string, ITexture*> MapTexture;
 
-		MapTexture           mTextures;
-		bool                 mIsInitialise;
+		MapTexture mTextures;
+		bool mIsInitialise;
 	};
 
 } // namespace MyGUI

@@ -14,6 +14,15 @@
 #ifdef MYGUI_USE_FREETYPE
 #	include <ft2build.h>
 #	include FT_FREETYPE_H
+
+#ifdef MYGUI_MSDF_FONTS
+namespace msdfgen
+{
+	class FontHandle;
+	class Shape;
+}
+#endif
+
 #endif // MYGUI_USE_FREETYPE
 
 #include <unordered_map>
@@ -35,12 +44,12 @@ namespace MyGUI
 
 		// Returns the glyph info for the specified code point, or the glyph info for a substitute glyph if the code point does not
 		// exist in this font. Returns nullptr if there is a problem with the font.
-		GlyphInfo* getGlyphInfo(Char _id) override;
+		const GlyphInfo* getGlyphInfo(Char _id) const override;
 
-		ITexture* getTextureFont() override;
+		ITexture* getTextureFont() const override;
 
 		// получившаяся высота при генерации в пикселях
-		int getDefaultHeight() override;
+		int getDefaultHeight() const override;
 
 		// update texture after render device lost event
 		void textureInvalidate(ITexture* _texture) override;
@@ -57,6 +66,7 @@ namespace MyGUI
 		void initialise();
 
 		void setSource(const std::string& _value);
+		void setShader(const std::string& _value);
 		void setSize(float _value);
 		void setResolution(unsigned int _value);
 		void setHinting(const std::string& _value);
@@ -65,6 +75,8 @@ namespace MyGUI
 		void setOffsetHeight(int _value);
 		void setSubstituteCode(int _value);
 		void setDistance(int _value);
+		void setMsdfMode(bool _value);
+		void setMsdfRange(int _value);
 
 		void addCodePointRange(Char _first, Char _second);
 		void removeCodePointRange(Char _first, Char _second);
@@ -86,6 +98,7 @@ namespace MyGUI
 
 		// The following variables are set directly from values specified by the user.
 		std::string mSource; // Source (filename) of the font.
+		std::string mShader; // Optional shader, applied to the font.
 		float mSize; // Size of the font, in points (there are 72 points per inch).
 		unsigned int mResolution; // Resolution of the font, in pixels per inch.
 		Hinting mHinting; // What type of hinting to use when rendering the font.
@@ -95,6 +108,8 @@ namespace MyGUI
 		float mTabWidth; // The width of the "Tab" special character, in pixels.
 		int mOffsetHeight; // How far up to nudge text rendered in this font, in pixels. May be negative to nudge text down.
 		Char mSubstituteCodePoint; // The code point to use as a substitute for code points that don't exist in the font.
+		bool mMsdfMode; // Signed distance field texture, designed to be used with shader (see https://github.com/Chlumsky/msdfgen)
+		int mMsdfRange; // Gragient area range in pixels for msdf mode (higher range is required for thick outlines)
 
 		// The following variables are calculated automatically.
 		int mDefaultHeight; // The nominal height of the font in pixels.
@@ -115,7 +130,7 @@ namespace MyGUI
 		typedef std::unordered_map<Char, GlyphInfo> GlyphMap;
 
 		// A map of glyph heights to the set of paired glyph indices and glyph info objects that are of that height.
-		typedef std::map<FT_Pos, std::map<FT_UInt, GlyphInfo*> > GlyphHeightMap;
+		typedef std::map<int, std::map<FT_UInt, GlyphInfo*> > GlyphHeightMap;
 
 		template<bool LAMode, bool Antialias>
 		void initialiseFreeType();
@@ -129,10 +144,10 @@ namespace MyGUI
 
 		// Wraps the current texture coordinates _texX and _texY to the beginning of the next line if the specified glyph width
 		// doesn't fit at the end of the current line. Automatically takes the glyph spacing into account.
-		void autoWrapGlyphPos(int _glyphWidth, int _texWidth, int _lineHeight, int& _texX, int& _texY);
+		void autoWrapGlyphPos(int _glyphWidth, int _texWidth, int _lineHeight, int& _texX, int& _texY) const;
 
 		// Creates a GlyphInfo object using the specified information.
-		GlyphInfo createFaceGlyphInfo(Char _codePoint, int _fontAscent, FT_GlyphSlot _glyph);
+		GlyphInfo createFaceGlyphInfo(Char _codePoint, int _fontAscent, FT_GlyphSlot _glyph) const;
 
 		// Creates a glyph with the specified glyph index and assigns it to the specified code point.
 		// Automatically updates _glyphHeightMap, mCharMap, and mGlyphMap with data from the new glyph..
@@ -154,6 +169,14 @@ namespace MyGUI
 
 		CharMap mCharMap; // A map of code points to glyph indices.
 		GlyphMap mGlyphMap; // A map of code points to glyph info objects.
+
+#ifdef MYGUI_MSDF_FONTS
+		GlyphInfo createMsdfFaceGlyphInfo(Char _codePoint, const msdfgen::Shape& _shape, double _advance, int _fontAscent);
+		int createMsdfGlyph(const GlyphInfo& _glyphInfo, GlyphHeightMap& _glyphHeightMap);
+		int createMsdfFaceGlyph(Char _codePoint, int _fontAscent, msdfgen::FontHandle* _fontHandle, GlyphHeightMap& _glyphHeightMap);
+
+		void renderMsdfGlyphs(const GlyphHeightMap& _glyphHeightMap, msdfgen::FontHandle* _fontHandle, uint8* _texBuffer, int _texWidth, int _texHeight);
+#endif
 
 #endif // MYGUI_USE_FREETYPE
 

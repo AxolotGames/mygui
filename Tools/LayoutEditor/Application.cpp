@@ -34,15 +34,15 @@ class BlurrySubSkin : public MyGUI::SubSkin
 	MYGUI_RTTI_DERIVED( BlurrySubSkin )
 };
 
-template <> tools::Application* MyGUI::Singleton<tools::Application>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::Application>::mClassTypeName = "Application";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(Application);
 
-	Application::Application()
+	Application::Application() :
+		mSingletonHolder(this)
 	{
 		ComponentFactory::Initialise();
+		mEnableVSync = true;
 	}
 
 	Application::~Application()
@@ -90,17 +90,6 @@ namespace tools
 
 		new HotKeyManager();
 		HotKeyManager::getInstance().initialise();
-
-		std::string language = SettingsManager::getInstance().getValue("Settings/InterfaceLanguage");
-		if (language.empty() || language == "Auto")
-		{
-			if (!mLocale.empty())
-				MyGUI::LanguageManager::getInstance().setCurrentLanguage(mLocale);
-		}
-		else
-		{
-			MyGUI::LanguageManager::getInstance().setCurrentLanguage(language);
-		}
 
 		new CommandManager();
 		CommandManager::getInstance().initialise();
@@ -150,9 +139,20 @@ namespace tools
 		new GridManager();
 		GridManager::getInstance().initialise();
 
-		LoadGuiSettings();
-		
 		MyGUI::ResourceManager::getInstance().load("Initialise.xml");
+
+        LoadGuiSettings();
+
+        std::string language = SettingsManager::getInstance().getValue("Settings/InterfaceLanguage");
+        if (language.empty() || language == "Auto")
+        {
+            if (!mLocale.empty())
+                MyGUI::LanguageManager::getInstance().setCurrentLanguage(mLocale);
+        }
+        else
+        {
+            MyGUI::LanguageManager::getInstance().setCurrentLanguage(language);
+        }
 
 		bool maximized = SettingsManager::getInstance().getValue<bool>("Controls/Main/Maximized");
 		setWindowMaximized(maximized);

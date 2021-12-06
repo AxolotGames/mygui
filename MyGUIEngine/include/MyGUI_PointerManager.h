@@ -18,10 +18,10 @@ namespace MyGUI
 {
 
 	class MYGUI_EXPORT PointerManager :
-		public Singleton<PointerManager>,
 		public IUnlinkWidget,
 		public MemberObsolete<PointerManager>
 	{
+		MYGUI_SINGLETON_DECLARATION(PointerManager);
 	public:
 		PointerManager();
 
@@ -61,14 +61,11 @@ namespace MyGUI
 		delegates::CMultiDelegate1<const std::string&> eventChangeMousePointer;
 
 	private:
-		void _unlinkWidget(Widget* _widget);
+		void _unlinkWidget(Widget* _widget) override;
 		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
 
 		// создает виджет
 		Widget* baseCreateWidget(WidgetStyle _style, const std::string& _type, const std::string& _skin, const IntCoord& _coord, Align _align, const std::string& _layer, const std::string& _name);
-
-		// удяляет неудачника
-		void _destroyChildWidget(Widget* _widget);
 
 		// удаляет всех детей
 		void _destroyAllChildWidget();

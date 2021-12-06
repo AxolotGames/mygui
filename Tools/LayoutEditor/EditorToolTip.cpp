@@ -10,18 +10,17 @@
 #include "EditorWidgets.h"
 #include "WidgetTypes.h"
 
-template <> tools::EditorToolTip* MyGUI::Singleton<tools::EditorToolTip>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::EditorToolTip>::mClassTypeName = "EditorToolTip";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(EditorToolTip);
 
 	EditorToolTip::EditorToolTip() :
 		BaseLayout("EditorToolTip.layout"),
 		mText(nullptr),
 		mLastWidget(nullptr),
 		mMinWidth(0),
-		mMinHeight(0)
+		mMinHeight(0),
+		mSingletonHolder(this)
 	{
 		assignWidget(mText, "Text");
 

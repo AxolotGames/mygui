@@ -49,24 +49,24 @@ namespace MyGUI
 		/** Set window caption */
 		void setCaption(const UString& _value) override;
 		/** Get window caption */
-		const UString& getCaption() override;
+		const UString& getCaption() const override;
 
 		/** Get window caption widget */
-		TextBox* getCaptionWidget();
+		TextBox* getCaptionWidget() const;
 
 		/** Set minimal possible window size */
 		void setMinSize(const IntSize& _value);
 		/** Set minimal possible window size */
 		void setMinSize(int _width, int _height);
 		/** Get minimal possible window size */
-		IntSize getMinSize();
+		IntSize getMinSize() const;
 
 		/** Set maximal possible window size */
 		void setMaxSize(const IntSize& _value);
 		/** Set maximal possible window size */
 		void setMaxSize(int _width, int _height);
 		/** Get maximal possible window size */
-		IntSize getMaxSize();
+		IntSize getMaxSize() const;
 
 		//! @copydoc Widget::setPosition(const IntPoint& _value)
 		void setPosition(const IntPoint& _value) override;
@@ -131,8 +131,9 @@ namespace MyGUI
 
 	private:
 		float getAlphaVisible() const;
-		void getSnappedCoord(IntCoord& _coord);
-		IntCoord _getActionScale(Widget* _widget);
+		enum class Snap {Position, Size};
+		void getSnappedCoord(IntCoord& _coord, Snap snapMode) const;
+		IntCoord _getActionScale(Widget* _widget) const;
 
 		ControllerFadeAlpha* createControllerFadeAlpha(float _alpha, float _coef, bool _enable);
 

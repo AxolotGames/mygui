@@ -7,6 +7,9 @@
 #include "DemoKeeper.h"
 #include "Base/Main.h"
 #include "ResourcePointerContext.h"
+#ifdef MYGUI_OGRE_PLATFORM
+#include <Ogre.h>
+#endif
 
 namespace demo
 {
@@ -50,13 +53,7 @@ namespace demo
 
 		MyGUI::ResourceManager::getInstance().load("Contexts.xml");
 
-#ifdef MYGUI_SAMPLES_INPUT_OIS
 		MyGUI::ResourceManager::getInstance().load("DemoPointers.xml");
-#elif MYGUI_SAMPLES_INPUT_WIN32
-		MyGUI::ResourceManager::getInstance().load("DemoPointersW32.xml");
-#elif MYGUI_SAMPLES_INPUT_WIN32_OIS
-		MyGUI::ResourceManager::getInstance().load("DemoPointersW32.xml");
-#endif
 
 		mPointerContextManager = new PointerContextManager(this);
 		mPointerContextManager->addContext("ptrx_Normal");
@@ -189,31 +186,31 @@ namespace demo
 
 		vec.y += 120;
 
-		getCamera()->setPosition(vec);
-		getCamera()->setOrientation(quatH);
+		getCameraNode()->setPosition(vec);
+		getCameraNode()->setOrientation(quatH);
 #endif
 	}
 
 	void DemoKeeper::createEntities()
 	{
 #ifdef MYGUI_OGRE_PLATFORM
-		Ogre::Entity* entity = getSceneManager()->createEntity("friend", "Mikki.mesh");
+		Ogre::Entity* entity = getSceneManager()->createEntity("friend", "Mikki.mesh", MyGuiResourceGroup);
 		Ogre::SceneNode* node = getSceneManager()->getRootSceneNode()->createChildSceneNode();
 		node->attachObject(entity);
 		node->setPosition(0, 0, 300);
 
-		entity = getSceneManager()->createEntity("enemy", "Robot.mesh");
+		entity = getSceneManager()->createEntity("enemy", "Robot.mesh", MyGuiResourceGroup);
 		node = getSceneManager()->getRootSceneNode()->createChildSceneNode();
 		node->attachObject(entity);
 		node->setPosition(0, 0, -300);
 		//node->showBoundingBox(true);
 
 		Ogre::MeshManager::getSingleton().createPlane(
-			"FloorPlane", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+			"FloorPlane", MyGuiResourceGroup,
 			Ogre::Plane(Ogre::Vector3::UNIT_Y, 0), 2000, 2000, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
 
-		entity = getSceneManager()->createEntity("floor", "FloorPlane");
-		entity->setMaterialName("Ground");
+		entity = getSceneManager()->createEntity("floor", "FloorPlane", MyGuiResourceGroup);
+		entity->setMaterialName("Ground", MyGuiResourceGroup);
 		node = getSceneManager()->getRootSceneNode()->createChildSceneNode();
 		node->attachObject(entity);
 
@@ -242,7 +239,7 @@ namespace demo
 		Ogre::RaySceneQueryResult& result = gRaySceneQuery->execute();
 		for (Ogre::RaySceneQueryResult::iterator iter = result.begin(); iter != result.end(); ++iter)
 		{
-			if (iter->movable != 0)
+			if (iter->movable != nullptr)
 			{
 				if (iter->movable->getName() == "enemy")
 					return "enemy";

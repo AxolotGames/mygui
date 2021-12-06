@@ -34,7 +34,7 @@ namespace MyGUI
 		virtual const IntSize& getViewSize() const;
 
 		/** @see RenderManager::getVertexFormat */
-		virtual VertexColourType getVertexFormat();
+		virtual VertexColourType getVertexFormat() const;
 
 		/** @see RenderManager::createVertexBuffer */
 		virtual IVertexBuffer* createVertexBuffer();
@@ -60,7 +60,7 @@ namespace MyGUI
 		virtual void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count);
 
 		/** @see IRenderTarget::getInfo */
-		virtual const RenderTargetInfo& getInfo();
+		const RenderTargetInfo& getInfo() const override;
 
 		/** @see RenderManager::setViewSize */
 		void setViewSize(int _width, int _height) override;
@@ -68,7 +68,7 @@ namespace MyGUI
 		/*internal:*/
 		void drawOneFrame();
 
-		RenderBatchInfo* getBatchInfo(size_t _index);
+		RenderBatchInfo* getBatchInfo(size_t _index) const;
 		void addTexture(const std::string& _name, size_t _id, int _width, int _height);
 
 		void doRenderLayer(ILayer* _layer);

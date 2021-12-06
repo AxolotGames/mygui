@@ -12,7 +12,7 @@
 #include "MyGUI_Gui.h"
 #include "MyGUI_Timer.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 namespace MyGUI
 {
@@ -84,7 +84,7 @@ namespace MyGUI
 		if (_texture)
 		{
 			OpenGLTexture* texture = static_cast<OpenGLTexture*>(_texture);
-			texture_id = texture->getTextureID();
+			texture_id = texture->getTextureId();
 			//MYGUI_PLATFORM_ASSERT(texture_id, "Texture is not created");
 		}
 
@@ -161,7 +161,7 @@ namespace MyGUI
 		glPopClientAttrib();
 	}
 
-	const RenderTargetInfo& OpenGLRenderManager::getInfo()
+	const RenderTargetInfo& OpenGLRenderManager::getInfo() const
 	{
 		return mInfo;
 	}
@@ -171,7 +171,7 @@ namespace MyGUI
 		return mViewSize;
 	}
 
-	VertexColourType OpenGLRenderManager::getVertexFormat()
+	VertexColourType OpenGLRenderManager::getVertexFormat() const
 	{
 		return mVertexFormat;
 	}
@@ -192,7 +192,7 @@ namespace MyGUI
 		unsigned long now_time = timer.getMilliseconds();
 		unsigned long time = now_time - last_time;
 
-		onFrameEvent((float)((double)(time) / (double)1000));
+		onFrameEvent(time / 1000.0f);
 
 		last_time = now_time;
 
@@ -223,6 +223,14 @@ namespace MyGUI
 
 		onResizeView(mViewSize);
 		mUpdate = true;
+	}
+
+	void OpenGLRenderManager::registerShader(
+		const std::string& _shaderName,
+		const std::string& _vertexProgramFile,
+		const std::string& _fragmentProgramFile)
+	{
+		MYGUI_PLATFORM_LOG(Warning, "OpenGLRenderManager::registerShader is not implemented");
 	}
 
 	bool OpenGLRenderManager::isPixelBufferObjectSupported() const

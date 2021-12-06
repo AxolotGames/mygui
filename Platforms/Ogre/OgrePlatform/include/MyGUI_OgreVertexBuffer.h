@@ -10,15 +10,9 @@
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_IVertexBuffer.h"
 
-#include <OgreHardwareBufferManager.h>
-#include <OgreHardwareVertexBuffer.h>
 #include <OgrePrerequisites.h>
 #include <OgreRenderOperation.h>
-#include <OgreRenderSystem.h>
-#include <OgreTextureManager.h>
-#include <OgreTextureUnitState.h>
-
-#include "MyGUI_LastHeader.h"
+#include <OgreHardwareVertexBuffer.h>
 
 namespace MyGUI
 {
@@ -31,7 +25,7 @@ namespace MyGUI
 		~OgreVertexBuffer() override;
 
 		void setVertexCount(size_t _count) override;
-		size_t getVertexCount() override;
+		size_t getVertexCount() const override;
 
 		Vertex* lock() override;
 		void unlock() override;

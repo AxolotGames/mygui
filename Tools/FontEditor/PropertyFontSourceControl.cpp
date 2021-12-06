@@ -124,16 +124,16 @@ namespace tools
 	{
 		mResources.clear();
 
-		std::set<std::string, StrCmpI> allFilenames;
+		std::set<std::string> allFilenames;
 
-		for (MyGUI::VectorString::const_iterator fileType = fileTypes.begin(); fileType != fileTypes.end(); ++fileType)
+		for (const auto& fileType : fileTypes)
 		{
-			const MyGUI::VectorString& filenames = MyGUI::DataManager::getInstance().getDataListNames(*fileType);
+			const MyGUI::VectorString& filenames = MyGUI::DataManager::getInstance().getDataListNames(fileType);
 			allFilenames.insert(filenames.begin(), filenames.end());
 		}
 
-		for (std::set<std::string, StrCmpI>::const_iterator iter = allFilenames.begin(); iter != allFilenames.end(); ++iter)
-			mResources.push_back(*iter);
+		for (const auto& fileName : allFilenames)
+			mResources.push_back(fileName);
 	}
 
 }

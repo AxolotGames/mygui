@@ -11,28 +11,16 @@ else(WIN32)
 endif(WIN32)
 
 set(INST_FILES
-  Packages/FindOIS.cmake
   Packages/FindOGRE.cmake
   Utils/FindPkgMacros.cmake
   Utils/PreprocessorUtils.cmake
   Utils/MyGUIConfigTargets.cmake
   Utils/MyGUIGetVersion.cmake
-  Utils/MyGUIFindFrameworks.cmake
 )
 set(STATIC_INST_FILES
   Packages/FindDirectX.cmake
   Packages/FindDirectX11.cmake
-  Packages/FindFreetype.cmake
 )
-if (APPLE)
-  set(INST_FILES ${INST_FILES}
-	Packages/FindIOKit.cmake
-  )
-  set(STATIC_INST_FILES ${STATIC_INST_FILES}
-	Packages/FindCarbon.cmake
-	Packages/FindCocoa.cmake
-  )
-endif ()
 
 #install(FILES ${INST_FILES} DESTINATION ${MYGUI_CMAKE_DIR})
 if (MYGUI_STATIC)

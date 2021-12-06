@@ -21,10 +21,10 @@ namespace MyGUI
 	typedef delegates::CMultiDelegate1<float> EventHandle_FrameEventDelegate;
 
 	class MYGUI_EXPORT Gui :
-		public Singleton<Gui>,
 		public IUnlinkWidget,
 		public MemberObsolete<Gui>
 	{
+		MYGUI_SINGLETON_DECLARATION(Gui);
 		friend class WidgetManager;
 
 	public:
@@ -163,7 +163,7 @@ namespace MyGUI
 		// удаляет всех детей
 		void _destroyAllChildWidget();
 
-		virtual void _unlinkWidget(Widget* _widget);
+		void _unlinkWidget(Widget* _widget) override;
 
 	private:
 		// вектор всех детей виджетов

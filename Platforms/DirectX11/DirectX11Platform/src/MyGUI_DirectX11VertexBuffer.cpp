@@ -34,7 +34,7 @@ namespace MyGUI
 		mNeedVertexCount = _count;
 	}
 
-	size_t DirectX11VertexBuffer::getVertexCount()
+	size_t DirectX11VertexBuffer::getVertexCount() const
 	{
 		return mNeedVertexCount;
 	}

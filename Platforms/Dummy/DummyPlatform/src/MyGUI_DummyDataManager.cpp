@@ -29,7 +29,7 @@ namespace MyGUI
 		MYGUI_PLATFORM_LOG(Info, getClassTypeName() << " successfully shutdown");
 	}
 
-	IDataStream* DummyDataManager::getData(const std::string& _name)
+	IDataStream* DummyDataManager::getData(const std::string& _name) const
 	{
 		return nullptr;
 	}
@@ -39,18 +39,18 @@ namespace MyGUI
 		delete _data;
 	}
 
-	bool DummyDataManager::isDataExist(const std::string& _name)
+	bool DummyDataManager::isDataExist(const std::string& _name) const
 	{
 		return false;
 	}
 
-	const VectorString& DummyDataManager::getDataListNames(const std::string& _pattern)
+	const VectorString& DummyDataManager::getDataListNames(const std::string& _pattern) const
 	{
 		static VectorString result;
 		return result;
 	}
 
-	const std::string& DummyDataManager::getDataPath(const std::string& _name)
+	const std::string& DummyDataManager::getDataPath(const std::string& _name) const
 	{
 		static std::string result;
 		return result;

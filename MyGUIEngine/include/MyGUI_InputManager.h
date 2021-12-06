@@ -25,10 +25,10 @@ namespace MyGUI
 {
 
 	class MYGUI_EXPORT InputManager :
-		public Singleton<InputManager>,
 		public IUnlinkWidget,
 		public MemberObsolete<InputManager>
 	{
+		MYGUI_SINGLETON_DECLARATION(InputManager);
 	public:
 		InputManager();
 
@@ -87,7 +87,7 @@ namespace MyGUI
 		/** Get mouse position on current layer.
 			This position might different from getMousePosition() if mouse is over non-2d layer.
 		*/
-		IntPoint getMousePositionByLayer();
+		IntPoint getMousePositionByLayer() const;
 
 		// работа с модальными окнами
 		/** Add modal widget - all other widgets inaccessible while modal widget exist */
@@ -129,7 +129,7 @@ namespace MyGUI
 
 	private:
 		// удаляем данный виджет из всех возможных мест
-		void _unlinkWidget(Widget* _widget);
+		void _unlinkWidget(Widget* _widget) override;
 
 		void frameEntered(float _frame);
 

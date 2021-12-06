@@ -11,6 +11,7 @@
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_InputManager.h"
 #include "MyGUI_WidgetManager.h"
+#include "MyGUI_LanguageManager.h"
 
 namespace MyGUI
 {
@@ -117,15 +118,11 @@ namespace MyGUI
 		}
 		else if (_key == KeyCode::Home)
 		{
-			if (sel != 0)
-				sel = 0;
+			sel = 0;
 		}
 		else if (_key == KeyCode::End)
 		{
-			if (sel != (getItemCount() - 1))
-			{
-				sel = getItemCount() - 1;
-			}
+			sel = getItemCount() - 1;
 		}
 		else if (_key == KeyCode::PageUp)
 		{
@@ -756,7 +753,7 @@ namespace MyGUI
 		_redrawItem(_index);
 	}
 
-	const UString& ListBox::getItemNameAt(size_t _index)
+	const UString& ListBox::getItemNameAt(size_t _index) const
 	{
 		MYGUI_ASSERT_RANGE(_index, mItemsInfo.size(), "ListBox::getItemNameAt");
 		return mItemsInfo[_index].first;
@@ -904,7 +901,7 @@ namespace MyGUI
 		return ITEM_NONE;
 	}
 
-	int ListBox::getOptimalHeight()
+	int ListBox::getOptimalHeight() const
 	{
 		return (int)((mCoord.height - _getClientWidget()->getHeight()) + (mItemsInfo.size() * mHeightLine));
 	}
@@ -957,12 +954,12 @@ namespace MyGUI
 		return isItemVisibleAt(mIndexSelect, _fill);
 	}
 
-	size_t ListBox::_getItemIndex(Widget* _item)
+	size_t ListBox::_getItemIndex(Widget* _item) const
 	{
-		for (VectorButton::iterator iter = mWidgetLines.begin(); iter != mWidgetLines.end(); ++iter)
+		for (const auto& line : mWidgetLines)
 		{
-			if ((*iter) == _item)
-				return *(*iter)->_getInternalData<size_t>() + mTopIndex;
+			if (line == _item)
+				return *line->_getInternalData<size_t>() + mTopIndex;
 		}
 		return ITEM_NONE;
 	}
@@ -975,8 +972,8 @@ namespace MyGUI
 		if (!_update)
 		{
 			WidgetManager& instance = WidgetManager::getInstance();
-			for (VectorButton::iterator iter = mWidgetLines.begin(); iter != mWidgetLines.end(); ++iter)
-				instance.unlinkFromUnlinkers(*iter);
+			for (const auto& line : mWidgetLines)
+				instance.unlinkFromUnlinkers(line);
 		}
 	}
 
@@ -984,7 +981,7 @@ namespace MyGUI
 	{
 		// не коментировать
 		if (_key == "AddItem")
-			addItem(_value);
+			addItem(LanguageManager::getInstance().replaceTags(_value));
 		else if (_key == "ActivateOnClick")
 			mActivateOnClick = utility::parseBool(_value);
 		else
@@ -1036,7 +1033,7 @@ namespace MyGUI
 		_resetContainer(true);
 	}
 
-	size_t ListBox::_getItemCount()
+	size_t ListBox::_getItemCount() const
 	{
 		return getItemCount();
 	}
@@ -1056,12 +1053,12 @@ namespace MyGUI
 		setItemNameAt(_index, _name);
 	}
 
-	const UString& ListBox::_getItemNameAt(size_t _index)
+	const UString& ListBox::_getItemNameAt(size_t _index) const
 	{
 		return getItemNameAt(_index);
 	}
 
-	size_t ListBox::getIndexByWidget(Widget* _widget)
+	size_t ListBox::getIndexByWidget(Widget* _widget) const
 	{
 		if (_widget == getClientWidget())
 			return ITEM_NONE;
@@ -1101,7 +1098,7 @@ namespace MyGUI
 			return nullptr;
 
 		// индекс в нашем массиве
-		size_t index = _index + (size_t)mTopIndex;
+		size_t index = _index - (size_t)mTopIndex;
 
 		if (index < mWidgetLines.size())
 			return mWidgetLines[index];

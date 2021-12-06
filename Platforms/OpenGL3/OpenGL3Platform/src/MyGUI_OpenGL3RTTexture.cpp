@@ -8,20 +8,20 @@
 #include "MyGUI_OpenGL3RenderManager.h"
 #include "MyGUI_OpenGL3Diagnostic.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 namespace MyGUI
 {
 
 	OpenGL3RTTexture::OpenGL3RTTexture(unsigned int _texture) :
-		mTextureID(_texture),
+		mTextureId(_texture),
 		mWidth(0),
 		mHeight(0),
 		mFBOID(0),
 		mRBOID(0)
 	{
 		int miplevel = 0;
-		glBindTexture(GL_TEXTURE_2D, mTextureID);
+		glBindTexture(GL_TEXTURE_2D, mTextureId);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_WIDTH, &mWidth);
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, miplevel, GL_TEXTURE_HEIGHT, &mHeight);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -49,7 +49,7 @@ namespace MyGUI
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
 
 		// attach a texture to FBO color attachement point
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, mTextureID, 0);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, mTextureId, 0);
 
 		// attach a renderbuffer to depth attachment point
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, mRBOID);
@@ -73,15 +73,15 @@ namespace MyGUI
 
 	void OpenGL3RTTexture::begin()
 	{
-    glGetIntegerv(GL_VIEWPORT, mSavedViewport); // save current viewport
-    
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFBOID);
+		glGetIntegerv(GL_VIEWPORT, mSavedViewport); // save current viewport
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFBOID);
 
 		glViewport(0, 0, mWidth, mHeight);
 
 		OpenGL3RenderManager::getInstance().begin();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  }
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 
 	void OpenGL3RTTexture::end()
 	{
@@ -89,8 +89,8 @@ namespace MyGUI
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // unbind
 
-    glViewport(mSavedViewport[0], mSavedViewport[1], mSavedViewport[2], mSavedViewport[3]); // restore old viewport
-  }
+		glViewport(mSavedViewport[0], mSavedViewport[1], mSavedViewport[2], mSavedViewport[3]); // restore old viewport
+	}
 
 	void OpenGL3RTTexture::doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count)
 	{

@@ -284,7 +284,7 @@ namespace MyGUI
 		}
 	}
 
-	size_t ItemBox::_getItemIndex(Widget* _item)
+	size_t ItemBox::_getItemIndex(Widget* _item) const
 	{
 		if (_item == _getClientWidget())
 			return ITEM_NONE;
@@ -483,7 +483,7 @@ namespace MyGUI
 		eventNotifyItem(this, IBNotifyItemData(getIndexByWidget(_sender), IBNotifyItemData::KeyReleased, _key));
 	}
 
-	size_t ItemBox::getIndexByWidget(Widget* _widget)
+	size_t ItemBox::getIndexByWidget(Widget* _widget) const
 	{
 		MYGUI_ASSERT(_widget, "ItemBox::getIndexByWidget : Widget == nullptr");
 		if (_widget == _getClientWidget()) return ITEM_NONE;
@@ -495,15 +495,15 @@ namespace MyGUI
 		return index;
 	}
 
-	size_t ItemBox::_getContainerIndex(const IntPoint& _point)
+	size_t ItemBox::_getContainerIndex(const IntPoint& _point) const
 	{
-		for (VectorWidgetPtr::iterator iter = mVectorItems.begin(); iter != mVectorItems.end(); ++iter)
+		for (const auto& item : mVectorItems)
 		{
-			if ((*iter)->getVisible())
+			if (item->getVisible())
 			{
-				if ((*iter)->getAbsoluteRect().inside(_point))
+				if (item->getAbsoluteRect().inside(_point))
 				{
-					return getIndexByWidget(*iter);
+					return getIndexByWidget(item);
 				}
 			}
 		}
@@ -823,22 +823,22 @@ namespace MyGUI
 		endDrop(true);
 	}
 
-	size_t ItemBox::calcIndexByWidget(Widget* _widget)
+	size_t ItemBox::calcIndexByWidget(Widget* _widget) const
 	{
 		return *_widget->_getInternalData<size_t>() + (mFirstVisibleIndex * mCountItemInLine);
 	}
 
-	IntSize ItemBox::getContentSize()
+	IntSize ItemBox::getContentSize() const
 	{
 		return mContentSize;
 	}
 
-	IntPoint ItemBox::getContentPosition()
+	IntPoint ItemBox::getContentPosition() const
 	{
 		return mContentPosition;
 	}
 
-	IntSize ItemBox::getViewSize()
+	IntSize ItemBox::getViewSize() const
 	{
 		return _getClientWidget()->getSize();
 	}
@@ -848,17 +848,17 @@ namespace MyGUI
 		updateMetrics();
 	}
 
-	size_t ItemBox::getHScrollPage()
+	size_t ItemBox::getHScrollPage() const
 	{
 		return mSizeItem.width;
 	}
 
-	size_t ItemBox::getVScrollPage()
+	size_t ItemBox::getVScrollPage() const
 	{
 		return mSizeItem.height;
 	}
 
-	Align ItemBox::getContentAlign()
+	Align ItemBox::getContentAlign() const
 	{
 		return Align::Default;
 	}
@@ -893,7 +893,7 @@ namespace MyGUI
 		return mAlignVert;
 	}
 
-	Widget* ItemBox::getWidgetDrag()
+	Widget* ItemBox::getWidgetDrag() const
 	{
 		return mItemDrag;
 	}
@@ -1004,7 +1004,7 @@ namespace MyGUI
 			mHScroll->setScrollPosition(mContentPosition.left);
 	}
 
-	IntPoint ItemBox::getViewOffset()
+	IntPoint ItemBox::getViewOffset() const
 	{
 		return getContentPosition();
 	}

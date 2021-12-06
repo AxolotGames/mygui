@@ -10,9 +10,8 @@
 #include "MyGUI_OgreRenderManager.h"
 #include "MyGUI_OgreDiagnostic.h"
 #include "MyGUI_OgreRTTexture.h"
+#include "MyGUI_OgreDataManager.h"
 #include <Ogre.h>
-
-#include "MyGUI_LastHeader.h"
 
 namespace MyGUI
 {
@@ -50,6 +49,11 @@ namespace MyGUI
 		unlock();
 	}
 
+	void OgreTexture::setShader(const std::string& _shaderName)
+	{
+		mShaderInfo = OgreRenderManager::getInstance().getShaderInfo(_shaderName);
+	}
+
 	void OgreTexture::setInvalidateListener(ITextureInvalidateListener* _listener)
 	{
 		mListener = _listener;
@@ -59,7 +63,7 @@ namespace MyGUI
 	{
 		if (mTmpData.data != nullptr)
 		{
-			delete [] (uint8*)mTmpData.data;
+			delete[] (uint8*)mTmpData.data;
 			mTmpData.data = nullptr;
 		}
 
@@ -69,19 +73,19 @@ namespace MyGUI
 			mRenderTarget = nullptr;
 		}
 
-		if (!mTexture.isNull())
+		if (mTexture)
 		{
 			Ogre::TextureManager::getSingleton().remove(mTexture->getHandle());
-			mTexture.setNull();
+			mTexture.reset();
 		}
 	}
 
-	int OgreTexture::getWidth()
+	int OgreTexture::getWidth() const
 	{
 		return (int)mTexture->getWidth();
 	}
 
-	int OgreTexture::getHeight()
+	int OgreTexture::getHeight() const
 	{
 		return (int)mTexture->getHeight();
 	}
@@ -90,7 +94,7 @@ namespace MyGUI
 	{
 		if (_access == TextureUsage::Write)
 		{
-			return mTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+			return mTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_WRITE_ONLY);
 		}
 
 		// здесь проверить режим создания, и возможно так залочить без пиксель бокса
@@ -98,11 +102,15 @@ namespace MyGUI
 		// для чтения копируем в пиксель бокс
 		if (mTmpData.data != nullptr)
 		{
-			delete [] (uint8*)mTmpData.data;
+			delete[] (uint8*)mTmpData.data;
 			mTmpData.data = nullptr;
 		}
 
-		mTmpData = Ogre::PixelBox(mTexture->getWidth(), mTexture->getHeight(), mTexture->getDepth(), mTexture->getFormat());
+		mTmpData = Ogre::PixelBox(
+			mTexture->getWidth(),
+			mTexture->getHeight(),
+			mTexture->getDepth(),
+			mTexture->getFormat());
 		mTmpData.data = new uint8[mTexture->getBuffer()->getSizeInBytes()];
 
 		mTexture->getBuffer()->blitToMemory(mTmpData);
@@ -118,12 +126,12 @@ namespace MyGUI
 		}
 		else if (mTmpData.data != nullptr)
 		{
-			delete [] (uint8*)mTmpData.data;
+			delete[] (uint8*)mTmpData.data;
 			mTmpData.data = nullptr;
 		}
 	}
 
-	bool OgreTexture::isLocked()
+	bool OgreTexture::isLocked() const
 	{
 		return mTexture->getBuffer()->isLocked();
 	}
@@ -188,12 +196,7 @@ namespace MyGUI
 	{
 		mOriginalFormat = _format;
 		mPixelFormat = convertFormat(_format);
-		mNumElemBytes = 0;
-
-		if (_format == PixelFormat::L8) mNumElemBytes = 1;
-		else if (_format == PixelFormat::L8A8) mNumElemBytes = 2;
-		else if (_format == PixelFormat::R8G8B8) mNumElemBytes = 3;
-		else if (_format == PixelFormat::R8G8B8A8) mNumElemBytes = 4;
+		mNumElemBytes = _format.getBytesPerPixel();
 	}
 
 	void OgreTexture::setUsage(TextureUsage _usage)
@@ -226,23 +229,23 @@ namespace MyGUI
 	{
 		setUsage(TextureUsage::Default);
 
-		Ogre::TextureManager* manager = Ogre::TextureManager::getSingletonPtr();
-
-		if ( !manager->resourceExists(_filename) )
+		auto createResult = Ogre::TextureManager::getSingleton().createOrRetrieve(
+			_filename,
+			OgreDataManager::getInstance().getGroup(),
+			false,
+			nullptr,
+			nullptr,
+			Ogre::TEX_TYPE_2D,
+			0);
+		if (!createResult.second)
 		{
-			DataManager& resourcer = DataManager::getInstance();
-			if (!resourcer.isDataExist(_filename))
-			{
-				MYGUI_PLATFORM_LOG(Error, "Texture '" + _filename + "' not found, set default texture");
-			}
-			else
-			{
-				mTexture = manager->load(_filename, mGroup, Ogre::TEX_TYPE_2D, 0);
-			}
+			MYGUI_PLATFORM_LOG(Error, "Texture '" + _filename + "' not found, set default texture");
 		}
 		else
 		{
-			mTexture = manager->getByName(_filename);
+			mTexture = std::static_pointer_cast<Ogre::Texture>(createResult.first);
+			if (!mTexture->isLoaded())
+				mTexture->load();
 		}
 
 		setFormatByOgreTexture();
@@ -254,7 +257,7 @@ namespace MyGUI
 		mPixelFormat = Ogre::PF_UNKNOWN;
 		mNumElemBytes = 0;
 
-		if (!mTexture.isNull())
+		if (mTexture)
 		{
 			mPixelFormat = mTexture->getFormat();
 

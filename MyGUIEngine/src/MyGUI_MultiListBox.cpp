@@ -95,13 +95,13 @@ namespace MyGUI
 		updateColumns();
 	}
 
-	const UString& MultiListBox::getColumnNameAt(size_t _column)
+	const UString& MultiListBox::getColumnNameAt(size_t _column) const
 	{
 		MYGUI_ASSERT_RANGE(_column, mVectorColumnInfo.size(), "MultiListBox::getColumnNameAt");
 		return mVectorColumnInfo[_column].name;
 	}
 
-	int MultiListBox::getColumnWidthAt(size_t _column)
+	int MultiListBox::getColumnWidthAt(size_t _column) const
 	{
 		MYGUI_ASSERT_RANGE(_column, mVectorColumnInfo.size(), "MultiListBox::getColumnWidthAt");
 		return mVectorColumnInfo[_column].width;
@@ -194,7 +194,7 @@ namespace MyGUI
 			frameAdvise(true);
 	}
 
-	const UString& MultiListBox::getSubItemNameAt(size_t _column, size_t _index)
+	const UString& MultiListBox::getSubItemNameAt(size_t _column, size_t _index) const
 	{
 		MYGUI_ASSERT_RANGE(_index, mVectorColumnInfo.begin()->list->getItemCount(), "MultiListBox::getSubItemNameAt");
 
@@ -334,7 +334,7 @@ namespace MyGUI
 		}
 	}
 
-	Widget* MultiListBox::getSeparator(size_t _index)
+	Widget* MultiListBox::getOrCreateSeparator(size_t _index)
 	{
 		if (!mWidthSeparator || mSkinSeparator.empty())
 			return nullptr;
@@ -537,7 +537,7 @@ namespace MyGUI
 		setSubItemNameAt(0, _index, _name);
 	}
 
-	const UString& MultiListBox::getItemNameAt(size_t _index)
+	const UString& MultiListBox::getItemNameAt(size_t _index) const
 	{
 		return getSubItemNameAt(0, _index);
 	}
@@ -567,13 +567,13 @@ namespace MyGUI
 		setSubItemDataAt(_column, _index, Any::Null);
 	}
 
-	ListBox* MultiListBox::getSubItemAt(size_t _column)
+	ListBox* MultiListBox::getSubItemAt(size_t _column) const
 	{
 		MYGUI_ASSERT_RANGE(_column, mVectorColumnInfo.size(), "MultiListBox::getSubItemAt");
 		return mVectorColumnInfo[_column].list;
 	}
 
-	size_t MultiListBox::_getItemCount()
+	size_t MultiListBox::_getItemCount() const
 	{
 		return getColumnCount();
 	}
@@ -594,7 +594,7 @@ namespace MyGUI
 		setColumnNameAt(_index, _name);
 	}
 
-	const UString& MultiListBox::_getItemNameAt(size_t _index)
+	const UString& MultiListBox::_getItemNameAt(size_t _index) const
 	{
 		return getColumnNameAt(_index);
 	}
@@ -697,6 +697,7 @@ namespace MyGUI
 
 		ColumnInfo column;
 		column.width = 0;
+		column.realWidth = 0;
 		column.sizeType = ResizingPolicy::Auto;
 
 		column.item = _item;
@@ -762,7 +763,7 @@ namespace MyGUI
 			mVectorColumnInfo.back().list->setScrollVisible(true);
 	}
 
-	Widget* MultiListBox::_getItemAt(size_t _index)
+	Widget* MultiListBox::_getItemAt(size_t _index) const
 	{
 		MYGUI_ASSERT_RANGE(_index, mVectorColumnInfo.size(), "MultiListBox::_getItemAt");
 		return mVectorColumnInfo[_index].item;
@@ -773,12 +774,12 @@ namespace MyGUI
 		setColumnNameAt(getColumnIndex(_item), _name);
 	}
 
-	const UString& MultiListBox::getColumnName(MultiListItem* _item)
+	const UString& MultiListBox::getColumnName(const MultiListItem* _item) const
 	{
 		return getColumnNameAt(getColumnIndex(_item));
 	}
 
-	size_t MultiListBox::getColumnIndex(MultiListItem* _item)
+	size_t MultiListBox::getColumnIndex(const MultiListItem* _item) const
 	{
 		for (size_t index = 0; index < mVectorColumnInfo.size(); ++ index)
 		{
@@ -827,14 +828,14 @@ namespace MyGUI
 			updateColumns();
 	}
 
-	bool MultiListBox::getUpdateByResize()
+	bool MultiListBox::getUpdateByResize() const
 	{
 		if (mWidgetEmpty != nullptr)
 			return true;
 
-		for (VectorColumnInfo::iterator item = mVectorColumnInfo.begin(); item != mVectorColumnInfo.end(); ++item)
+		for (const auto& info : mVectorColumnInfo)
 		{
-			if ((*item).sizeType == ResizingPolicy::Fill)
+			if (info.sizeType == ResizingPolicy::Fill)
 				return true;
 		}
 		return false;
@@ -935,7 +936,7 @@ namespace MyGUI
 			mWidthBar += columnWidth;
 
 			// промежуток между листами
-			Widget* separator = getSeparator(index);
+			Widget* separator = getOrCreateSeparator(index);
 			if (separator)
 			{
 				separator->setCoord(mWidthBar, 0, mWidthSeparator, _getClientWidget()->getHeight());

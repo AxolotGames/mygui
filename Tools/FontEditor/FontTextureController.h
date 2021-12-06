@@ -20,14 +20,14 @@ namespace tools
 	public:
 		FontTextureController();
 
-		virtual void setTarget(Control* _control);
+		void setTarget(Control* _control) override;
 
-		virtual void activate();
-		virtual void deactivate();
+		void activate() override;
+		void deactivate() override;
 
 	private:
 		void notifyChangeDataSelector(DataPtr _data, bool _changeOnlySelection);
-		void notifyChangeProperty(PropertyPtr _sender);
+//		void notifyChangeProperty(PropertyPtr _sender);
 		void notifyChangeScope(const std::string& _scope);
 
 		void updateTexture(const std::string& _value);

@@ -6,14 +6,14 @@
 #include "Precompiled.h"
 #include "Console.h"
 
-// внутри неймспейса demo почему то не линкуется, даже если указать абсолютные пути
-template <> demo::Console* MyGUI::Singleton<demo::Console>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<demo::Console>::mClassTypeName = "Console";
-
 namespace demo
 {
 
-	Console::Console() : BaseLayout("Console.layout")
+	MYGUI_SINGLETON_DEFINITION(Console);
+
+	Console::Console() :
+		BaseLayout("Console.layout"),
+		mSingletonHolder(this)
 	{
 		assignWidget(mListHistory, "list_History");
 		assignWidget(mComboCommand, "combo_Command");
@@ -36,6 +36,8 @@ namespace demo
 		mListHistory->setOverflowToTheLeft(true);
 
 		mMainWidget->setVisible(false);
+
+        registerConsoleDelegate("clear", MyGUI::newDelegate(this, &Console::internalCommand));
 	}
 
 	void Console::notifyWindowButtonPressed(MyGUI::Window* _sender, const std::string& _button)
@@ -162,7 +164,7 @@ namespace demo
 			MYGUI_LOG(Warning, "console - command '" << _command << "' doesn't exist");
 	}
 
-	void Console::internalCommand(MyGUI::Widget* _sender, const MyGUI::UString& _key, const MyGUI::UString& _value)
+	void Console::internalCommand(const MyGUI::UString& _key, const MyGUI::UString& _value)
 	{
 		if (_key == "clear")
 		{

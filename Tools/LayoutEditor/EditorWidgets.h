@@ -14,9 +14,9 @@ namespace tools
 	typedef MyGUI::Enumerator<VectorWidgetContainer> EnumeratorWidgetContainer;
 
 	class EditorWidgets :
-		public MyGUI::Singleton<EditorWidgets>,
 		public MyGUI::IUnlinkWidget
 	{
+		MYGUI_SINGLETON_DECLARATION(EditorWidgets);
 	public:
 		EditorWidgets();
 
@@ -49,7 +49,7 @@ namespace tools
 		Event_ChangeWidgets eventChangeWidgets;
 		Event_ChangeWidgetCoord eventChangeWidgetCoord;
 
-		virtual void _unlinkWidget(MyGUI::Widget* _widget);
+		void _unlinkWidget(MyGUI::Widget* _widget) override;
 
 		MyGUI::MapString& getCodeGeneratorSettings();
 

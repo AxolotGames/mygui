@@ -6,9 +6,7 @@
 
 #include "MyGUI_OgreVertexBuffer.h"
 
-#include <OgreHardwareVertexBuffer.h>
-
-#include "MyGUI_LastHeader.h"
+#include <OgreHardwareBufferManager.h>
 
 namespace MyGUI
 {
@@ -32,21 +30,23 @@ namespace MyGUI
 		mRenderOperation.vertexData->vertexStart = 0;
 
 		Ogre::VertexDeclaration* vd = mRenderOperation.vertexData->vertexDeclaration;
-		vd->addElement( 0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION );
-		vd->addElement( 0, Ogre::VertexElement::getTypeSize( Ogre::VET_FLOAT3 ), Ogre::VET_COLOUR, Ogre::VES_DIFFUSE );
-		vd->addElement( 0, Ogre::VertexElement::getTypeSize( Ogre::VET_FLOAT3 ) +
-			Ogre::VertexElement::getTypeSize( Ogre::VET_COLOUR ),
-			Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES );
+		vd->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+		vd->addElement(0, Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3), Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
+		vd->addElement(
+			0,
+			Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3) + Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
+			Ogre::VET_FLOAT2,
+			Ogre::VES_TEXTURE_COORDINATES);
 
 		// Create the Vertex Buffer, using the Vertex Structure we previously declared in _declareVertexStructure.
-		mVertexBuffer = Ogre::HardwareBufferManager::getSingleton( ).createVertexBuffer(
+		mVertexBuffer = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
 			mRenderOperation.vertexData->vertexDeclaration->getVertexSize(0), // declared Vertex used
 			mVertexCount,
 			Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
-			false );
+			false);
 
 		// Bind the created buffer to the renderOperation object.  Now we can manipulate the buffer, and the RenderOp keeps the changes.
-		mRenderOperation.vertexData->vertexBufferBinding->setBinding( 0, mVertexBuffer );
+		mRenderOperation.vertexData->vertexBufferBinding->setBinding(0, mVertexBuffer);
 		mRenderOperation.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
 		mRenderOperation.useIndexes = false;
 	}
@@ -55,7 +55,7 @@ namespace MyGUI
 	{
 		delete mRenderOperation.vertexData;
 		mRenderOperation.vertexData = nullptr;
-		mVertexBuffer.setNull();
+		mVertexBuffer.reset();
 	}
 
 	void OgreVertexBuffer::resize()
@@ -70,7 +70,7 @@ namespace MyGUI
 		mNeedVertexCount = _count;
 	}
 
-	size_t OgreVertexBuffer::getVertexCount()
+	size_t OgreVertexBuffer::getVertexCount() const
 	{
 		return mNeedVertexCount;
 	}

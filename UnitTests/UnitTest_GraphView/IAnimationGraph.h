@@ -6,7 +6,8 @@
 #ifndef I_ANIMATION_GRAPH_H_
 #define I_ANIMATION_GRAPH_H_
 
-#include <Ogre.h>
+#include <OgrePrerequisites.h>
+#include <OgreAny.h>
 #include <string>
 #include "IAnimationNode.h"
 
@@ -18,7 +19,7 @@ namespace animation
 	{
 	public:
 		IAnimationGraph() : IAnimationNode() { }
-		IAnimationGraph(const std::string& _name) : IAnimationNode(_name, 0) { }
+		IAnimationGraph(const std::string& _name) : IAnimationNode(_name, nullptr) { }
 
 		virtual Ogre::Any getData(const std::string& _name) = 0;
 		virtual void addData(const std::string& _name, Ogre::Any _any) = 0;

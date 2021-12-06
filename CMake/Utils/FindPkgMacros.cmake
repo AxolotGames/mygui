@@ -9,13 +9,6 @@ macro(findpkg_begin PREFIX)
   endif ()
 endmacro(findpkg_begin)
 
-# Display a status message unless FIND_QUIETLY is set
-macro(pkg_message PREFIX)
-  if (NOT ${PREFIX}_FIND_QUIETLY)
-    message(STATUS ${ARGN})
-  endif ()
-endmacro(pkg_message)
-
 # Get environment variable, define it as ENV_$var and make sure backslashes are converted to forward slashes
 macro(getenv_path VAR)
    set(ENV_${VAR} $ENV{${VAR}})
@@ -48,40 +41,6 @@ macro(clear_if_changed TESTVAR)
   set(${TESTVAR}_INT_CHECK ${${TESTVAR}} CACHE INTERNAL "x" FORCE)
 endmacro(clear_if_changed)
 
-# Try to get some hints from pkg-config, if available
-macro(use_pkgconfig PREFIX PKGNAME)
-  find_package(PkgConfig)
-  if (PKG_CONFIG_FOUND)
-    pkg_check_modules(${PREFIX} ${PKGNAME})
-  endif ()
-endmacro (use_pkgconfig)
-
-# Couple a set of release AND debug libraries (or frameworks)
-macro(make_library_set PREFIX)
-  if (${PREFIX}_FWK)
-    set(${PREFIX} ${${PREFIX}_FWK})
-  elseif (${PREFIX}_REL AND ${PREFIX}_DBG)
-    set(${PREFIX} optimized ${${PREFIX}_REL} debug ${${PREFIX}_DBG})
-  elseif (${PREFIX}_REL)
-    set(${PREFIX} ${${PREFIX}_REL})
-  elseif (${PREFIX}_DBG)
-    set(${PREFIX} ${${PREFIX}_DBG})
-  endif ()
-endmacro(make_library_set)
-
-# Generate debug names from given release names
-macro(get_debug_names PREFIX)
-  foreach(i ${${PREFIX}})
-    set(${PREFIX}_DBG ${${PREFIX}_DBG} ${i}d ${i}D ${i}_d ${i}_D)
-  endforeach(i)
-endmacro(get_debug_names)
-
-# Add the parent dir from DIR to VAR 
-macro(add_parent_dir VAR DIR)
-  get_filename_component(${DIR}_TEMP "${${DIR}}/.." ABSOLUTE)
-  set(${VAR} ${${VAR}} ${${DIR}_TEMP})
-endmacro(add_parent_dir)
-
 # Do the final processing for the package find.
 macro(findpkg_finish PREFIX)
   # skip if already processed during this run
@@ -105,40 +64,3 @@ macro(findpkg_finish PREFIX)
     mark_as_advanced(${PREFIX}_INCLUDE_DIR ${PREFIX}_LIBRARY ${PREFIX}_LIBRARY_REL ${PREFIX}_LIBRARY_DBG ${PREFIX}_LIBRARY_FWK)
   endif ()
 endmacro(findpkg_finish)
-
-# Simplified framework finder
-MACRO (find_framework fwk)
-    find_library(${fwk}_LIBRARY ${fwk})
-    if (${fwk}_LIBRARY)
-        set(${fwk}_FOUND TRUE)
-        set(${fwk}_INCLUDE "${${fwk}_LIBRARY}/Headers")
-    endif (${fwk}_LIBRARY)
-    # Compatibility stuff
-    set(${fwk}_INCLUDE_DIR ${${fwk}_INCLUDE})
-    set(${fwk}_INCLUDE_DIRS ${${fwk}_INCLUDE})
-    set(${fwk}_LIBRARIES ${${fwk}_LIBRARY})
-ENDMACRO (find_framework)
-
-# Slightly customised framework finder
-MACRO(findpkg_framework fwk)
-  IF(APPLE)
-    SET(${fwk}_FRAMEWORK_PATH
-      ${${fwk}_FRAMEWORK_SEARCH_PATH}
-      ${CMAKE_FRAMEWORK_PATH}
-      ~/Library/Frameworks
-      /Library/Frameworks
-      /System/Library/Frameworks
-      /Network/Library/Frameworks
-    )
-    FOREACH(dir ${${fwk}_FRAMEWORK_PATH})
-      SET(fwkpath ${dir}/${fwk}.framework)
-      IF(EXISTS ${fwkpath})
-        SET(${fwk}_FRAMEWORK_INCLUDES ${${fwk}_FRAMEWORK_INCLUDES}
-          ${fwkpath}/Headers ${fwkpath}/PrivateHeaders)
-        if (NOT ${fwk}_LIBRARY_FWK)
-          SET(${fwk}_LIBRARY_FWK "-framework ${fwk}" CACHE STRING "${fwk} library")
-        endif ()
-      ENDIF(EXISTS ${fwkpath})
-    ENDFOREACH(dir)
-  ENDIF(APPLE)
-ENDMACRO(findpkg_framework)

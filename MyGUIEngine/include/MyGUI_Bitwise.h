@@ -12,9 +12,8 @@
 namespace MyGUI
 {
 
-	class Bitwise
+	namespace Bitwise
 	{
-	public:
 		/** Returns the closest power-of-two number greater or equal to value.
 		*/
 		template<typename Type>
@@ -37,23 +36,6 @@ namespace MyGUI
 			return (_value & (_value - 1)) == 0;
 		}
 
-		/** Returns the number of bits a pattern must be shifted right by to
-		remove right-hand zeros.
-		*/
-		template<typename Type>
-		static inline size_t getBitShift(Type _mask)
-		{
-			if (_mask == 0)
-				return 0;
-
-			size_t result = 0;
-			while ((_mask & 1) == 0)
-			{
-				++result;
-				_mask >>= 1;
-			}
-			return result;
-		}
 	};
 
 } // namespace MyGUI

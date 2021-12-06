@@ -15,14 +15,14 @@
 namespace MyGUI
 {
 
-	template <> ClipboardManager* Singleton<ClipboardManager>::msInstance = nullptr;
-	template <> const char* Singleton<ClipboardManager>::mClassTypeName = "ClipboardManager";
+	MYGUI_SINGLETON_DEFINITION(ClipboardManager);
 
 	ClipboardManager::ClipboardManager() :
 #if MYGUI_PLATFORM == MYGUI_PLATFORM_WIN32
 		mWindowsClipboardHandler(nullptr),
 #endif
-		mIsInitialise(false)
+		mIsInitialise(false),
+		mSingletonHolder(this)
 	{
 	}
 
@@ -68,10 +68,10 @@ namespace MyGUI
 		if (iter != mClipboardData.end()) mClipboardData.erase(iter);
 	}
 
-	std::string ClipboardManager::getClipboardData(const std::string& _type)
+	std::string ClipboardManager::getClipboardData(const std::string& _type) const
 	{
 		std::string ret;
-		MapString::iterator iter = mClipboardData.find(_type);
+		MapString::const_iterator iter = mClipboardData.find(_type);
 		if (iter != mClipboardData.end())
 			ret = (*iter).second;
 

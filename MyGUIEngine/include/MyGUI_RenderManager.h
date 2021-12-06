@@ -17,10 +17,12 @@
 namespace MyGUI
 {
 
-	class MYGUI_EXPORT RenderManager :
-		public Singleton<RenderManager>
+	class MYGUI_EXPORT RenderManager
 	{
+		MYGUI_SINGLETON_DECLARATION(RenderManager);
 	public:
+		RenderManager();
+		virtual ~RenderManager() = default;
 
 		/** Create vertex buffer.
 			This method should create vertex buffer with triangles list type,
@@ -41,13 +43,21 @@ namespace MyGUI
 		virtual const IntSize& getViewSize() const = 0;
 
 		/** Get current vertex colour type */
-		virtual VertexColourType getVertexFormat() = 0;
+		virtual VertexColourType getVertexFormat() const = 0;
 
 		/** Check if texture format supported by hardware */
 		virtual bool isFormatSupported(PixelFormat _format, TextureUsage _usage);
 
         /** Set render view size. Should be called on every window resize */
 		virtual void setViewSize(int _width, int _height) = 0;
+
+		/** Register shader, that can set with ITexture::setShader.
+			Registering "Default" shader would change main shader, used for all textures without shader.
+		*/
+		virtual void registerShader(
+			const std::string& _shaderName,
+			const std::string& _vertexProgramFile,
+			const std::string& _fragmentProgramFile) = 0;
 
 #if MYGUI_DEBUG_MODE == 1
 		/** Check if texture is valid */

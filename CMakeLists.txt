@@ -5,9 +5,20 @@
 # and provide build configuration options.
 ######################################################################
 
-cmake_minimum_required(VERSION 2.6)
-set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE)
+cmake_minimum_required(VERSION 2.8.12)
 cmake_policy(SET CMP0003 NEW)
+cmake_policy(SET CMP0011 NEW)
+cmake_policy(SET CMP0048 OLD)
+
+# for link time optimization, remove if cmake version is >= 3.9
+if(POLICY CMP0069) # LTO
+  cmake_policy(SET CMP0069 NEW)
+endif()
+
+# for position-independent executable, remove if cmake version is >= 3.14
+if(POLICY CMP0083)
+  cmake_policy(SET CMP0083 NEW)
+endif()
 
 project(MYGUI)
 
@@ -21,11 +32,11 @@ include(CMakeDependentOption)
 include(MacroLogFeature)
 include(MyGUIConfigTargets)
 include(PreprocessorUtils)
-include(Utils)
+include(GNUInstallDirs)
 set(MYGUI_TEMPLATES_DIR "${MYGUI_SOURCE_DIR}/CMake/Templates")
-set(MYGUI_WORK_DIR ${MYGUI_BINARY_DIR})
 
 SET(CMAKE_CXX_STANDARD 11)
+set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 #####################################################################
 # Set up the basic build environment
@@ -77,13 +88,10 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_C
 	endif()
 endif ()
 
-# definitions for samples
-set(MYGUI_LIBRARIES MyGUIEngine)
-
 # Specify build paths
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${MYGUI_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MYGUI_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MYGUI_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${MYGUI_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MYGUI_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MYGUI_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
 if (WIN32 OR APPLE)
 	if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 		if (UNIX)
@@ -103,32 +111,33 @@ endif(WIN32 OR APPLE)
 ######################################################################
 
 if (EMSCRIPTEN)
-	set(MYGUI_SAMPLES_INPUT 4 CACHE STRING "")
 	set(MYGUI_STATIC True CACHE BOOL "")
 	set(MYGUI_DISABLE_PLUGINS True CACHE BOOL "")
-	set(MYGUI_USE_SYSTEM_GLEW True CACHE BOOL "")
 
-	set(OPENGL_gl_LIBRARY Dummy CACHE STRING "")
-	set(OPENGL_glu_LIBRARY Dummy CACHE STRING "")
-	set(GLEW_LIBRARY Dummy CACHE STRING "")
-	set(SDL2_LIBRARY Dummy CACHE STRING "")
-	set(SDL2_IMAGE_LIBRARY Dummy CACHE STRING "")
-	set(SDL2_INCLUDE_DIR "" CACHE STRING "")
-	set(SDL2_IMAGE_INCLUDE_DIR "" CACHE STRING "")
+	set(SDL2_INCLUDE_DIR "." CACHE STRING "")
+	set(SDL2_IMAGE_INCLUDE_DIR "." CACHE STRING "")
 
-	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -O2 --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/Media/@/ -s FULL_ES3=1 -s ALLOW_MEMORY_GROWTH=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]'")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -O2 -s ALLOW_MEMORY_GROWTH=1")
+	# TODO: required only by demos and tools, not by MyGUIEngine or MyGUI.OpenGLESPlatform
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s FULL_ES3=1 -s USE_WEBGL2=1")
+	# TODO: set preload-file flags for demos and tools only
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/Media/@/Media")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --preload-file ${CMAKE_CURRENT_BINARY_DIR}/bin/resources.xml@/resources.xml")
+
+	SET(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif ()
 
 # Customise what to build
 option(MYGUI_STATIC "Static build" FALSE)
 option(MYGUI_DISABLE_PLUGINS "Disable plugins support" FALSE)
-option(MYGUI_USE_FREETYPE "Use freetype for font rendering" TRUE)
-option(MYGUI_DONT_USE_OBSOLETE "Remove obsole functions from build" FALSE)
+option(MYGUI_USE_FREETYPE "Use freetype for font texture rendering" TRUE)
+option(MYGUI_MSDF_FONTS "Enable msdf fonts generation support" FALSE)
+option(MYGUI_DONT_USE_OBSOLETE "Remove obsolete functions from build" FALSE)
 
 set(MYGUI_RENDERSYSTEM 6 CACHE STRING
 "Specify the Render System. Possible values:
   1 - Dummy
-  2 - Export (latter)
+  2 - Export (not used)
   3 - Ogre
   4 - OpenGL
   5 - Direct3D 9
@@ -142,56 +151,31 @@ if(MYGUI_RENDERSYSTEM EQUAL 4 OR MYGUI_RENDERSYSTEM EQUAL 7)
 endif()
 
 option(MYGUI_BUILD_DEMOS "Build MyGUI demos" TRUE)
-option(MYGUI_BUILD_PLUGINS "Build MyGUI plugins" TRUE)
+cmake_dependent_option(MYGUI_BUILD_PLUGINS "Build MyGUI plugins" TRUE "NOT MYGUI_DISABLE_PLUGINS" FALSE)
 option(MYGUI_BUILD_TOOLS "Build the tools" TRUE)
 option(MYGUI_BUILD_UNITTESTS "Build the unit tests" FALSE)
 option(MYGUI_BUILD_TEST_APP "Build TestApp" FALSE)
 option(MYGUI_BUILD_WRAPPER "Build the wrapper" FALSE)
 
-option(MYGUI_INSTALL_SAMPLES "Install MyGUI demos." FALSE)
-option(MYGUI_INSTALL_TOOLS "Install MyGUI tools." FALSE)
+cmake_dependent_option(MYGUI_INSTALL_DEMOS "Install MyGUI demos." FALSE "MYGUI_BUILD_DEMOS" FALSE)
+cmake_dependent_option(MYGUI_INSTALL_TOOLS "Install MyGUI tools." FALSE "MYGUI_BUILD_TOOLS" FALSE)
 option(MYGUI_INSTALL_DOCS "Install documentation." FALSE)
 option(MYGUI_INSTALL_MEDIA "Install media files." FALSE)
-option(MYGUI_INSTALL_SAMPLES_SOURCE "Install samples source files." FALSE)
-cmake_dependent_option(MYGUI_INSTALL_PDB "Install debug pdb files" FALSE "MSVC" FALSE)
-option(MYGUI_FULL_RPATH "Build executables with the full required RPATH to run from their install location." FALSE)
+cmake_dependent_option(MYGUI_INSTALL_PDB "Install debug pdb files" FALSE "MSVC;NOT MYGUI_STATIC" FALSE)
 option(MYGUI_STANDALONE_BUILD "Generate build files that do not reference CMake (should be used only from Scripts/prepareRelease.py)" FALSE)
 MARK_AS_ADVANCED(MYGUI_STANDALONE_BUILD)
 option(MYGUI_GENERATE_LIST_FILES_FROM_VSPROJECT "Generate .list files from visual studio project files" FALSE)
-
-if (WIN32)
-	set(MYGUI_SAMPLES_INPUT 2 CACHE STRING
-	"Specify the Input Manager for samples. Possible values:
-	  1 - OIS
-	  2 - Win32
-	  3 - Win32 (Mouse) + OIS (Keyboard)
-	  4 - SDL2"
-	)
-else()
-	set(MYGUI_SAMPLES_INPUT 1)
-endif()
-
-if(MYGUI_RENDERSYSTEM EQUAL 4 OR MYGUI_RENDERSYSTEM EQUAL 7 OR MYGUI_RENDERSYSTEM EQUAL 8)
-	set(MYGUI_SAMPLES_INPUT 4)
-endif()
+MARK_AS_ADVANCED(MYGUI_GENERATE_LIST_FILES_FROM_VSPROJECT)
 
 if (MSVC)
-	option(MYGUI_USE_PROJECT_FOLDERS "Use Visual Studio solution folders for projects." FALSE)
+	option(MYGUI_USE_PROJECT_FOLDERS "Use Visual Studio solution folders for projects." TRUE)
 endif ()
 
 # Used to not annoy users with high level warnings (should be TRUE for developers)
 option(MYGUI_HIGH_LEVEL_WARNINGS "Use high level compiler warnings. Developers should enable this." FALSE)
-if (MSVC)
-	option(MYGUI_CHECK_MEMORY_LEAKS "Check memory leaks. Developers should enable this." FALSE)
-endif ()
 
 if (MYGUI_USE_PROJECT_FOLDERS)
 	SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
-endif ()
-
-# Global defines
-if (MYGUI_CHECK_MEMORY_LEAKS)
-	add_definitions(-DMYGUI_CHECK_MEMORY_LEAKS)
 endif ()
 
 if (MYGUI_DONT_USE_OBSOLETE)
@@ -207,40 +191,17 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_C
 	if (NOT MYGUI_HIGH_LEVEL_WARNINGS)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 	else ()
-		if (MYGUI_USE_FREETYPE)
-			ignore_warnings(${FREETYPE_INCLUDE_DIRS})
-			ignore_warnings(${FREETYPE_FT2BUILD_INCLUDE_DIR})
-		endif ()
-		if (MYGUI_RENDERSYSTEM EQUAL 3)
-			# to avoid warnings from OGRE
-			ignore_warnings(${OGRE_INCLUDE_DIR})
-		endif ()
-		if (MYGUI_SAMPLES_INPUT EQUAL 1 OR MYGUI_SAMPLES_INPUT EQUAL 3)
-			# to avoid warnings from OIS
-			ignore_warnings(${OIS_INCLUDE_DIR})
-		endif ()
-		if (MYGUI_RENDERSYSTEM EQUAL 4 OR MYGUI_RENDERSYSTEM EQUAL 7 OR MYGUI_RENDERSYSTEM EQUAL 8)
-			# to avoid warnings from SDL2
-			ignore_warnings(${SDL2_INCLUDE_DIRS})
-
-			if (NOT MSVC)
-				# violated in glew.h
-				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-id-macro")
-			endif ()
-		endif ()
-
 		if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything")
-                        # useful, TODO
-                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override")
-                        # might be useful
-                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-exceptions -Wno-documentation-unknown-command -Wno-unknown-warning-option -Wno-sign-conversion -Wno-conversion -Wno-documentation -Wno-old-style-cast")
-                        # not useful
-                        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-prototypes -Wno-reorder -Wno-undefined-var-template -Wno-c++98-compat-pedantic -Wno-c++98-compat -Wno-c++11-extensions -Wno-float-equal -Wno-padded -Wno-padded -Wno-weak-vtables -Wno-duplicate-enum -Wno-exit-time-destructors -Wno-unused-parameter -Wno-global-constructors")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything")
+			# might be useful
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-documentation-unknown-command -Wno-unknown-warning-option -Wno-sign-conversion -Wno-conversion -Wno-documentation -Wno-old-style-cast")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-poison-system-directories")
+			# not useful
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-prototypes -Wno-reorder -Wno-c++98-compat-pedantic -Wno-c++11-extensions -Wno-float-equal -Wno-padded -Wno-weak-vtables -Wno-duplicate-enum -Wno-exit-time-destructors -Wno-unused-parameter -Wno-global-constructors")
 		else ()
 			# very interesting option, but way too many warnings
 			#add_definitions(-Weffc++)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall  -Winit-self -Woverloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-unused-parameter")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall -Wno-reorder -Winit-self -Woverloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-unused-parameter")
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
 			if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wctor-dtor-privacy")
@@ -283,10 +244,8 @@ if (MSVC)
 	endif ()
 	# disable: warning C4100: '***' : unreferenced formal parameter
 	add_definitions(/wd4100)
-	# disable: warning C4127: conditional expression is constant
-	add_definitions(/wd4127)
-	# disable: warning C4512: '***' : assignment operator could not be generated
-	add_definitions(/wd4512)
+
+	# TODO: move to Tools only
 	# disable: warning C4275: non dll-interface class '***' used as base for dll-interface clas '***'
 	add_definitions(/wd4275)
 
@@ -296,11 +255,6 @@ if (MSVC)
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_LEVEL}")
 	endif ()
 
-endif ()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
-	# Otherwise, boost complains that there is no threading support.
-	SET(CMAKE_CXX_FLAGS "-pthread ${CMAKE_CXX_FLAGS}")
 endif ()
 
 cmake_dependent_option(MYGUI_BUILD_DOCS "Generate documentation" TRUE "DOXYGEN_FOUND" FALSE)
@@ -372,10 +326,3 @@ add_subdirectory(CMake)
 
 # Provide CPack packaging target
 include(Packaging)
-
-# copy dlls required by SDL2 and SDL2_image
-if(WIN32)
-    if(MYGUI_RENDERSYSTEM EQUAL 4)
-
-    endif(MYGUI_RENDERSYSTEM EQUAL 4)
-endif(WIN32)

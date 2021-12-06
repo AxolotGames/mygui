@@ -7,7 +7,7 @@
 #include "MyGUI_OpenGLVertexBuffer.h"
 #include "MyGUI_OpenGLDiagnostic.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 namespace MyGUI
 {
@@ -32,7 +32,7 @@ namespace MyGUI
 		mNeedVertexCount = _count;
 	}
 
-	size_t OpenGLVertexBuffer::getVertexCount()
+	size_t OpenGLVertexBuffer::getVertexCount() const
 	{
 		return mNeedVertexCount;
 	}
@@ -49,7 +49,6 @@ namespace MyGUI
 
 		// Discard the buffer
 		glBufferData(GL_ARRAY_BUFFER, mSizeInBytes, nullptr, GL_STREAM_DRAW);
-
 
 		Vertex* pBuffer = reinterpret_cast<Vertex*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
 

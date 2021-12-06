@@ -11,13 +11,16 @@
 #include "MyGUI_ITexture.h"
 #include "MyGUI_RenderFormat.h"
 #include "MyGUI_Types.h"
+#include "MyGUI_DirectX11Diagnostic.h"
 
-struct IDirect3DTexture9;
+struct ID3D11Texture2D;
+struct ID3D11ShaderResourceView;
 
 namespace MyGUI
 {
 	class DirectX11RenderManager;
 	class DirectX11RTTexture;
+	struct DirectX11ShaderInfo;
 
 	struct ICreateTextureCallbackStruct
 	{
@@ -29,26 +32,30 @@ namespace MyGUI
 	{
 	public:
 		DirectX11Texture(const std::string& _name, DirectX11RenderManager* _manager);
-		virtual ~DirectX11Texture();
+		~DirectX11Texture() override;
 
-		virtual const std::string& getName() const;
+		const std::string& getName() const override;
 
-		virtual void createManual(int _width, int _height, TextureUsage _usage, PixelFormat _format);
-		virtual void loadFromFile(const std::string& _filename);
-		virtual void saveToFile(const std::string& _filename) { }
+		void createManual(int _width, int _height, TextureUsage _usage, PixelFormat _format) override;
+		void loadFromFile(const std::string& _filename) override;
+		void saveToFile(const std::string& _filename) override
+		{
+			MYGUI_PLATFORM_LOG(Warning, "saveToFile not implemented (was trying to save '" << _filename << "')");
+		}
+		void setShader(const std::string& _shaderName) override;
 
-		virtual void destroy();
+		void destroy() override;
 
-		virtual void* lock(TextureUsage _access);
-		virtual void unlock();
-		virtual bool isLocked();
+		void* lock(TextureUsage _access) override;
+		void unlock() override;
+		bool isLocked() const override;
 
-		virtual int getWidth();
-		virtual int getHeight();
+		int getWidth() const override;
+		int getHeight() const override;
 
-		virtual PixelFormat  getFormat();
-		virtual TextureUsage getUsage();
-		virtual size_t       getNumElemBytes();
+		PixelFormat getFormat() const override;
+		TextureUsage getUsage() const override;
+		size_t getNumElemBytes() const override;
 
 		virtual IRenderTarget*	getRenderTarget();
 
@@ -60,11 +67,13 @@ namespace MyGUI
 
 	private:
 		friend class DirectX11RTTexture;
-		ID3D11Texture2D*          mTexture;
-		void*                     mWriteData;
+
+		ID3D11Texture2D* mTexture;
+		void* mWriteData;
 
 	public:
 		ID3D11ShaderResourceView* mResourceView;
+		DirectX11ShaderInfo* mShaderInfo = nullptr;
 
 	private:
 		int                       mWidth;

@@ -41,15 +41,13 @@ namespace MyGUI
 		mDataManager->shutdown();
 	}
 
-	OpenGLESRenderManager* OpenGLESPlatform::getRenderManagerPtr()
+	OpenGLESRenderManager* OpenGLESPlatform::getRenderManagerPtr() const
 	{
-		assert(mIsInitialise);
 		return mRenderManager;
 	}
 
-	OpenGLESDataManager* OpenGLESPlatform::getDataManagerPtr()
+	OpenGLESDataManager* OpenGLESPlatform::getDataManagerPtr() const
 	{
-		assert(mIsInitialise);
 		return mDataManager;
 	}
 

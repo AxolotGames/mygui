@@ -20,21 +20,21 @@ namespace MyGUI
 	{
 	public:
 		OpenGLRTTexture(unsigned int _texture);
-		virtual ~OpenGLRTTexture();
+		~OpenGLRTTexture() override;
 
-		virtual void begin();
-		virtual void end();
+		void begin() override;
+		void end() override;
 
-		virtual void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count);
+		void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count) override;
 
-		virtual const RenderTargetInfo& getInfo()
+		const RenderTargetInfo& getInfo() const override
 		{
 			return mRenderTargetInfo;
 		}
 
 	private:
 		RenderTargetInfo mRenderTargetInfo;
-		unsigned int mTextureID;
+		unsigned int mTextureId;
 		int mWidth;
 		int mHeight;
 		unsigned int mFBOID;

@@ -87,7 +87,7 @@ namespace MyGUI
 		unsigned long now_time = timer.getMilliseconds();
 		unsigned long time = now_time - last_time;
 
-		onFrameEvent((float)((double)(time) / (double)1000));
+		onFrameEvent(time / 1000.0f);
 
 		last_time = now_time;
 
@@ -170,7 +170,7 @@ namespace MyGUI
 		mTextures.clear();
 	}
 
-	const RenderTargetInfo& ExportRenderManager::getInfo()
+	const RenderTargetInfo& ExportRenderManager::getInfo() const
 	{
 		return mInfo;
 	}
@@ -180,12 +180,12 @@ namespace MyGUI
 		return mViewSize;
 	}
 
-	VertexColourType ExportRenderManager::getVertexFormat()
+	VertexColourType ExportRenderManager::getVertexFormat() const
 	{
 		return VertexColourType::ColourARGB;
 	}
 
-	RenderBatchInfo* ExportRenderManager::getBatchInfo(size_t _index)
+	RenderBatchInfo* ExportRenderManager::getBatchInfo(size_t _index) const
 	{
 		if (_index < mBatchInfo.size())
 			return &mBatchInfo[_index];

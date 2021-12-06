@@ -14,6 +14,7 @@
 #include "MyGUI_Button.h"
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_LayerManager.h"
+#include "MyGUI_LanguageManager.h"
 
 namespace MyGUI
 {
@@ -460,7 +461,7 @@ namespace MyGUI
 
 		// не коментировать
 		else if (_key == "AddItem")
-			addItem(_value);
+			addItem(LanguageManager::getInstance().replaceTags(_value));
 
 		else
 		{
@@ -496,7 +497,7 @@ namespace MyGUI
 		setItemDataAt(_index, Any::Null);
 	}
 
-	const UString& ComboBox::getItemNameAt(size_t _index)
+	const UString& ComboBox::getItemNameAt(size_t _index) const
 	{
 		return mList->getItemNameAt(_index);
 	}
@@ -560,7 +561,7 @@ namespace MyGUI
 			eventToolTip(this, _info);
 	}
 
-	size_t ComboBox::_getItemCount()
+	size_t ComboBox::_getItemCount() const
 	{
 		return getItemCount();
 	}
@@ -580,7 +581,7 @@ namespace MyGUI
 		setItemNameAt(_index, _name);
 	}
 
-	const UString& ComboBox::_getItemNameAt(size_t _index)
+	const UString& ComboBox::_getItemNameAt(size_t _index) const
 	{
 		return getItemNameAt(_index);
 	}

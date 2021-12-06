@@ -10,8 +10,6 @@
 
 #include <Ogre.h>
 
-#include "MyGUI_LastHeader.h"
-
 namespace MyGUI
 {
 
@@ -45,11 +43,11 @@ namespace MyGUI
 		mIsInitialise = false;
 	}
 
-	IDataStream* OgreDataManager::getData(const std::string& _name)
+	IDataStream* OgreDataManager::getData(const std::string& _name) const
 	{
 		try
 		{
-			Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(_name, mGroup, true);
+			Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(_name, mGroup);
 			OgreDataStream* data = new OgreDataStream(stream);
 
 			return data;
@@ -67,7 +65,7 @@ namespace MyGUI
 		delete _data;
 	}
 
-	bool OgreDataManager::isDataExist(const std::string& _name)
+	bool OgreDataManager::isDataExist(const std::string& _name) const
 	{
 		if (mAllGroups)
 			return Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(_name);
@@ -75,12 +73,12 @@ namespace MyGUI
 			return Ogre::ResourceGroupManager::getSingleton().resourceExists(mGroup, _name);
 	}
 
-	const VectorString& OgreDataManager::getDataListNames(const std::string& _pattern)
+	const VectorString& OgreDataManager::getDataListNames(const std::string& _pattern) const
 	{
 		return getDataListNames(_pattern, false);
 	}
 
-	const VectorString& OgreDataManager::getDataListNames(const std::string& _pattern, bool _fullpath)
+	const VectorString& OgreDataManager::getDataListNames(const std::string& _pattern, bool _fullpath) const
 	{
 		static VectorString result;
 		result.clear();
@@ -106,7 +104,7 @@ namespace MyGUI
 			if (!pFileInfo->empty())
 				pFileInfos.push_back(pFileInfo);
 			else
-				pFileInfo.setNull();
+				pFileInfo.reset();
 		}
 
 		result.reserve(resultSize);
@@ -114,7 +112,7 @@ namespace MyGUI
 		for (size_t i = 0; i < pFileInfos.size(); i++)
 		{
 			Ogre::FileInfoListPtr pFileInfo = pFileInfos[i];
-			for (Ogre::FileInfoList::iterator fi = pFileInfo->begin(); fi != pFileInfo->end(); ++fi )
+			for (Ogre::FileInfoList::iterator fi = pFileInfo->begin(); fi != pFileInfo->end(); ++fi)
 			{
 				if (fi->path.empty())
 				{
@@ -134,13 +132,13 @@ namespace MyGUI
 				}
 			}
 
-			pFileInfo.setNull();
+			pFileInfo.reset();
 		}
 
 		return result;
 	}
 
-	const std::string& OgreDataManager::getDataPath(const std::string& _name)
+	const std::string& OgreDataManager::getDataPath(const std::string& _name) const
 	{
 		static std::string result;
 		result.clear();
@@ -153,12 +151,17 @@ namespace MyGUI
 			{
 				MYGUI_PLATFORM_LOG(Warning, "There are several files with name '" << _name << "'. '" << result << "' was used.");
 				MYGUI_PLATFORM_LOG(Warning, "Other candidates are:");
-				for (size_t index = 1; index < files.size(); index ++)
+				for (size_t index = 1; index < files.size(); index++)
 					MYGUI_PLATFORM_LOG(Warning, " - '" << files[index] << "'");
 			}
 		}
 
 		return result;
+	}
+
+	void OgreDataManager::addResourceLocation(const std::string& _name, bool _recursive)
+	{
+		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(_name, "FileSystem", mGroup, _recursive);
 	}
 
 } // namespace MyGUI

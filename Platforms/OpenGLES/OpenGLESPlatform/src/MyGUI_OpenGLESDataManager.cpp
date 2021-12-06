@@ -32,7 +32,7 @@ namespace MyGUI
 		mIsInitialise = false;
 	}
 
-	IDataStream* OpenGLESDataManager::getData(const std::string& _name)
+	IDataStream* OpenGLESDataManager::getData(const std::string& _name) const
 	{
 		std::string filepath = getDataPath(_name);
 		if (filepath.empty())
@@ -57,13 +57,13 @@ namespace MyGUI
 		delete _data;
 	}
 
-	bool OpenGLESDataManager::isDataExist(const std::string& _name)
+	bool OpenGLESDataManager::isDataExist(const std::string& _name) const
 	{
 		const VectorString& files = getDataListNames(_name);
 		return files.size() == 1;
 	}
 
-	const VectorString& OpenGLESDataManager::getDataListNames(const std::string& _pattern)
+	const VectorString& OpenGLESDataManager::getDataListNames(const std::string& _pattern) const
 	{
 		static VectorString result;
 		common::VectorWString wresult;
@@ -82,7 +82,7 @@ namespace MyGUI
 		return result;
 	}
 
-	const std::string& OpenGLESDataManager::getDataPath(const std::string& _name)
+	const std::string& OpenGLESDataManager::getDataPath(const std::string& _name) const
 	{
 		static std::string path;
 		VectorString result;
@@ -106,7 +106,7 @@ namespace MyGUI
 			{
 				MYGUI_PLATFORM_LOG(Warning, "There are several files with name '" << _name << "'. '" << path << "' was used.");
 				MYGUI_PLATFORM_LOG(Warning, "Other candidates are:");
-				for (size_t index = 1; index < result.size(); index ++)
+				for (size_t index = 1; index < result.size(); index++)
 					MYGUI_PLATFORM_LOG(Warning, " - '" << result[index] << "'");
 			}
 		}

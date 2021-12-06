@@ -517,8 +517,7 @@ namespace MyGUI
 
 				mLine ++;
 				mCol = 0; // потом проверить на многострочных тэгах
-				if (read.empty())
-					continue;
+
 				// текущая строка для разбора и то что еще прочитали
 				line += read;
 
@@ -588,11 +587,11 @@ namespace MyGUI
 				return true;
 			}
 
-			char simbol = _content[0];
+			char symbol = _content[0];
 			bool tagDeclaration = false;
 
 			// проверяем на коментарии
-			if (simbol == '!')
+			if (symbol == '!')
 			{
 				if (_currentNode != nullptr)
 				{
@@ -601,7 +600,7 @@ namespace MyGUI
 				return true;
 			}
 			// проверяем на информационный тег
-			else if (simbol == '?')
+			else if (symbol == '?')
 			{
 				tagDeclaration = true;
 				_content.erase(0, 1); // удаляем первый символ
@@ -610,16 +609,12 @@ namespace MyGUI
 			size_t start = 0;
 			size_t end = 0;
 			// проверяем на закрытие тега
-			if (simbol == '/')
+			if (symbol == '/')
 			{
 				if (_currentNode == nullptr)
 				{
-					// чета мы закрывам а ниче даже и не открыто
-					if (!mRoot)
-					{
-						mLastError = ErrorType::CloseNotOpenedElement;
-						return false;
-					}
+					mLastError = ErrorType::CloseNotOpenedElement;
+					return false;
 				}
 				// обрезаем имя тэга
 				start = _content.find_first_not_of(" \t", 1);
@@ -875,7 +870,7 @@ namespace MyGUI
 				size_t start = find(_line, '<');
 				if (start == _line.npos)
 					break;
-				size_t end = _line.npos;
+				size_t end;
 
 				// пытаемся вырезать многострочный коментарий
 				if ((start + 3 < _line.size()) && (_line[start + 1] == '!') && (_line[start + 2] == '-') && (_line[start + 3] == '-'))
@@ -921,7 +916,7 @@ namespace MyGUI
 			return true;
 		}
 
-		std::string Document::getLastError()
+		std::string Document::getLastError() const
 		{
 			const std::string& error = mLastError.print();
 			if (error.empty())

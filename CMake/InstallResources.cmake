@@ -7,19 +7,19 @@ function(install_file FILENAME)
 	if (WIN32)
 		install(FILES
 			${MYGUI_BINARY_DIR}/bin/debug/${FILENAME}
-			DESTINATION "bin${MYGUI_DEBUG_PATH}" CONFIGURATIONS Debug
+			DESTINATION "${CMAKE_INSTALL_BINDIR}${MYGUI_DEBUG_PATH}" CONFIGURATIONS Debug
 		)
 		install(FILES
 			${MYGUI_BINARY_DIR}/bin/release/${FILENAME}
-			DESTINATION "bin${MYGUI_RELEASE_PATH}" CONFIGURATIONS Release None ""
+			DESTINATION "${CMAKE_INSTALL_BINDIR}${MYGUI_RELEASE_PATH}" CONFIGURATIONS Release None ""
 		)
 		install(FILES
 			${MYGUI_BINARY_DIR}/bin/release/${FILENAME}
-			DESTINATION "bin${MYGUI_RELWDBG_PATH}" CONFIGURATIONS RelWithDebInfo
+			DESTINATION "${CMAKE_INSTALL_BINDIR}${MYGUI_RELWDBG_PATH}" CONFIGURATIONS RelWithDebInfo
 		)
 		install(FILES
 			${MYGUI_BINARY_DIR}/bin/release/${FILENAME}
-			DESTINATION "bin${MYGUI_MINSIZE_PATH}" CONFIGURATIONS MinSizeRel
+			DESTINATION "${CMAKE_INSTALL_BINDIR}${MYGUI_MINSIZE_PATH}" CONFIGURATIONS MinSizeRel
 		)
 	else ()
 		install(FILES
@@ -31,12 +31,16 @@ endfunction(install_file)
 
 
 # install resource files
-if (MYGUI_INSTALL_SAMPLES OR MYGUI_INSTALL_TOOLS)
+if (MYGUI_INSTALL_DEMOS OR MYGUI_INSTALL_TOOLS)
 	if (MYGUI_RENDERSYSTEM EQUAL 3)
 		# copy plugins.cfg
 		if (DEFINED OGRE_CONFIG_DIR)
 			if (WIN32)
-				configure_file(${OGRE_CONFIG_DIR}/plugins_d.cfg ${MYGUI_BINARY_DIR}/bin/debug/plugins.cfg)
+				if(EXISTS ${OGRE_CONFIG_DIR}/plugins_d.cfg)
+					configure_file(${OGRE_CONFIG_DIR}/plugins_d.cfg ${MYGUI_BINARY_DIR}/bin/debug/plugins.cfg)
+				else()
+					file(COPY ${OGRE_CONFIG_DIR}/plugins.cfg DESTINATION ${MYGUI_BINARY_DIR}/bin/debug/)
+				endif ()
 				file(COPY ${OGRE_CONFIG_DIR}/plugins.cfg DESTINATION ${MYGUI_BINARY_DIR}/bin/release/)
 				file(COPY ${OGRE_CONFIG_DIR}/plugins.cfg DESTINATION ${MYGUI_BINARY_DIR}/bin/relwithdebinfo/)
 				file(COPY ${OGRE_CONFIG_DIR}/plugins.cfg DESTINATION ${MYGUI_BINARY_DIR}/bin/minsizerel/)
@@ -58,10 +62,6 @@ if (MYGUI_INSTALL_SAMPLES OR MYGUI_INSTALL_TOOLS)
 		configure_file(${MYGUI_TEMPLATES_DIR}/resources.xml.in ${MYGUI_BINARY_DIR}/bin/debug/resources.xml)
 		configure_file(${MYGUI_TEMPLATES_DIR}/resources.xml.in ${MYGUI_BINARY_DIR}/bin/release/resources.xml)
 	else() # other OS only need one cfg file
-		string(TOLOWER "${CMAKE_BUILD_TYPE}" MYGUI_BUILD_TYPE)
-		if (MYGUI_BUILD_TYPE STREQUAL "debug" AND NOT APPLE)
-			set(MYGUI_CFG_SUFFIX "_d")
-		endif ()
 		# create resources.xml
 		configure_file(${MYGUI_TEMPLATES_DIR}/resources.xml.in ${MYGUI_BINARY_DIR}/bin/resources.xml)
 	endif ()
@@ -73,6 +73,9 @@ if (MYGUI_INSTALL_SAMPLES OR MYGUI_INSTALL_TOOLS)
 else ()
 
 	set(MYGUI_MEDIA_DIR "${MYGUI_SOURCE_DIR}/Media")
+	if (EMSCRIPTEN)
+		set(MYGUI_MEDIA_DIR "/Media")
+	endif ()
 
 	if (WIN32)
 		# create resources.xml

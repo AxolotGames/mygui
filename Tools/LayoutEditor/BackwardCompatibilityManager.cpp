@@ -8,13 +8,12 @@
 #include "BackwardCompatibilityManager.h"
 #include "SettingsManager.h"
 
-template <> tools::BackwardCompatibilityManager* MyGUI::Singleton<tools::BackwardCompatibilityManager>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::BackwardCompatibilityManager>::mClassTypeName = "BackwardCompatibilityManager";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(BackwardCompatibilityManager);
 
-	BackwardCompatibilityManager::BackwardCompatibilityManager()
+	BackwardCompatibilityManager::BackwardCompatibilityManager() :
+		mSingletonHolder(this)
 	{
 		mVersions.push_back("3.2.0");
 		mVersions.push_back("3.1.0");

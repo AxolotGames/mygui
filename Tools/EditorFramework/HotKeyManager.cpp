@@ -8,13 +8,12 @@
 #include "HotKeyManager.h"
 #include "CommandManager.h"
 
-template <> tools::HotKeyManager* MyGUI::Singleton<tools::HotKeyManager>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::HotKeyManager>::mClassTypeName = "HotKeyManager";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(HotKeyManager);
 
-	HotKeyManager::HotKeyManager()
+	HotKeyManager::HotKeyManager() :
+		mSingletonHolder(this)
 	{
 		#define BIND_KEY(name) mKeyNames[#name] = MyGUI::KeyCode::name
 

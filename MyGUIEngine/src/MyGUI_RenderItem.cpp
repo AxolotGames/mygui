@@ -167,7 +167,7 @@ namespace MyGUI
 		if (mTexture == _value)
 			return;
 
-		//MYGUI_DEBUG_ASSERT(mVertexBuffer->getVertexCount() == 0, "change texture only empty buffer");
+		MYGUI_DEBUG_ASSERT(mVertexBuffer->getVertexCount() == 0, "change texture only empty buffer");
 		MYGUI_DEBUG_ASSERT(mNeedVertexCount == 0, "change texture only empty buffer");
 
 		mTexture = _value;
@@ -177,7 +177,7 @@ namespace MyGUI
 #endif
 	}
 
-	ITexture* RenderItem::getTexture()
+	ITexture* RenderItem::getTexture() const
 	{
 		return mTexture;
 	}

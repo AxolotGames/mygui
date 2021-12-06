@@ -2,28 +2,24 @@ set (PROJECTNAME MyGUIEngine)
 
 project( ${PROJECTNAME} )
 
-include(PrecompiledHeader)
-
 include(${PROJECTNAME}.list)
 
 include_directories(include)
 if (MYGUI_USE_FREETYPE)
-	include_directories(
-		${FREETYPE_INCLUDE_DIRS} ${FREETYPE_FT2BUILD_INCLUDE_DIR}
+	include_directories(SYSTEM
+		${FREETYPE_INCLUDE_DIRS}
 	)
 	add_definitions(-DMYGUI_USE_FREETYPE)
+
+	if (MYGUI_MSDF_FONTS)
+		add_definitions(-DMYGUI_MSDF_FONTS)
+	endif ()
 endif ()
 if (MYGUI_DISABLE_PLUGINS)
 	add_definitions(-DMYGUI_DISABLE_PLUGINS)
 endif ()
 
 add_definitions(-DMYGUI_BUILD)
-
-if (MSVC)
-	# disable: "no suitable definition provided for explicit template instantiation request"
-	# Occurs for no justifiable reason on all #includes of Singleton
-	add_definitions(/wd4661)
-endif ()
 
 # setup MyGUIEngine target
 add_library(${PROJECTNAME} ${MYGUI_LIB_TYPE} ${HEADER_FILES} ${SOURCE_FILES})
@@ -41,31 +37,28 @@ if (UNIX)
 endif()
 
 if (MYGUI_USE_FREETYPE)
-	target_link_libraries(${PROJECTNAME}
-		${FREETYPE_LIBRARIES}
-	)
+	if (MYGUI_MSDF_FONTS)
+		add_subdirectory(src/msdfgen)
+		target_link_libraries(${PROJECTNAME} msdfgen)
+	endif ()
+
+	target_link_libraries(${PROJECTNAME} ${FREETYPE_LIBRARIES})
+	if (ZLIB_FOUND) # hacky way to check if freetype was built with zlib
+		target_link_libraries(${PROJECTNAME} ${ZLIB_LIBRARIES})
+	endif()
 endif()
 
 # platform specific dependencies
 if (APPLE)
 	include_directories(/usr/local/include /usr/include)
-	target_link_libraries(${PROJECTNAME} ${Carbon_LIBRARY})
 endif ()
 
-# specify a precompiled header to use
-use_precompiled_header(${PROJECTNAME}
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/MyGUI_Precompiled.h"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/MyGUI_Precompiled.cpp"
-)
+if (${CMAKE_VERSION} VERSION_EQUAL "3.16" OR ${CMAKE_VERSION} VERSION_GREATER "3.16")
+	target_precompile_headers(${PROJECTNAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/MyGUI_Precompiled.h")
+endif ()
 
 set(${PROJECTNAME}_HEADERS ${HEADER_FILES}) # for Mac OS X
 mygui_config_lib(${PROJECTNAME})
-
-# link Carbon on Mac OS X
-if (APPLE)
-	find_library(CARBON_LIBRARY Carbon)
-	target_link_libraries(${PROJECTNAME} ${CARBON_LIBRARY})
-endif ()
 
 # install MyGUIEngine headers
 install(FILES ${HEADER_FILES}

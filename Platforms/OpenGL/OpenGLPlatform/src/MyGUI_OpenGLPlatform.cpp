@@ -47,15 +47,13 @@ namespace MyGUI
 		mDataManager->shutdown();
 	}
 
-	OpenGLRenderManager* OpenGLPlatform::getRenderManagerPtr()
+	OpenGLRenderManager* OpenGLPlatform::getRenderManagerPtr() const
 	{
-		assert(mIsInitialise);
 		return mRenderManager;
 	}
 
-	OpenGLDataManager* OpenGLPlatform::getDataManagerPtr()
+	OpenGLDataManager* OpenGLPlatform::getDataManagerPtr() const
 	{
-		assert(mIsInitialise);
 		return mDataManager;
 	}
 

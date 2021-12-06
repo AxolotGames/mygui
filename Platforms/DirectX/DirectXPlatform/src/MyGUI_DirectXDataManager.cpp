@@ -36,7 +36,7 @@ namespace MyGUI
 		mIsInitialise = false;
 	}
 
-	IDataStream* DirectXDataManager::getData(const std::string& _name)
+	IDataStream* DirectXDataManager::getData(const std::string& _name) const
 	{
 		std::string filepath = getDataPath(_name);
 		if (filepath.empty())
@@ -61,13 +61,13 @@ namespace MyGUI
 		delete _data;
 	}
 
-	bool DirectXDataManager::isDataExist(const std::string& _name)
+	bool DirectXDataManager::isDataExist(const std::string& _name) const
 	{
 		const VectorString& files = getDataListNames(_name);
 		return !files.empty();
 	}
 
-	const VectorString& DirectXDataManager::getDataListNames(const std::string& _pattern)
+	const VectorString& DirectXDataManager::getDataListNames(const std::string& _pattern) const
 	{
 		static VectorString result;
 		common::VectorWString wresult;
@@ -86,7 +86,7 @@ namespace MyGUI
 		return result;
 	}
 
-	const std::string& DirectXDataManager::getDataPath(const std::string& _name)
+	const std::string& DirectXDataManager::getDataPath(const std::string& _name) const
 	{
 		static std::string path;
 		VectorString result;
@@ -110,7 +110,7 @@ namespace MyGUI
 			{
 				MYGUI_PLATFORM_LOG(Warning, "There are several files with name '" << _name << "'. '" << path << "' was used.");
 				MYGUI_PLATFORM_LOG(Warning, "Other candidates are:");
-				for (size_t index = 1; index < result.size(); index ++)
+				for (size_t index = 1; index < result.size(); index++)
 					MYGUI_PLATFORM_LOG(Warning, " - '" << result[index] << "'");
 			}
 		}

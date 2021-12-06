@@ -9,13 +9,6 @@
 
 #include "MyGUI_Platform.h"
 
-#if MYGUI_COMPILER == MYGUI_COMPILER_MSVC
-#	ifdef MYGUI_CHECK_MEMORY_LEAKS
-#		define _CRTDBG_MAP_ALLOC
-#		include <crtdbg.h>
-#	endif
-#endif
-
 #define MYGUI_DEFINE_VERSION(major, minor, patch) ((major << 16) | (minor << 8) | patch)
 
 namespace MyGUI
@@ -66,7 +59,7 @@ namespace MyGUI
 	// Define version
 #define MYGUI_VERSION_MAJOR 3
 #define MYGUI_VERSION_MINOR 4
-#define MYGUI_VERSION_PATCH 0
+#define MYGUI_VERSION_PATCH 2
 
 #define MYGUI_VERSION    MYGUI_DEFINE_VERSION(MYGUI_VERSION_MAJOR, MYGUI_VERSION_MINOR, MYGUI_VERSION_PATCH)
 

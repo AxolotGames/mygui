@@ -17,9 +17,9 @@ namespace MyGUI
 
 	class WindowsClipboardHandler;
 
-	class MYGUI_EXPORT ClipboardManager :
-		public Singleton<ClipboardManager>
+	class MYGUI_EXPORT ClipboardManager
 	{
+		MYGUI_SINGLETON_DECLARATION(ClipboardManager);
 	public:
 		ClipboardManager();
 
@@ -40,7 +40,7 @@ namespace MyGUI
 		/** Get specific type data
 			@param _type of data to get (for example "Text")
 		*/
-		std::string getClipboardData(const std::string& _type);
+		std::string getClipboardData(const std::string& _type) const;
 
 		/*events:*/
 		/** Event : Clipboard content was changed via setClipboardData.\n

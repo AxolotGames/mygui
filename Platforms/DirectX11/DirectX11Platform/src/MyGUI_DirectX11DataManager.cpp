@@ -37,7 +37,7 @@ namespace MyGUI
 		mIsInitialise = false;
 	}
 
-	IDataStream* DirectX11DataManager::getData(const std::string& _name)
+	IDataStream* DirectX11DataManager::getData(const std::string& _name) const
 	{
 		MyGUI::UString filepath = getDataPath(_name);
 		if (filepath.empty())
@@ -76,7 +76,7 @@ namespace MyGUI
 		return true;
 	}
 
-	const VectorString& DirectX11DataManager::getDataListNames(const std::string& _pattern)
+	const VectorString& DirectX11DataManager::getDataListNames(const std::string& _pattern) const
 	{
 		static VectorString result;
 		common::VectorWString wresult;
@@ -95,7 +95,7 @@ namespace MyGUI
 		return result;
 	}
 
-	const std::string& DirectX11DataManager::getDataPath(const std::string& _name)
+	const std::string& DirectX11DataManager::getDataPath(const std::string& _name) const
 	{
 		static std::string path;
 		bool callbackSuccess = false;

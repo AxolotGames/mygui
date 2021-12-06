@@ -20,13 +20,13 @@ namespace MyGUI
 		struct End { };
 
 	public:
-		std::string operator << (const End& _endl)
+		std::string operator << (const End& /*_endl*/)
 		{
 			return mStream.str();
 		}
 
 		template <typename T>
-		LogStream& operator << (T _value)
+		LogStream& operator << (const T& _value)
 		{
 			mStream << _value;
 			return *this;

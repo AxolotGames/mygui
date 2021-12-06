@@ -19,7 +19,7 @@ namespace MyGUI
 namespace delegates
 {
 	// base class for unsubscribing from multi delegates
-	class IDelegateUnlink
+	class MYGUI_EXPORT IDelegateUnlink
 	{
 	public:
 		virtual ~IDelegateUnlink() = default;
@@ -51,7 +51,7 @@ namespace delegates
 		}
 
 		// non-static class method
-		DelegateFunction(Function _function, Any _functionPointer, IDelegateUnlink* _object) :
+		DelegateFunction(Function _function, Any _functionPointer, const IDelegateUnlink* _object) :
 			mFunction(_function),
 			mUnlink(_object),
 			mObject(_object),
@@ -60,7 +60,7 @@ namespace delegates
 		}
 
 		// non-static class method
-		DelegateFunction(Function _function, Any _functionPointer, void* _object) :
+		DelegateFunction(Function _function, Any _functionPointer, const void* _object) :
 			mFunction(_function),
 			mUnlink(nullptr),
 			mObject(_object),
@@ -87,8 +87,8 @@ namespace delegates
 	private:
 		Function mFunction;
 
-		IDelegateUnlink* mUnlink = nullptr;
-		void* mObject = nullptr;
+        const IDelegateUnlink* mUnlink = nullptr;
+		const void* mObject = nullptr;
 		Any mFunctionPointer;
 	};
 
@@ -109,6 +109,23 @@ inline delegates::DelegateFunction<Args...>* newDelegate(T* _object, void (T::*_
 		[=](Args&&... args) { return (_object->*_method)(std::forward<decltype(args)>(args)...); },
 		_method,
 		_object);
+}
+template <typename T, typename ...Args>
+inline delegates::DelegateFunction<Args...>* newDelegate(const T* _object, void (T::*_method)(Args... args) const)
+{
+    return new delegates::DelegateFunction<Args...>(
+        [=](Args&&... args) { return (_object->*_method)(std::forward<decltype(args)>(args)...); },
+        _method,
+        _object);
+}
+
+// Creates delegate from std::function
+// Require some user-defined delegateId, that should be used if operator-= is called to remove delegate.
+// delegateId need to be unique within single delegate.
+template <typename ...Args>
+inline delegates::DelegateFunction<Args...>* newDelegate(const std::function<void(Args...)>& _function, int64_t delegateId)
+{
+	return new delegates::DelegateFunction<Args...>(_function, delegateId);
 }
 
 namespace delegates
@@ -168,7 +185,7 @@ namespace delegates
 			return *this;
 		}
 
-		void operator()(Args... args)
+		void operator()(Args... args) const
 		{
 			if (mDelegate == nullptr) return;
 			mDelegate->invoke(args...);
@@ -250,7 +267,7 @@ namespace delegates
 			delete _delegate;
 		}
 
-		void operator()(Args... args)
+		void operator()(Args... args) const
 		{
 			auto iter = mListDelegates.begin();
 			while (iter != mListDelegates.end())
@@ -327,7 +344,7 @@ namespace delegates
 		}
 
 	private:
-		ListDelegate mListDelegates;
+		mutable ListDelegate mListDelegates;
 	};
 
 //#ifndef MYGUI_DONT_USE_OBSOLETE // TODO

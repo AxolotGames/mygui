@@ -6,6 +6,10 @@
 
 #include <MyGUI.h>
 #include "SceneObject.h"
+#include "BaseManager.h"
+#ifdef MYGUI_OGRE_PLATFORM
+#include <Ogre.h>
+#endif
 
 #ifdef MYGUI_OGRE_PLATFORM
 
@@ -258,17 +262,17 @@ namespace demo
 		_position -= _corner0; // расстояние от начала координат (от точки 0)
 
 		Ogre::Vector3 div = (dirX.crossProduct(dirY));
-		if (div.x != 0.0)
+		if (div.x != 0.0f)
 		{
 			result = Ogre::Vector2((_position.crossProduct(dirY)).x, (dirX.crossProduct(_position)).x);
 			result /= div.x;
 		}
-		else if (div.y != 0.0)
+		else if (div.y != 0.0f)
 		{
 			result = Ogre::Vector2((_position.crossProduct(dirY)).y, (dirX.crossProduct(_position)).y);
 			result /= div.y;
 		}
-		else if (div.z != 0.0)
+		else if (div.z != 0.0f)
 		{
 			result = Ogre::Vector2((_position.crossProduct(dirY)).z, (dirX.crossProduct(_position)).z);
 			result /= div.z;
@@ -329,8 +333,8 @@ namespace demo
 			mIndexCount = 0;
 			GetMeshInformation(entity->getMesh(), mVertexCount, mVertices, mIndexCount, mIndices, mTextureCoords, Ogre::Vector3::ZERO, Ogre::Quaternion::IDENTITY, Ogre::Vector3::UNIT_SCALE, mMaterialName);
 
-			Ogre::MaterialPtr material = (Ogre::MaterialPtr)Ogre::MaterialManager::getSingleton().getByName(mMaterialName);
-			if (!material.isNull())
+			Ogre::MaterialPtr material = (Ogre::MaterialPtr)Ogre::MaterialManager::getSingleton().getByName(mMaterialName, base::BaseManager::MyGuiResourceGroup);
+			if (material)
 			{
 				mTextureUnit = material->getTechnique(0)->getPass(0)->getTextureUnitState("gui");
 				if (mTextureUnit)
@@ -369,7 +373,7 @@ namespace demo
 		Ogre::RaySceneQueryResult& result = mRaySceneQuery->execute();
 		for (Ogre::RaySceneQueryResult::iterator iter = result.begin(); iter != result.end(); ++iter)
 		{
-			if (iter->movable != 0)
+			if (iter->movable != nullptr)
 			{
 				if (iter->movable->getName() == mEntityName)
 				{

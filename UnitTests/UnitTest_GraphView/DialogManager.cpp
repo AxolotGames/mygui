@@ -6,11 +6,10 @@
 #include "Precompiled.h"
 #include "DialogManager.h"
 
-template <> tools::DialogManager* MyGUI::Singleton<tools::DialogManager>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::DialogManager>::mClassTypeName = "DialogManager";
-
 namespace tools
 {
+
+	MYGUI_SINGLETON_DEFINITION(DialogManager);
 
 	void DialogManager::initialise()
 	{

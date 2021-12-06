@@ -18,9 +18,9 @@ namespace MyGUI
 {
 
 	class MYGUI_EXPORT LanguageManager :
-		public Singleton<LanguageManager>,
 		public MemberObsolete<LanguageManager>
 	{
+		MYGUI_SINGLETON_DECLARATION(LanguageManager);
 	public:
 		LanguageManager();
 
@@ -39,7 +39,7 @@ namespace MyGUI
 		UString replaceTags(const UString& _line);
 
 		/** Get tag value */
-		UString getTag(const UString& _tag);
+		UString getTag(const UString& _tag) const;
 
 		/** Add user tag */
 		void addUserTag(const UString& _tag, const UString& _replace);

@@ -79,55 +79,43 @@ namespace MyGUI
 
 	void RotatingSkin::_setAlign(const IntSize& _oldsize)
 	{
-		// необходимо разобраться
-		bool need_update = true;
-
 		// первоначальное выравнивание
 		if (mAlign.isHStretch())
 		{
 			// растягиваем
 			mCoord.width = mCoord.width + (mCroppedParent->getWidth() - _oldsize.width);
-			need_update = true;
 			mIsMargin = true; // при изменении размеров все пересчитывать
 		}
 		else if (mAlign.isRight())
 		{
 			// двигаем по правому краю
 			mCoord.left = mCoord.left + (mCroppedParent->getWidth() - _oldsize.width);
-			need_update = true;
 		}
 		else if (mAlign.isHCenter())
 		{
 			// выравнивание по горизонтали без растяжения
 			mCoord.left = (mCroppedParent->getWidth() - mCoord.width) / 2;
-			need_update = true;
 		}
 
 		if (mAlign.isVStretch())
 		{
 			// растягиваем
 			mCoord.height = mCoord.height + (mCroppedParent->getHeight() - _oldsize.height);
-			need_update = true;
 			mIsMargin = true; // при изменении размеров все пересчитывать
 		}
 		else if (mAlign.isBottom())
 		{
 			// двигаем по нижнему краю
 			mCoord.top = mCoord.top + (mCroppedParent->getHeight() - _oldsize.height);
-			need_update = true;
 		}
 		else if (mAlign.isVCenter())
 		{
 			// выравнивание по вертикали без растяжения
 			mCoord.top = (mCroppedParent->getHeight() - mCoord.height) / 2;
-			need_update = true;
 		}
 
-		if (need_update)
-		{
-			mCurrentCoord = mCoord;
-			_updateView();
-		}
+        mCurrentCoord = mCoord;
+        _updateView();
 	}
 
 	void RotatingSkin::_updateView()
@@ -317,7 +305,7 @@ namespace MyGUI
 				else
 				{
 					// all unused verticies is equal to last used
-					mResultVerticiesUV[i] = mResultVerticiesUV[size - 1];
+					mResultVerticiesUV[i] = mResultVerticiesUV[size == 0 ? 0 : (size - 1)];
 				}
 			}
 		}
@@ -338,7 +326,7 @@ namespace MyGUI
 			else
 			{
 				// all unused verticies is equal to last used
-				mResultVerticiesPos[i] = mResultVerticiesPos[size - 1];
+				mResultVerticiesPos[i] = mResultVerticiesPos[size == 0 ? 0 : (size - 1)];
 			}
 		}
 	}

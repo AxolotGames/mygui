@@ -13,7 +13,7 @@
 #include "FileSystemInfo/FileSystemInfo.h"
 
 // рутовая папка всей медиа
-MyGUI::UString gMediaBase;
+static MyGUI::UString gMediaBase;
 typedef std::pair<std::wstring, common::FileInfo> PairFileInfo;
 
 class SampleLayout :
@@ -29,7 +29,7 @@ private:
 	MyGUI::TreeControl* mpResourcesTree;
 };
 
-SampleLayout* mSampleLayout;
+static SampleLayout* mSampleLayout;
 
 SampleLayout::SampleLayout() : BaseLayout("SampleLayout.layout")
 {
@@ -150,12 +150,12 @@ void SampleLayout::notifyTreeNodePrepare(MyGUI::TreeControl* pTreeControl, MyGUI
 			else
 			{
 				MyGUI::UString strName((*item).name);
-				MyGUI::UString strExtension;
+				std::string strExtension;
 				size_t nPosition = strName.rfind(".");
 				if (nPosition != MyGUI::UString::npos)
 				{
 					strExtension = strName.substr(nPosition + 1);
-					std::transform(strExtension.begin(), strExtension.end(), strExtension.begin(), tolower);
+					std::transform(strExtension.begin(), strExtension.end(), strExtension.begin(), [](unsigned char c) { return tolower(c); });
 				}
 
 				MyGUI::UString strImage;

@@ -10,7 +10,7 @@
 namespace demo
 {
 
-	MyGUI::VectorWidgetPtr all_widgets;
+	static MyGUI::VectorWidgetPtr all_widgets;
 
 	void test_widgets()
 	{
@@ -44,7 +44,7 @@ namespace demo
 
 	MyGUI::Widget* get_random(MyGUI::VectorWidgetPtr& _mass)
 	{
-		if (_mass.empty()) return 0;
+		if (_mass.empty()) return nullptr;
 		return _mass.at(random((int)_mass.size()));
 	}
 
@@ -82,7 +82,7 @@ namespace demo
 		{
 			step_detach_layer();
 			--count;
-		};
+		}
 	}
 
 	void step_attach_layer()
@@ -105,7 +105,7 @@ namespace demo
 		{
 			step_attach_layer();
 			--count;
-		};
+		}
 	}
 
 	void step_detach_widget()
@@ -123,7 +123,7 @@ namespace demo
 		{
 			step_detach_widget();
 			--count;
-		};
+		}
 	}
 
 	void step_attach_widget()
@@ -151,7 +151,7 @@ namespace demo
 		{
 			step_attach_widget();
 			--count;
-		};
+		}
 	}
 
 	void step_destroy_widget()
@@ -170,7 +170,7 @@ namespace demo
 		{
 			step_destroy_widget();
 			--count;
-		};
+		}
 	}
 
 	void step_create_widget()
@@ -214,7 +214,7 @@ namespace demo
 		{
 			step_create_widget();
 			--count;
-		};
+		}
 	}
 
 	void step_change_skin()
@@ -232,7 +232,7 @@ namespace demo
 		{
 			step_change_skin();
 			--count;
-		};
+		}
 	}
 
 	void step_change_type()
@@ -250,20 +250,20 @@ namespace demo
 		{
 			step_change_type();
 			--count;
-		};
+		}
 	}
 
 	class Unlink :
 		public MyGUI::IUnlinkWidget
 	{
 	public:
-		void _unlinkWidget(MyGUI::Widget* _widget)
+		void _unlinkWidget(MyGUI::Widget* _widget) override
 		{
 			erase_widget(all_widgets, _widget);
 		}
 	};
 
-	Unlink unlink_holder;
+	static Unlink unlink_holder;
 
 	void DemoKeeper::createScene()
 	{

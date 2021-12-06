@@ -7,11 +7,9 @@
 #include "Precompiled.h"
 #include "StateManager.h"
 
-template <> tools::StateManager* MyGUI::Singleton<tools::StateManager>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::StateManager>::mClassTypeName = "StateManager";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(StateManager);
 
 	void StateManager::initialise()
 	{

@@ -40,7 +40,7 @@ namespace MyGUI
 		{
 		}
 
-		void set(size_t _position, UString::const_iterator& _space_point, size_t _count, float _width)
+		void set(size_t _position, const UString::utf32string::const_iterator& _space_point, size_t _count, float _width)
 		{
 			position = _position;
 			space_point = _space_point;
@@ -77,7 +77,7 @@ namespace MyGUI
 			return position;
 		}
 
-		UString::const_iterator getTextIter() const
+		UString::utf32string::const_iterator getTextIter() const
 		{
 			MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid");
 			return space_point;
@@ -85,7 +85,7 @@ namespace MyGUI
 
 	private:
 		size_t position;
-		UString::const_iterator space_point;
+		UString::utf32string::const_iterator space_point;
 		size_t count;
 		float width;
 		bool rollback;
@@ -97,7 +97,7 @@ namespace MyGUI
 	{
 	}
 
-	void TextView::update(const UString& _text, IFont* _font, int _height, Align _align, VertexColourType _format, int _maxWidth)
+	void TextView::update(const UString::utf32string& _text, IFont* _font, int _height, Align _align, VertexColourType _format, int _maxWidth)
 	{
 		mFontHeight = _height;
 
@@ -121,8 +121,8 @@ namespace MyGUI
 		LineInfo line_info;
 		int font_height = _font->getDefaultHeight();
 
-		UString::const_iterator end = _text.end();
-		UString::const_iterator index = _text.begin();
+		UString::utf32string::const_iterator end = _text.end();
+		UString::utf32string::const_iterator index = _text.begin();
 
 		/*if (index == end)
 			return;*/
@@ -140,7 +140,7 @@ namespace MyGUI
 			{
 				if (character == FontCodeType::CR)
 				{
-					UString::const_iterator peeki = index;
+					UString::utf32string::const_iterator peeki = index;
 					++peeki;
 					if ((peeki != end) && (*peeki == FontCodeType::LF))
 						index = peeki; // skip both as one newline
@@ -197,20 +197,20 @@ namespace MyGUI
 					// если нужно, то меняем красный и синий компоненты
 					texture_utility::convertColour(colour, _format);
 
-					line_info.simbols.push_back( CharInfo(colour) );
+					line_info.symbols.push_back( CharInfo(colour) );
 
 					continue;
 				}
 			}
 
-			if (character == FontCodeType::Space || character == FontCodeType::Tab)
-			{
-				roll_back.set(line_info.simbols.size(), index, count, width);
-			}
-			else if (character == FontCodeType::ZWSP)
-			{
-				roll_back.set(line_info.simbols.size(), index, count, width);
+			const GlyphInfo* info = _font->getGlyphInfo(character);
+
+			if (info == nullptr)
 				continue;
+
+			if (FontCodeType::Space == character || FontCodeType::Tab == character)
+			{
+				roll_back.set(line_info.symbols.size(), index, count, width);
 			}
 
 			GlyphInfo* info = _font->getGlyphInfo(character);
@@ -246,7 +246,7 @@ namespace MyGUI
 				width = roll_back.getWidth();
 				count = roll_back.getCount();
 				index = roll_back.getTextIter();
-				line_info.simbols.erase(line_info.simbols.begin() + roll_back.getPosition(), line_info.simbols.end());
+				line_info.symbols.erase(line_info.symbols.begin() + roll_back.getPosition(), line_info.symbols.end());
 
 				// запоминаем место отката, как полную строку
 				line_info.width = (int)std::ceil(width);
@@ -267,7 +267,7 @@ namespace MyGUI
 				continue;
 			}
 
-			line_info.simbols.push_back(CharInfo(info->uvRect, char_width, char_height, char_advance, char_bearingX, char_bearingY));
+			line_info.symbols.push_back(CharInfo(info->uvRect, char_width, char_height, char_advance, char_bearingX, char_bearingY));
 			width += char_fullAdvance;
 			count ++;
 		}
@@ -292,31 +292,33 @@ namespace MyGUI
 		mViewSize = result;
 	}
 
-	size_t TextView::getCursorPosition(const IntPoint& _value)
+	size_t TextView::getCursorPosition(const IntPoint& _value) const
 	{
-		const int height = mFontHeight;
 		size_t result = 0;
 		int top = 0;
 
 		for (VectorLineInfo::const_iterator line = mLineInfo.begin(); line != mLineInfo.end(); ++line)
 		{
-			// это последняя строка
-			bool lastline = !(line + 1 != mLineInfo.end());
+			bool lastline = line + 1 == mLineInfo.end();
 
 			// наша строчка
-			if (top + height > _value.top || lastline)
+			if (top + mFontHeight <= _value.top && !lastline)
+            {
+				top += mFontHeight;
+                result += line->count + 1;
+            }
+			else
 			{
-				top += height;
 				float left = (float)line->offset;
 				int count = 0;
 
 				// ищем символ
-				for (VectorCharInfo::const_iterator sim = line->simbols.begin(); sim != line->simbols.end(); ++sim)
+				for (const auto& sim : line->symbols)
 				{
-					if (sim->isColour())
+					if (sim.isColour())
 						continue;
 
-					float fullAdvance = sim->getAdvance() + sim->getBearingX();
+					float fullAdvance = sim.getAdvance() + sim.getBearingX();
 					if (left + fullAdvance / 2.0f > _value.left)
 					{
 						break;
@@ -328,18 +330,12 @@ namespace MyGUI
 				result += count;
 				break;
 			}
-
-			if (!lastline)
-			{
-				top += height;
-				result += line->count + 1;
-			}
 		}
 
 		return result;
 	}
 
-	IntPoint TextView::getCursorPoint(size_t _position)
+	IntPoint TextView::getCursorPoint(size_t _position) const
 	{
 		setMin(_position, mLength);
 
@@ -351,7 +347,7 @@ namespace MyGUI
 			left = (float)line->offset;
 			if (position + line->count >= _position)
 			{
-				for (VectorCharInfo::const_iterator sim = line->simbols.begin(); sim != line->simbols.end(); ++sim)
+				for (VectorCharInfo::const_iterator sim = line->symbols.begin(); sim != line->symbols.end(); ++sim)
 				{
 					if (sim->isColour())
 						continue;

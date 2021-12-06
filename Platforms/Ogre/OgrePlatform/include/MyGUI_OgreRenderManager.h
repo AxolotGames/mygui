@@ -12,12 +12,18 @@
 #include "MyGUI_IVertexBuffer.h"
 #include "MyGUI_RenderManager.h"
 
-#include <Ogre.h>
-
-#include "MyGUI_LastHeader.h"
+#include <OgrePrerequisites.h>
+#include <OgreRenderQueueListener.h>
+#include <OgreRenderSystem.h>
 
 namespace MyGUI
 {
+
+	struct OgreShaderInfo
+	{
+		Ogre::HighLevelGpuProgramPtr vertexProgram;
+		Ogre::HighLevelGpuProgramPtr fragmentProgram;
+	};
 
 	class OgreRenderManager :
 		public RenderManager,
@@ -35,39 +41,39 @@ namespace MyGUI
 		static OgreRenderManager* getInstancePtr();
 
 		/** @see RenderManager::getViewSize */
-		virtual const IntSize& getViewSize() const;
+		const IntSize& getViewSize() const override;
 
 		/** @see RenderManager::getVertexFormat */
-		virtual VertexColourType getVertexFormat();
+		VertexColourType getVertexFormat() const override;
 
 		/** @see RenderManager::createVertexBuffer */
-		virtual IVertexBuffer* createVertexBuffer();
+		IVertexBuffer* createVertexBuffer() override;
 		/** @see RenderManager::destroyVertexBuffer */
-		virtual void destroyVertexBuffer(IVertexBuffer* _buffer);
+		void destroyVertexBuffer(IVertexBuffer* _buffer) override;
 
 		/** @see RenderManager::createTexture */
-		virtual ITexture* createTexture(const std::string& _name);
+		ITexture* createTexture(const std::string& _name) override;
 		/** @see RenderManager::destroyTexture */
-		virtual void destroyTexture(ITexture* _texture);
+		void destroyTexture(ITexture* _texture) override;
 		/** @see RenderManager::getTexture */
-		virtual ITexture* getTexture(const std::string& _name);
+		ITexture* getTexture(const std::string& _name) override;
 
 		/** @see RenderManager::isFormatSupported */
-		virtual bool isFormatSupported(PixelFormat _format, TextureUsage _usage);
+		bool isFormatSupported(PixelFormat _format, TextureUsage _usage) override;
 
 		/** @see IRenderTarget::begin */
-		virtual void begin();
+		void begin() override;
 		/** @see IRenderTarget::end */
-		virtual void end();
+		void end() override;
 
 		/** @see IRenderTarget::doRender */
-		virtual void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count);
+		void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count) override;
 
 		/** @see IRenderTarget::getInfo */
-		virtual const RenderTargetInfo& getInfo();
+		const RenderTargetInfo& getInfo() const override;
 
 		void setRenderSystem(Ogre::RenderSystem* _render);
-		Ogre::RenderSystem* getRenderSystem();
+		Ogre::RenderSystem* getRenderSystem() const;
 
 		void setRenderWindow(Ogre::RenderWindow* _window);
 
@@ -75,14 +81,14 @@ namespace MyGUI
 		void setSceneManager(Ogre::SceneManager* _scene);
 
 		/** Get GUI viewport index */
-		size_t getActiveViewport();
+		size_t getActiveViewport() const;
 
 		/** Set GUI viewport index */
 		void setActiveViewport(unsigned short _num);
 
-		Ogre::RenderWindow* getRenderWindow();
+		Ogre::RenderWindow* getRenderWindow() const;
 
-		bool getManualRender();
+		bool getManualRender() const;
 		void setManualRender(bool _value);
 
 		size_t getBatchCount() const;
@@ -90,24 +96,48 @@ namespace MyGUI
 		/** @see RenderManager::setViewSize */
 		void setViewSize(int _width, int _height) override;
 
+		/** @see RenderManager::registerShader */
+		void registerShader(
+			const std::string& _shaderName,
+			const std::string& _vertexProgramFile,
+			const std::string& _fragmentProgramFile) override;
+
 #if MYGUI_DEBUG_MODE == 1
 		virtual bool checkTexture(ITexture* _texture);
 #endif
 
+		std::string getShaderExtension() const;
+
 	/*internal:*/
-		/* for use with RTT, flips Y coordinate if necesary when rendering */
-		void doRenderRtt(IVertexBuffer* _buffer, ITexture* _texture, size_t _count, bool flipY);
+		/* for use with RTT */
+		void beginRttRender(bool isFlippedTexture);
+		void endRttRender();
+		void doRenderRtt(IVertexBuffer* _buffer, ITexture* _texture, size_t _count, Ogre::RenderTexture* rtt);
+		OgreShaderInfo* getShaderInfo(const std::string& _shaderName) const;
 
 	private:
-		virtual void renderQueueStarted(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation);
-		virtual void renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation);
+		void renderQueueStarted(
+			Ogre::uint8 queueGroupId,
+			const Ogre::String& invocation,
+			bool& skipThisInvocation) override;
+		void renderQueueEnded(
+			Ogre::uint8 queueGroupId,
+			const Ogre::String& invocation,
+			bool& repeatThisInvocation) override;
 		virtual void windowResized(Ogre::RenderWindow* _window);
 
-		// восстанавливаем буферы
-		virtual void eventOccurred(const Ogre::String& eventName, const Ogre::NameValuePairList* parameters);
+		// restore buffers
+		void eventOccurred(const Ogre::String& eventName, const Ogre::NameValuePairList* parameters) override;
 
 		void destroyAllResources();
 		void updateRenderInfo();
+
+		OgreShaderInfo* createShader(
+			const std::string& _shaderName,
+			const std::string& _vertexProgramFile,
+			const std::string& _fragmentProgramFile);
+
+		void setShaderProjectionMatrix(bool isFlipped);
 
 	private:
 		// флаг для обновления всех и вся
@@ -126,13 +156,6 @@ namespace MyGUI
 		unsigned short mActiveViewport;
 
 		Ogre::RenderSystem* mRenderSystem;
-#if OGRE_VERSION >= MYGUI_DEFINE_VERSION(1, 11, 3)
-		Ogre::Sampler::UVWAddressingMode mTextureAddressMode;
-#else
-		Ogre::TextureUnitState::UVWAddressingMode mTextureAddressMode;
-#endif
-		Ogre::LayerBlendModeEx mColorBlendMode, mAlphaBlendMode;
-
 		RenderTargetInfo mInfo;
 
 		typedef std::map<std::string, ITexture*> MapTexture;
@@ -142,8 +165,11 @@ namespace MyGUI
 		bool mManualRender;
 		size_t mCountBatch;
 
-		Ogre::HighLevelGpuProgramPtr mVertexProgram;
-		Ogre::HighLevelGpuProgramPtr mFragmentProgram;
+		OgreShaderInfo* mDefaultShader = nullptr;
+		std::map<std::string, OgreShaderInfo*> mRegisteredShaders;
+
+		Ogre::MaterialPtr mMaterial;
+		Ogre::Pass* mPass;
 	};
 
 } // namespace MyGUI

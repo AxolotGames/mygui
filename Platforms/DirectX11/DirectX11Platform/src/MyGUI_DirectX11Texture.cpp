@@ -83,7 +83,7 @@ namespace MyGUI
 			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 		desc.CPUAccessFlags = 0;
 		desc.MiscFlags = 0;
-		HRESULT hr = mManager->mpD3DDevice->CreateTexture2D(&desc, 0, &mTexture);
+		HRESULT hr = mManager->mpD3DDevice->CreateTexture2D(&desc, nullptr, &mTexture);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Create Texture failed!");
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -141,6 +141,28 @@ namespace MyGUI
 			mWidth = int( uWidth );
 			mHeight = int( uHeight );
 		}
+		D3DX11_IMAGE_LOAD_INFO loadInfo;
+		loadInfo.Width = fileInfo.Width;
+		loadInfo.Height = fileInfo.Height;
+		loadInfo.FirstMipLevel = 0;
+		loadInfo.MipLevels = fileInfo.MipLevels;
+		loadInfo.Usage = D3D11_USAGE_DEFAULT;
+		loadInfo.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		loadInfo.CpuAccessFlags = 0;
+		loadInfo.MiscFlags = 0;
+		loadInfo.Format = fileInfo.Format;
+		loadInfo.Filter = D3DX11_FILTER_NONE;
+		loadInfo.MipFilter = D3DX11_FILTER_NONE;
+		loadInfo.pSrcInfo = &fileInfo;
+
+		HRESULT hr = D3DX11CreateTextureFromFileA(
+			mManager->mpD3DDevice,
+			fullname.c_str(),
+			&loadInfo,
+			nullptr,
+			(ID3D11Resource**)&mTexture,
+			nullptr);
+		MYGUI_PLATFORM_ASSERT(hr == S_OK, "CreateTextureFromFile failed!");
 
 		D3D11_TEXTURE2D_DESC desc;
 		mTexture->GetDesc(&desc);
@@ -157,9 +179,14 @@ namespace MyGUI
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Create Shader ResourceView failed!");
 	}
 
+	void DirectX11Texture::setShader(const std::string& _shaderName)
+	{
+		mShaderInfo = DirectX11RenderManager::getInstance().getShaderInfo(_shaderName);
+	}
+
 	void DirectX11Texture::destroy()
 	{
-		if ( mTexture )
+		if (mTexture)
 		{
 			if( !mExternal )
 			{
@@ -168,7 +195,7 @@ namespace MyGUI
 			mTexture = 0;
 		}
 
-		if ( mResourceView )
+		if (mResourceView)
 		{
 			if( !mExternalSRV ) 
 			{
@@ -178,53 +205,53 @@ namespace MyGUI
 		}
 	}
 
-	int DirectX11Texture::getWidth()
+	int DirectX11Texture::getWidth() const
 	{
 		return mWidth;
 	}
 
-	int DirectX11Texture::getHeight()
+	int DirectX11Texture::getHeight() const
 	{
 		return mHeight;
 	}
 
 	void* DirectX11Texture::lock(TextureUsage _access)
 	{
-		if ( mLock ) return 0;
+		if (mLock) return nullptr;
 		mLock = true;
 
-		if ( _access == TextureUsage::Write )
+		if (_access == TextureUsage::Write)
 		{
 			mWriteData = malloc(mWidth * mHeight * getNumElemBytes());
 			return mWriteData;
 		}
-		return 0;
+		return nullptr;
 	}
 
 	void DirectX11Texture::unlock()
 	{
-		if ( !mLock ) return;
+		if (!mLock) return;
 		mLock = false;
 
-		if ( mWriteData )
+		if (mWriteData)
 		{
 			mManager->mpD3DContext->UpdateSubresource(mTexture, D3D11CalcSubresource( 0, 0, 0 ), 0, mWriteData, mWidth * getNumElemBytes(), 0);
 			free(mWriteData);
-			mWriteData = 0;
+			mWriteData = nullptr;
 		}
 	}
 
-	bool DirectX11Texture::isLocked()
+	bool DirectX11Texture::isLocked() const
 	{
 		return mLock;
 	}
 
-	PixelFormat DirectX11Texture::getFormat()
+	PixelFormat DirectX11Texture::getFormat() const
 	{
 		return mPixelFormat;
 	}
 
-	size_t DirectX11Texture::getNumElemBytes()
+	size_t DirectX11Texture::getNumElemBytes() const
 	{
 		switch(mPixelFormat.getValue())
 		{
@@ -243,14 +270,14 @@ namespace MyGUI
 		}
 	}
 
-	TextureUsage DirectX11Texture::getUsage()
+	TextureUsage DirectX11Texture::getUsage() const
 	{
 		return mTextureUsage;
 	}
 
 	IRenderTarget* DirectX11Texture::getRenderTarget()
 	{
-		if ( mRenderTarget == 0 ) mRenderTarget = new DirectX11RTTexture(this, mManager);
+		if (mRenderTarget == nullptr) mRenderTarget = new DirectX11RTTexture(this, mManager);
 		return mRenderTarget;
 	}
 

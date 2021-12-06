@@ -1,14 +1,10 @@
-#ifndef MYGUI_OPENGLES_RENDER_MANAGER_H__
-#define MYGUI_OPENGLES_RENDER_MANAGER_H__
+#pragma once
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_RenderFormat.h"
 #include "MyGUI_IVertexBuffer.h"
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_OpenGLESImageLoader.h"
-
-#include <GLES3/gl3.h>
-#include <GLES3/gl2ext.h>
 
 namespace MyGUI
 {
@@ -23,60 +19,70 @@ namespace MyGUI
 		void initialise(OpenGLESImageLoader* _loader = nullptr);
 		void shutdown();
 
-		static OpenGLESRenderManager& getInstance()
-		{
-			return *getInstancePtr();
-		}
-		static OpenGLESRenderManager* getInstancePtr()
-		{
-			return static_cast<OpenGLESRenderManager*>(RenderManager::getInstancePtr());
-		}
+		static OpenGLESRenderManager& getInstance();
+		static OpenGLESRenderManager* getInstancePtr();
 
 		/** @see RenderManager::getViewSize */
-		virtual const IntSize& getViewSize() const;
+		const IntSize& getViewSize() const override;
 
 		/** @see RenderManager::getVertexFormat */
-		virtual VertexColourType getVertexFormat();
+		VertexColourType getVertexFormat() const override;
+
+		/** @see RenderManager::isFormatSupported */
+		bool isFormatSupported(PixelFormat _format, TextureUsage _usage) override;
 
 		/** @see RenderManager::createVertexBuffer */
-		virtual IVertexBuffer* createVertexBuffer();
+		IVertexBuffer* createVertexBuffer() override;
 		/** @see RenderManager::destroyVertexBuffer */
-		virtual void destroyVertexBuffer(IVertexBuffer* _buffer);
+		void destroyVertexBuffer(IVertexBuffer* _buffer) override;
 
 		/** @see RenderManager::createTexture */
-		virtual ITexture* createTexture(const std::string& _name);
+		ITexture* createTexture(const std::string& _name) override;
 		/** @see RenderManager::destroyTexture */
-		virtual void destroyTexture(ITexture* _texture);
+		void destroyTexture(ITexture* _texture) override;
 		/** @see RenderManager::getTexture */
-		virtual ITexture* getTexture(const std::string& _name);
-
+		ITexture* getTexture(const std::string& _name) override;
 
 		/** @see IRenderTarget::begin */
-		virtual void begin();
+		void begin() override;
 		/** @see IRenderTarget::end */
-		virtual void end();
+		void end() override;
 		/** @see IRenderTarget::doRender */
-		virtual void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count);
+		void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count) override;
 		/** @see IRenderTarget::getInfo */
-		virtual const RenderTargetInfo& getInfo();
+		const RenderTargetInfo& getInfo() const override;
 
 		/** @see RenderManager::setViewSize */
 		void setViewSize(int _width, int _height) override;
 
-	/*internal:*/
+		/** @see RenderManager::registerShader */
+		void registerShader(
+			const std::string& _shaderName,
+			const std::string& _vertexProgramFile,
+			const std::string& _fragmentProgramFile) override;
+
+		/* for use with RTT, flips Y coordinate when rendering */
+		void doRenderRtt(IVertexBuffer* _buffer, ITexture* _texture, size_t _count);
+
+		/*internal:*/
 		void drawOneFrame();
 		bool isPixelBufferObjectSupported() const;
+		unsigned int getShaderProgramId(const std::string& _shaderName) const;
 
 	private:
+		std::string loadFileContent(const std::string& _file);
+		unsigned int createShaderProgram(const std::string& _vertexProgramFile, const std::string& _fragmentProgramFile);
 		void destroyAllResources();
-        GLuint BuildShader(const char* source, GLenum shaderType) const;
-        GLuint BuildProgram(const char* vertexShaderSource, const char* fragmentShaderSource) const;
 
 	private:
 		IntSize mViewSize;
 		bool mUpdate;
 		VertexColourType mVertexFormat;
 		RenderTargetInfo mInfo;
+		unsigned int mDefaultProgramId;
+		std::map<std::string, unsigned int> mRegisteredShaders;
+		unsigned int mReferenceCount; // for nested rendering
+		int mYScaleUniformLocation;
 
 		typedef std::map<std::string, ITexture*> MapTexture;
 		MapTexture mTextures;
@@ -84,16 +90,6 @@ namespace MyGUI
 		bool mPboIsSupported;
 
 		bool mIsInitialise;
-
-        GLuint _positionSlot;
-        GLuint _colorSlot;
-        GLuint _texSlot;
-
-        GLuint mProgram;
-        GLuint mVertShader;
-        GLuint mFragShader;
 	};
 
 } // namespace MyGUI
-
-#endif // MYGUI_OPENGLES_RENDER_MANAGER_H__

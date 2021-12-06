@@ -31,8 +31,8 @@ namespace MyGUI
 	Widget::Widget() :
 		mWidgetClient(nullptr),
 		mEnabled(true),
-		mInheritsEnabled(true),
-		mInheritsVisible(true),
+		mInheritedEnabled(true),
+		mInheritedVisible(true),
 		mAlpha(ALPHA_MAX),
 		mRealAlpha(ALPHA_MAX),
 		mInheritsAlpha(true),
@@ -122,6 +122,8 @@ namespace MyGUI
 
 	void Widget::_shutdown()
 	{
+        eventWidgetDestroyed(this);
+
 		setUserData(Any::Null);
 
 		// витр метод для наследников
@@ -422,7 +424,7 @@ namespace MyGUI
 		}
 	}
 
-	IntCoord Widget::getClientCoord()
+	IntCoord Widget::getClientCoord() const
 	{
 		if (mWidgetClient != nullptr)
 			return mWidgetClient->getCoord();
@@ -463,7 +465,7 @@ namespace MyGUI
 	{
 		// проверяем попадание
 		if (!mEnabled
-			|| !mVisible
+			|| !mInheritedVisible
 			|| (!getNeedMouseFocus() && !getInheritsPick())
 			|| !_checkPoint(_left, _top)
 			// если есть маска, проверяем еще и по маске
@@ -931,14 +933,14 @@ namespace MyGUI
 		return Enumerator<VectorWidgetPtr>(mWidgetChild.begin(), mWidgetChild.end());
 	}
 
-	size_t Widget::getChildCount()
+	size_t Widget::getChildCount() const
 	{
 		if (mWidgetClient != nullptr)
 			return mWidgetClient->getChildCount();
 		return mWidgetChild.size();
 	}
 
-	Widget* Widget::getChildAt(size_t _index)
+	Widget* Widget::getChildAt(size_t _index) const
 	{
 		if (mWidgetClient != nullptr)
 			return mWidgetClient->getChildAt(_index);
@@ -965,19 +967,19 @@ namespace MyGUI
 
 	void Widget::_updateVisible()
 	{
-		mInheritsVisible = mParent == nullptr || (mParent->getVisible() && mParent->getInheritedVisible());
-		bool value = mVisible && mInheritsVisible;
+		mInheritedVisible = mParent == nullptr || mParent->getInheritedVisible();
+        mInheritedVisible = mVisible && mInheritedVisible;
 
-		_setSkinItemVisible(value);
+		_setSkinItemVisible(mInheritedVisible);
 
 		for (VectorWidgetPtr::iterator widget = mWidgetChild.begin(); widget != mWidgetChild.end(); ++widget)
 			(*widget)->_updateVisible();
 		for (VectorWidgetPtr::iterator widget = mWidgetChildSkin.begin(); widget != mWidgetChildSkin.end(); ++widget)
 			(*widget)->_updateVisible();
 
-		if (!value && InputManager::getInstance().getMouseFocusWidget() == this)
+		if (!mInheritedVisible && InputManager::getInstance().getMouseFocusWidget() == this)
 			InputManager::getInstance()._resetMouseFocusWidget();
-		if (!value && InputManager::getInstance().getKeyFocusWidget() == this)
+		if (!mInheritedVisible && InputManager::getInstance().getKeyFocusWidget() == this)
 			InputManager::getInstance().resetKeyFocusWidget();
 	}
 
@@ -992,8 +994,8 @@ namespace MyGUI
 
 	void Widget::_updateEnabled()
 	{
-		mInheritsEnabled = mParent == nullptr || (mParent->getInheritedEnabled());
-		mInheritsEnabled = mInheritsEnabled && mEnabled;
+		mInheritedEnabled = mParent == nullptr || (mParent->getInheritedEnabled());
+		mInheritedEnabled = mInheritedEnabled && mEnabled;
 
 		for (VectorWidgetPtr::iterator iter = mWidgetChild.begin(); iter != mWidgetChild.end(); ++iter)
 			(*iter)->_updateEnabled();
@@ -1002,7 +1004,7 @@ namespace MyGUI
 
 		baseUpdateEnable();
 
-		if (!mInheritsEnabled)
+		if (!mInheritedEnabled)
 			InputManager::getInstance().unlinkWidget(this);
 	}
 
@@ -1084,12 +1086,12 @@ namespace MyGUI
 		}
 	}
 
-	VectorWidgetPtr Widget::getSkinWidgetsByName(const std::string& _name)
+	VectorWidgetPtr Widget::getSkinWidgetsByName(const std::string& _name) const
 	{
 		VectorWidgetPtr result;
 
-		for (VectorWidgetPtr::iterator iter = mWidgetChildSkin.begin(); iter != mWidgetChildSkin.end(); ++iter)
-			(*iter)->findWidgets(_name, result);
+		for (const auto& childSkin : mWidgetChildSkin)
+			childSkin->findWidgets(_name, result);
 
 		return result;
 	}
@@ -1110,12 +1112,6 @@ namespace MyGUI
 		}
 	}
 
-	void Widget::destroySkinWidget(Widget* _widget)
-	{
-		mWidgetChild.push_back(_widget);
-		WidgetManager::getInstance().destroyWidget(_widget);
-	}
-
 	void Widget::onWidgetCreated(Widget* _widget)
 	{
 	}
@@ -1131,6 +1127,11 @@ namespace MyGUI
 	}
 
 	Widget* Widget::_getClientWidget()
+	{
+		return getClientWidget() == nullptr ? this : getClientWidget();
+	}
+
+	const Widget* Widget::_getClientWidget() const
 	{
 		return getClientWidget() == nullptr ? this : getClientWidget();
 	}
@@ -1301,7 +1302,7 @@ namespace MyGUI
 		return mWidgetStyle;
 	}
 
-	size_t Widget::_getItemIndex(Widget* _item)
+	size_t Widget::_getItemIndex(Widget* _item) const
 	{
 		return ITEM_NONE;
 	}
@@ -1311,12 +1312,12 @@ namespace MyGUI
 		mContainer = _value;
 	}
 
-	Widget* Widget::_getContainer()
+	Widget* Widget::_getContainer() const
 	{
 		return mContainer;
 	}
 
-	size_t Widget::_getContainerIndex(const IntPoint& _point)
+	size_t Widget::_getContainerIndex(const IntPoint& _point) const
 	{
 		return ITEM_NONE;
 	}
@@ -1333,12 +1334,12 @@ namespace MyGUI
 
 	bool Widget::getInheritedEnabled() const
 	{
-		return mInheritsEnabled;
+		return mInheritedEnabled;
 	}
 
 	bool Widget::getInheritedVisible() const
 	{
-		return mInheritsVisible;
+		return mInheritedVisible;
 	}
 
 	void Widget::resizeLayerItemView(const IntSize& _oldView, const IntSize& _newView)
@@ -1392,7 +1393,7 @@ namespace MyGUI
 		{
 			if ((*widget)->getWidgetStyle() == WidgetStyle::Child)
 			{
-				(*widget)->detachFromLayerItemNode(true);
+				(*widget)->detachFromLayerItemNode(false);
 				removeChildItem((*widget));
 			}
 		}

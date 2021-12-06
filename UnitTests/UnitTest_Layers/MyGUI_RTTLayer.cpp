@@ -52,12 +52,15 @@ namespace MyGUI
 	{
 		bool out_date = false;
 
-		for (VectorILayerNode::iterator iter = mChildItems.begin(); iter != mChildItems.end(); ++iter)
+		if (!_update)
 		{
-			if ((*iter)->castType<LayerNode>()->isOutOfDate())
+			for (VectorILayerNode::iterator iter = mChildItems.begin(); iter != mChildItems.end(); ++iter)
 			{
-				out_date = true;
-				break;
+				if ((*iter)->castType<LayerNode>()->isOutOfDate())
+				{
+					out_date = true;
+					break;
+				}
 			}
 		}
 
@@ -123,7 +126,7 @@ namespace MyGUI
 			mTexture = nullptr;
 		}
 
-		MYGUI_ASSERT(mTextureSize.width * mTextureSize.height, "RTTLayer texture size must have non-zero width and height");
+		MYGUI_ASSERT(mTextureSize.width && mTextureSize.height, "RTTLayer texture size must have non-zero width and height");
 		std::string name = MyGUI::utility::toString((size_t)this, getClassTypeName());
 		mTexture = MyGUI::RenderManager::getInstance().createTexture(name);
 		mTexture->createManual(mTextureSize.width, mTextureSize.height, MyGUI::TextureUsage::RenderTarget, MyGUI::PixelFormat::R8G8B8A8);

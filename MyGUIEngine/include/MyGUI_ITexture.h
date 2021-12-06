@@ -34,21 +34,22 @@ namespace MyGUI
 		virtual void createManual(int _width, int _height, TextureUsage _usage, PixelFormat _format) = 0;
 		virtual void loadFromFile(const std::string& _filename) = 0;
 		virtual void saveToFile(const std::string& _filename) = 0;
+		virtual void setShader(const std::string& _shaderName) = 0;
 
-		virtual void setInvalidateListener(ITextureInvalidateListener* _listener) { }
+		virtual void setInvalidateListener(ITextureInvalidateListener* /*_listener*/) { }
 
 		virtual void destroy() = 0;
 
 		virtual void* lock(TextureUsage _access) = 0;
 		virtual void unlock() = 0;
-		virtual bool isLocked() = 0;
+		virtual bool isLocked() const = 0;
 
-		virtual int getWidth() = 0;
-		virtual int getHeight() = 0;
+		virtual int getWidth() const = 0;
+		virtual int getHeight() const = 0;
 
-		virtual PixelFormat getFormat() = 0;
-		virtual TextureUsage getUsage() = 0;
-		virtual size_t getNumElemBytes() = 0;
+		virtual PixelFormat getFormat() const = 0;
+		virtual TextureUsage getUsage() const = 0;
+		virtual size_t getNumElemBytes() const = 0;
 
 		virtual IRenderTarget* getRenderTarget()
 		{

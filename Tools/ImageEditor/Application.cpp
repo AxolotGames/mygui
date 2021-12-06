@@ -28,15 +28,15 @@
 #include "FactoryManager.h"
 #include "ComponentFactory.h"
 
-template <> tools::Application* MyGUI::Singleton<tools::Application>::msInstance = nullptr;
-template <> const char* MyGUI::Singleton<tools::Application>::mClassTypeName = "Application";
-
 namespace tools
 {
+	MYGUI_SINGLETON_DEFINITION(Application);
 
-	Application::Application()
+	Application::Application() :
+		mSingletonHolder(this)
 	{
 		ComponentFactory::Initialise();
+		mEnableVSync = true;
 	}
 
 	Application::~Application()

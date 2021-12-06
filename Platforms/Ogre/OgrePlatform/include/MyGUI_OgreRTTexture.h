@@ -10,9 +10,8 @@
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_IRenderTarget.h"
 
-#include <Ogre.h>
-
-#include "MyGUI_LastHeader.h"
+#include <OgrePrerequisites.h>
+#include <OgreTexture.h>
 
 namespace MyGUI
 {
@@ -23,12 +22,12 @@ namespace MyGUI
 	public:
 		OgreRTTexture(Ogre::TexturePtr _texture);
 
-		virtual void begin();
-		virtual void end();
+		void begin() override;
+		void end() override;
 
-		virtual void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count);
+		void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count) override;
 
-		virtual const RenderTargetInfo& getInfo()
+		const RenderTargetInfo& getInfo() const override
 		{
 			return mRenderTargetInfo;
 		}
@@ -38,7 +37,6 @@ namespace MyGUI
 		Ogre::Viewport* mViewport;
 		Ogre::Viewport* mSaveViewport;
 		Ogre::TexturePtr mTexture;
-		Ogre::Matrix4 mProjectMatrix;
 	};
 
 } // namespace MyGUI

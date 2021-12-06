@@ -71,6 +71,7 @@ namespace demo
 		base::BaseManager::setupResources();
 		addResourceLocation(getRootMedia() + "/UnitTests/UnitTest_GraphView");
 		addResourceLocation(getRootMedia() + "/Common/Tools");
+		addResourceLocation(getRootMedia() + "/Common/Scene");
 	}
 
 	void DemoKeeper::createScene()
@@ -84,9 +85,9 @@ namespace demo
 		tools::DialogManager::getInstance().initialise();
 
 		Ogre::SceneNode* node = getSceneManager()->getRootSceneNode()->createChildSceneNode();
-		Ogre::Entity* entity = getSceneManager()->createEntity("Object", "Robot.mesh");
+		Ogre::Entity* entity = getSceneManager()->createEntity("Object", "robot.mesh", MyGuiResourceGroup);
 		node->attachObject(entity);
-		getCamera()->setPosition(400, 400, 400);
+		getCameraNode()->setPosition(400, 400, 400);
 
 		mFileDialog = new tools::OpenSaveFileDialog();
 		mFileDialog->eventEndDialog = MyGUI::newDelegate(this, &DemoKeeper::notifyEndDialog);
@@ -100,6 +101,8 @@ namespace demo
 		mContextMenu->eventMenuAccept = MyGUI::newDelegate(this, &DemoKeeper::notifyMenuCtrlAccept);
 
 		MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate(this, &DemoKeeper::notifyFrameStarted);
+
+		loadFromFile(getRootMedia() + "/UnitTests/UnitTest_GraphView/TestAnimation.xml");
 	}
 
 	void DemoKeeper::destroyScene()
