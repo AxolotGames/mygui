@@ -8,43 +8,18 @@
 
 namespace base
 {
-#if MYGUI_PLATFORM == MYGUI_PLATFORM_APPLE
-	#include <CoreFoundation/CoreFoundation.h>
-	// This function will locate the path to our application on OS X,
-	// unlike windows you can not rely on the curent working directory
-	// for locating your configuration files and resources.
-	std::string macBundlePath()
-	{
-		char path[1024];
-		CFBundleRef mainBundle = CFBundleGetMainBundle();
-		assert(mainBundle);
-		CFURLRef mainBundleURL = CFBundleCopyBundleURL(mainBundle);
-		assert(mainBundleURL);
-		CFStringRef cfStringRef = CFURLCopyFileSystemPath( mainBundleURL, kCFURLPOSIXPathStyle);
-		assert(cfStringRef);
-		CFStringGetCString(cfStringRef, path, 1024, kCFStringEncodingASCII);
-		CFRelease(mainBundleURL);
-		CFRelease(cfStringRef);
-		return std::string(path);
-	}
-#endif
 
 	const std::string BaseManager::MyGuiResourceGroup = "MyGuiResourceGroup";
 
 	bool BaseManager::createRender(int _width, int _height, bool _windowed)
 	{
-#if MYGUI_PLATFORM == MYGUI_PLATFORM_APPLE
-		const std::string resourcePath = macBundlePath() + "/Contents/Resources/";
-#else
-		const std::string resourcePath = "";
-#endif
 		Ogre::String pluginsPath;
 
 #ifndef OGRE_STATIC_LIB
-		pluginsPath = resourcePath + "plugins.cfg";
+		pluginsPath = "plugins.cfg";
 #endif
 
-		mRoot = new Ogre::Root(pluginsPath, resourcePath + "ogre.cfg", resourcePath + "Ogre.log");
+		mRoot = new Ogre::Root(pluginsPath, "ogre.cfg", "Ogre.log");
 		auto renderSystem = mRoot->getRenderSystemByName(mRoot->getAvailableRenderers()[0]->getName());
 		mRoot->setRenderSystem(renderSystem);
 

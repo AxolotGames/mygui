@@ -37,7 +37,6 @@ include(FindPkgMacros)
 IF(NOT SDL2_FOUND)
 # Then try everything else
     CMAKE_POLICY(PUSH)
-    CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
     find_package(PkgConfig QUIET)
     pkg_check_modules(PC_SDL2 QUIET sdl2)
 
@@ -97,5 +96,11 @@ IF(NOT SDL2_FOUND)
                                       VERSION_VAR SDL2_VERSION_STRING)
 
     mark_as_advanced(SDL2_INCLUDE_DIR SDL2_LIBRARY)
+    add_library(SDL2::Main INTERFACE IMPORTED)
+    set_target_properties(
+		SDL2::Main PROPERTIES
+		INTERFACE_LINK_LIBRARIES "${SDL2_LIBRARY}"
+		INTERFACE_INCLUDE_DIRECTORIES "${SDL2_INCLUDE_DIR}"
+	)
     CMAKE_POLICY(POP)
 ENDIF(NOT SDL2_FOUND)

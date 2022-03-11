@@ -6,9 +6,9 @@
 ######################################################################
 
 cmake_minimum_required(VERSION 2.8.12)
-cmake_policy(SET CMP0003 NEW)
-cmake_policy(SET CMP0011 NEW)
-cmake_policy(SET CMP0048 OLD)
+if(POLICY CMP0048)
+	cmake_policy(SET CMP0048 NEW)
+endif()
 
 # for link time optimization, remove if cmake version is >= 3.9
 if(POLICY CMP0069) # LTO
@@ -160,7 +160,6 @@ option(MYGUI_BUILD_WRAPPER "Build the wrapper" FALSE)
 cmake_dependent_option(MYGUI_INSTALL_DEMOS "Install MyGUI demos." FALSE "MYGUI_BUILD_DEMOS" FALSE)
 cmake_dependent_option(MYGUI_INSTALL_TOOLS "Install MyGUI tools." FALSE "MYGUI_BUILD_TOOLS" FALSE)
 option(MYGUI_INSTALL_DOCS "Install documentation." FALSE)
-option(MYGUI_INSTALL_MEDIA "Install media files." FALSE)
 cmake_dependent_option(MYGUI_INSTALL_PDB "Install debug pdb files" FALSE "MSVC;NOT MYGUI_STATIC" FALSE)
 option(MYGUI_STANDALONE_BUILD "Generate build files that do not reference CMake (should be used only from Scripts/prepareRelease.py)" FALSE)
 MARK_AS_ADVANCED(MYGUI_STANDALONE_BUILD)
@@ -188,28 +187,60 @@ include(Dependencies)
 
 # Set compiler specific build flags
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+	add_compile_options(-Werror)
 	if (NOT MYGUI_HIGH_LEVEL_WARNINGS)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+		add_compile_options(-w)
 	else ()
 		if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything")
+			add_compile_options(
+				-Weverything
+			)
 			# might be useful
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-documentation-unknown-command -Wno-unknown-warning-option -Wno-sign-conversion -Wno-conversion -Wno-documentation -Wno-old-style-cast")
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-poison-system-directories")
+			add_compile_options(
+				-Wno-reorder
+			)
 			# not useful
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-prototypes -Wno-reorder -Wno-c++98-compat-pedantic -Wno-c++11-extensions -Wno-float-equal -Wno-padded -Wno-weak-vtables -Wno-duplicate-enum -Wno-exit-time-destructors -Wno-unused-parameter -Wno-global-constructors")
+			add_compile_options(
+				-Wno-unknown-warning-option
+				-Wno-documentation
+				-Wno-documentation-unknown-command
+				-Wno-conversion
+				-Wno-old-style-cast
+				-Wno-poison-system-directories
+				-Wno-c++98-compat-pedantic
+				-Wno-c++11-extensions
+				-Wno-float-equal
+				-Wno-padded
+				-Wno-weak-vtables
+				-Wno-duplicate-enum
+				-Wno-exit-time-destructors
+				-Wno-unused-parameter
+				-Wno-global-constructors
+			)
 		else ()
-			# very interesting option, but way too many warnings
-			#add_definitions(-Weffc++)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wall -Wno-reorder -Winit-self -Woverloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-unused-parameter")
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
+			# TODO: the warnings below have'nt been checked for a while
+			add_compile_options(
+				-Wno-deprecated
+				-Wall
+				-Wno-reorder
+				-Winit-self
+				-Woverloaded-virtual
+				-Wcast-qual
+				-Wwrite-strings
+				-Wextra
+				-pedantic
+			)
 			if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wctor-dtor-privacy")
-				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-show-option")
+				add_compile_definitions(-Wctor-dtor-privacy)
+				add_compile_definitions(-fdiagnostics-show-option)
 			endif ()
+			# disable some
+			add_compile_definitions(
+				-Wno-unused-parameter
+			)
 
 			# MyGUI_UString.h ignored from warnings because of this
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wshadow")
+			add_compile_definitions(-Wshadow)
 		endif ()
 	endif ()
 endif ()
@@ -219,8 +250,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	# UBSAN_OPTIONS=print_stacktrace=1,suppressions=sanitizers/UBSanitizer.supp <command>
 	option(MYGUI_UB_SANITIZER "Compile with undefined behaviour sanitizer" FALSE)
 	if (MYGUI_UB_SANITIZER)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -fno-sanitize-recover=undefined")
+		add_compile_definitions(-fno-omit-frame-pointer -fno-optimize-sibling-calls)
+		add_compile_definitions(-fsanitize=undefined -fno-sanitize-recover=undefined)
 	endif()
 
 	# usage:
@@ -228,8 +259,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	# alloc_dealloc_mismatch is here due to issues with Ogre and no clear way to suppress the issue
 	option(MYGUI_ADDRESS_SANITIZER "Compile with address sanitizer" FALSE)
 	if (MYGUI_ADDRESS_SANITIZER)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope")
+		add_compile_definitions(-fno-omit-frame-pointer -fno-optimize-sibling-calls)
+		add_compile_definitions(-fsanitize=address -fsanitize-address-use-after-scope)
 	endif()
 endif ()
 
@@ -252,7 +283,7 @@ if (MSVC)
 	if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
 		STRING(REGEX REPLACE "/W[0-4]" "${WARNING_LEVEL}" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	else ()
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_LEVEL}")
+		add_compile_definitions(${WARNING_LEVEL})
 	endif ()
 
 endif ()
@@ -317,7 +348,7 @@ if (MYGUI_BUILD_DOCS)
 endif ()
 
 # Install media files
-if (MYGUI_INSTALL_MEDIA)
+if (MYGUI_INSTALL_DEMOS OR MYGUI_INSTALL_TOOLS)
 	add_subdirectory(Media)
 endif ()
 

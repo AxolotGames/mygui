@@ -23,7 +23,12 @@ add_library(${PROJECTNAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 add_dependencies(${PROJECTNAME} MyGUIEngine)
 
-target_link_libraries(${PROJECTNAME} ${OPENGL_opengl_LIBRARY} MyGUIEngine)
+if (APPLE)
+	target_link_libraries(${PROJECTNAME} ${OPENGL_gl_LIBRARY} MyGUIEngine)
+else ()
+	# opengl instead of gl makes it compile and work in a libX11-free wayland setup
+	target_link_libraries(${PROJECTNAME} ${OPENGL_opengl_LIBRARY} MyGUIEngine)
+endif ()
 if (MYGUI_USE_SYSTEM_GLEW)
 	target_link_libraries(${PROJECTNAME} ${GLEW_LIBRARIES})
 else ()
@@ -34,13 +39,13 @@ link_directories(${OPENGL_LIB_DIR})
 
 # installation rules
 install(FILES ${HEADER_FILES}
-	DESTINATION include/MYGUI
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/MYGUI"
 )
 mygui_install_target(${PROJECTNAME} "")
 
 if (MYGUI_HIGH_LEVEL_WARNINGS)
 	if (NOT MSVC)
-		set_source_files_properties(include/GL/glew.c PROPERTIES COMPILE_FLAGS -w)
 		set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS -Wno-reserved-id-macro)
+		set_source_files_properties(include/GL/glew.c PROPERTIES COMPILE_FLAGS -w)
 	endif ()
 endif ()
