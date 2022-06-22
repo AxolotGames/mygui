@@ -5,7 +5,7 @@
 */
 
 #pragma warning(push, 0)
-#include <d3dx11.h>
+#include <d3d11.h>
 #pragma warning(pop)
 #include "MyGUI_DirectX11Texture.h"
 #include "MyGUI_DirectX11DataManager.h"
@@ -71,55 +71,7 @@ namespace MyGUI
 		hr = mManager->mpD3DDevice->CreateShaderResourceView(mTexture, &srvDesc, &mResourceView);
 		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Create Shader ResourceView failed!");
 	}
-
-	void DirectX11Texture::loadFromFile(const std::string& _filename)
-	{
-		destroy();
-
-		std::string fullname = DirectX11DataManager::getInstance().getDataPath(_filename);
-
-		D3DX11_IMAGE_INFO fileInfo;
-		D3DX11GetImageInfoFromFile(fullname.c_str(), nullptr, &fileInfo, nullptr);
-
-		mWidth = fileInfo.Width;
-		mHeight = fileInfo.Height;
-
-		D3DX11_IMAGE_LOAD_INFO loadInfo;
-		loadInfo.Width = fileInfo.Width;
-		loadInfo.Height = fileInfo.Height;
-		loadInfo.FirstMipLevel = 0;
-		loadInfo.MipLevels = fileInfo.MipLevels;
-		loadInfo.Usage = D3D11_USAGE_DEFAULT;
-		loadInfo.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		loadInfo.CpuAccessFlags = 0;
-		loadInfo.MiscFlags = 0;
-		loadInfo.Format = fileInfo.Format;
-		loadInfo.Filter = D3DX11_FILTER_NONE;
-		loadInfo.MipFilter = D3DX11_FILTER_NONE;
-		loadInfo.pSrcInfo = &fileInfo;
-
-		HRESULT hr = D3DX11CreateTextureFromFileA(
-			mManager->mpD3DDevice,
-			fullname.c_str(),
-			&loadInfo,
-			nullptr,
-			(ID3D11Resource**)&mTexture,
-			nullptr);
-		MYGUI_PLATFORM_ASSERT(hr == S_OK, "CreateTextureFromFile failed!");
-
-		D3D11_TEXTURE2D_DESC desc;
-		mTexture->GetDesc(&desc);
-
-		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-		srvDesc.Format = desc.Format;
-		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MipLevels = 1;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-
-		hr = mManager->mpD3DDevice->CreateShaderResourceView(mTexture, &srvDesc, &mResourceView);
-		MYGUI_PLATFORM_ASSERT(hr == S_OK, "Create Shader ResourceView failed!");
-	}
-
+	
 	void DirectX11Texture::setShader(const std::string& _shaderName)
 	{
 		mShaderInfo = DirectX11RenderManager::getInstance().getShaderInfo(_shaderName);

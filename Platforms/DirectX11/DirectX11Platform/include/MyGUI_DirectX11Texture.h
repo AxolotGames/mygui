@@ -31,7 +31,10 @@ namespace MyGUI
 		const std::string& getName() const override;
 
 		void createManual(int _width, int _height, TextureUsage _usage, PixelFormat _format) override;
-		void loadFromFile(const std::string& _filename) override;
+		void loadFromFile(const std::string& _filename) override
+		{
+			MYGUI_PLATFORM_LOG(Warning, "loadFromFile not implemented (was trying to load '" << _filename << "')");
+		}
 		void saveToFile(const std::string& _filename) override
 		{
 			MYGUI_PLATFORM_LOG(Warning, "saveToFile not implemented (was trying to save '" << _filename << "')");
