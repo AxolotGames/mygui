@@ -68,6 +68,8 @@ namespace MyGUI
 			return nullptr;
 		}
 
+		VectorString getWidgetFactoryNames() const;
+
 		/** Destroy object */
 		void destroyObject(IObject* _object);
 

@@ -131,4 +131,20 @@ namespace MyGUI
 		return true;
 	}
 
+	VectorString FactoryManager::getWidgetFactoryNames() const 
+	{
+		VectorString widgetFactories;
+
+		auto it = mRegisterFactoryItems.find( "Widget" );
+		if( it != mRegisterFactoryItems.end() )
+		{
+			for( const auto& [type, _] : it->second )
+			{
+				widgetFactories.push_back( type );
+			}
+		}
+
+		return widgetFactories;
+	}
+
 } // namespace MyGUI
