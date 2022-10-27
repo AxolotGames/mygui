@@ -267,6 +267,20 @@ namespace delegates
 			delete _delegate;
 		}
 
+		void addOrOverwrite( IDelegate* _delegate )
+		{
+			for (auto iter = mListDelegates.begin(); iter != mListDelegates.end(); ++iter)
+			{
+				if ((*iter) && (*iter)->compare(_delegate))
+				{
+					delete (*iter);
+					*iter = _delegate;
+					return;
+				}
+			}
+			mListDelegates.push_back(_delegate);
+		}
+
 		void operator()(Args... args) const
 		{
 			auto iter = mListDelegates.begin();
