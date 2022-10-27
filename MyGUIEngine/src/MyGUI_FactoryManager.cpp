@@ -138,9 +138,9 @@ namespace MyGUI
 		auto it = mRegisterFactoryItems.find( "Widget" );
 		if( it != mRegisterFactoryItems.end() )
 		{
-			for( const auto& [type, _] : it->second )
+			for( const auto& pair : it->second )
 			{
-				widgetFactories.push_back( type );
+				widgetFactories.push_back( pair.first );
 			}
 		}
 
