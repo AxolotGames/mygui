@@ -136,7 +136,7 @@ option(MYGUI_USE_FREETYPE "Use freetype for font texture rendering" TRUE)
 option(MYGUI_MSDF_FONTS "Enable msdf fonts generation support" FALSE)
 option(MYGUI_DONT_USE_OBSOLETE "Remove obsolete functions from build" FALSE)
 
-set(MYGUI_RENDERSYSTEM 3 CACHE STRING
+set(MYGUI_RENDERSYSTEM 1 CACHE STRING
 "Specify the Render System. Possible values:
   1 - Dummy
   2 - Export (not used)
@@ -152,9 +152,9 @@ if(MYGUI_RENDERSYSTEM EQUAL 4 OR MYGUI_RENDERSYSTEM EQUAL 7)
 	option(MYGUI_USE_SYSTEM_GLEW "Use system OpenGL Extension Wrangler Library (GLEW)" FALSE)
 endif()
 
-option(MYGUI_BUILD_DEMOS "Build MyGUI demos" TRUE)
+option(MYGUI_BUILD_DEMOS "Build MyGUI demos" FALSE)
 cmake_dependent_option(MYGUI_BUILD_PLUGINS "Build MyGUI plugins" TRUE "NOT MYGUI_DISABLE_PLUGINS" FALSE)
-option(MYGUI_BUILD_TOOLS "Build the tools" TRUE)
+option(MYGUI_BUILD_TOOLS "Build the tools" FALSE)
 option(MYGUI_BUILD_UNITTESTS "Build the unit tests" FALSE)
 option(MYGUI_BUILD_TEST_APP "Build TestApp" FALSE)
 option(MYGUI_BUILD_WRAPPER "Build the wrapper" FALSE)
