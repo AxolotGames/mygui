@@ -15,8 +15,15 @@ namespace MyGUI
 	class CharInfo
 	{
 	public:
-		CharInfo() :
-			mIsColour(false)
+
+		enum class Type : uint8_t
+		{
+			Normal,
+			Colour,
+			Whitespace
+		};
+
+		CharInfo()
 		{
 			mMetrics.mWidth = 0.0f;
 			mMetrics.mHeight = 0.0f;
@@ -31,8 +38,9 @@ namespace MyGUI
 			float _height,
 			float _advance,
 			float _bearingX,
-			float _bearingY) :
-			mIsColour(false),
+			float _bearingY,
+			Type eType = Type::Normal ) :
+			m_eType( eType ),
 			mUVRect(_rect)
 		{
 			mMetrics.mWidth = _width;
@@ -42,14 +50,19 @@ namespace MyGUI
 			mMetrics.mBearingY = _bearingY;
 		}
 
-		CharInfo(uint32 _colour) :
-			mIsColour(true),
-			mColour(_colour)
+		CharInfo( uint32 _colour ) :
+			m_eType( Type::Colour ),
+			mColour( _colour )
 		{ }
 
 		bool isColour() const
 		{
-			return mIsColour;
+			return m_eType == Type::Colour;
+		}
+
+		bool isWhitespace() const
+		{
+			return m_eType == Type::Whitespace;
 		}
 
 		float getWidth() const
@@ -89,7 +102,8 @@ namespace MyGUI
 
 	private:
 
-		bool mIsColour;
+		Type m_eType = Type::Normal;
+		
 		FloatRect mUVRect;
 
 		struct Metrics

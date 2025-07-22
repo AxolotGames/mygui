@@ -562,24 +562,29 @@ namespace MyGUI
 					drawGlyph(renderTargetInfo, vertex, vertexCount, vertexRect, selectedUVRect, selectedColour);
 				}
 
-				// Render the glyph shadow, if any.
-				if (mShadow)
+				if( !sim->isWhitespace() )
 				{
-					vertexRect.left = left + sim->getBearingX() + 1.0f;
-					vertexRect.top = top + sim->getBearingY() + 1.0f;
+
+					// Render the glyph shadow, if any.
+					if (mShadow)
+					{
+						vertexRect.left = left + sim->getBearingX() + 1.0f;
+						vertexRect.top = top + sim->getBearingY() + 1.0f;
+						vertexRect.right = vertexRect.left + sim->getWidth();
+						vertexRect.bottom = vertexRect.top + sim->getHeight();
+
+						drawGlyph(renderTargetInfo, vertex, vertexCount, vertexRect, sim->getUVRect(), mShadowColourNative);
+					}
+
+					// Render the glyph itself.
+					vertexRect.left = left + sim->getBearingX();
+					vertexRect.top = top + sim->getBearingY();
 					vertexRect.right = vertexRect.left + sim->getWidth();
 					vertexRect.bottom = vertexRect.top + sim->getHeight();
 
-					drawGlyph(renderTargetInfo, vertex, vertexCount, vertexRect, sim->getUVRect(), mShadowColourNative);
+					drawGlyph(renderTargetInfo, vertex, vertexCount, vertexRect, sim->getUVRect(), (!select || !mInvertSelect) ? colour : inverseColour);
 				}
 
-				// Render the glyph itself.
-				vertexRect.left = left + sim->getBearingX();
-				vertexRect.top = top + sim->getBearingY();
-				vertexRect.right = vertexRect.left + sim->getWidth();
-				vertexRect.bottom = vertexRect.top + sim->getHeight();
-
-				drawGlyph(renderTargetInfo, vertex, vertexCount, vertexRect, sim->getUVRect(), (!select || !mInvertSelect) ? colour : inverseColour);
 
 				left += fullAdvance;
 				++index;
