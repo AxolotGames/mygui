@@ -945,7 +945,7 @@ namespace MyGUI
 		if (mWidgetClient != nullptr)
 			return mWidgetClient->getChildAt(_index);
 		MYGUI_ASSERT_RANGE(_index, mWidgetChild.size(), "Widget::getChildAt");
-		return mWidgetChild[_index];
+		return ( _index >= mWidgetChild.size() ) ? nullptr : mWidgetChild[_index];
 	}
 
 	void Widget::baseUpdateEnable()
