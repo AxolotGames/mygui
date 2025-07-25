@@ -202,9 +202,11 @@ namespace MyGUI
 				}
 			}
 
-			if (FontCodeType::Space == character || FontCodeType::Tab == character)
+			CharInfo::Type eCharType = CharInfo::Type::Normal;
+			if( FontCodeType::Space == character || FontCodeType::Tab == character )
 			{
-				roll_back.set(line_info.symbols.size(), index, count, width);
+				roll_back.set( line_info.symbols.size(), index, count, width );
+				eCharType = CharInfo::Type::Whitespace;	
 			}
 			else if (FontCodeType::ZWSP == character)
 			{
@@ -266,7 +268,8 @@ namespace MyGUI
 				continue;
 			}
 
-			line_info.symbols.push_back(CharInfo(info->uvRect, char_width, char_height, char_advance, char_bearingX, char_bearingY));
+			line_info.symbols.push_back(CharInfo(info->uvRect, char_width, char_height, char_advance, char_bearingX, char_bearingY, eCharType ));
+
 			width += char_fullAdvance;
 			count ++;
 		}
