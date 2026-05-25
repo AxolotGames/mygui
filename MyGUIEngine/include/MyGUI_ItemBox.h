@@ -88,7 +88,7 @@ namespace MyGUI
 		ValueType* getItemDataAt(size_t _index, bool _throw = true)
 		{
 			MYGUI_ASSERT_RANGE(_index, mItemsInfo.size(), "ItemBox::getItemDataAt");
-			return mItemsInfo[_index].data.castType<ValueType>(_throw);
+			return _index < mItemsInfo.size() ? mItemsInfo[_index].data.castType<ValueType>(_throw) : nullptr;
 		}
 
 
