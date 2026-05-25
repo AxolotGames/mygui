@@ -26,7 +26,7 @@ function(install_dll_file DEBUG_FILEPATH RELEASE_FILEPATH FILENAME)
 		configure_file(${RELEASE_FILEPATH}${FILENAME}.dll ${MYGUI_BINARY_DIR}/bin/relwithdebinfo/${FILENAME}.dll COPYONLY)
 		configure_file(${RELEASE_FILEPATH}${FILENAME}.dll ${MYGUI_BINARY_DIR}/bin/minsizerel/${FILENAME}.dll COPYONLY)
 	endif ()
-endfunction(install_dll_file)
+endfunction()
 
 if (MYGUI_DEPENDENCIES_DIR STREQUAL "")
 	set(MYGUI_DEP_BIN_DIR ${MYGUI_SOURCE_DIR}/Dependencies/bin)

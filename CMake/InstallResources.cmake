@@ -27,7 +27,7 @@ function(install_file FILENAME)
 			DESTINATION "bin"
 		)
 	endif ()
-endfunction(install_file)
+endfunction()
 
 
 # install resource files

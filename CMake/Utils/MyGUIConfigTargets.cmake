@@ -40,7 +40,7 @@ function(mygui_set_platform_name PLATFORM_ID)
 	elseif(${PLATFORM_ID} EQUAL 8)
 		set(MYGUI_PLATFORM_NAME OpenGLES PARENT_SCOPE)
 	endif()
-endfunction(mygui_set_platform_name)
+endfunction()
 
 # install targets according to current build type
 function(mygui_install_target TARGETNAME SUFFIX)
@@ -68,7 +68,7 @@ function(mygui_install_target TARGETNAME SUFFIX)
 		ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}${MYGUI_LIB_DEBUG_PATH}${SUFFIX}" CONFIGURATIONS Debug
 		FRAMEWORK DESTINATION "${CMAKE_INSTALL_LIBDIR}" CONFIGURATIONS Debug
 	)
-endfunction(mygui_install_target)
+endfunction()
 
 # setup common target settings
 function(mygui_config_common TARGETNAME)
@@ -77,7 +77,7 @@ function(mygui_config_common TARGETNAME)
 		LIBRARY_OUTPUT_DIRECTORY ${MYGUI_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}
 		RUNTIME_OUTPUT_DIRECTORY ${MYGUI_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
 	)
-endfunction(mygui_config_common)
+endfunction()
 
 #setup Demo builds
 function(mygui_app PROJECTNAME SOLUTIONFOLDER)
@@ -204,7 +204,7 @@ function(mygui_app PROJECTNAME SOLUTIONFOLDER)
 			COMMENT "Generating *.list files")
 	endif ()
 
-endfunction(mygui_app)
+endfunction()
 
 #setup Tools dll builds
 function(mygui_dll PROJECTNAME SOLUTIONFOLDER)
@@ -317,14 +317,14 @@ function(mygui_dll PROJECTNAME SOLUTIONFOLDER)
 			COMMENT "Generating *.list files")
 	endif ()
 
-endfunction(mygui_dll)
+endfunction()
 
 function(mygui_demo PROJECTNAME)
 	mygui_app(${PROJECTNAME} Demos)
 	if (MYGUI_INSTALL_DEMOS)
 		mygui_install_app(${PROJECTNAME})
 	endif ()
-endfunction(mygui_demo)
+endfunction()
 
 
 function(mygui_tool PROJECTNAME)
@@ -341,12 +341,12 @@ function(mygui_tool PROJECTNAME)
 	target_link_libraries(${PROJECTNAME}
 		EditorFramework
 	)
-endfunction(mygui_tool)
+endfunction()
 
 
 function(mygui_unit_test PROJECTNAME)
 	mygui_app(${PROJECTNAME} UnitTest)
-endfunction(mygui_unit_test)
+endfunction()
 
 
 function(mygui_tool_dll PROJECTNAME)
@@ -355,7 +355,7 @@ function(mygui_tool_dll PROJECTNAME)
 	if (${CMAKE_VERSION} VERSION_EQUAL "3.16" OR ${CMAKE_VERSION} VERSION_GREATER "3.16")
 		target_precompile_headers(${PROJECTNAME} PRIVATE "../../Common/Precompiled.h")
 	endif ()
-endfunction(mygui_tool_dll)
+endfunction()
 
 
 function(mygui_install_app PROJECTNAME)
@@ -371,7 +371,7 @@ function(mygui_install_app PROJECTNAME)
 	endif ()
 
 	mygui_install_target(${PROJECTNAME} "")
-endfunction(mygui_install_app)
+endfunction()
 
 
 #setup Plugin builds
@@ -405,7 +405,7 @@ function(mygui_plugin PROJECTNAME)
 			target_compile_options(${PROJECTNAME} PRIVATE -Wno-missing-prototypes)
 		endif ()
 	endif ()
-endfunction(mygui_plugin)
+endfunction()
 
 
 # setup library build
@@ -414,7 +414,7 @@ function(mygui_config_lib PROJECTNAME)
 	if (MYGUI_STATIC)
 		# add static prefix, if compiling static version
 		set_target_properties(${PROJECTNAME} PROPERTIES OUTPUT_NAME ${PROJECTNAME}Static)
-	else (MYGUI_STATIC)
+	else ()
 		if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 			# add GCC visibility flags to shared library build
 			set_target_properties(${PROJECTNAME} PROPERTIES COMPILE_FLAGS "${MYGUI_GCC_VISIBILITY_FLAGS}")
@@ -426,9 +426,9 @@ function(mygui_config_lib PROJECTNAME)
 				set_target_properties(${PROJECTNAME} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 				set_target_properties(${PROJECTNAME} PROPERTIES BUILD_WITH_INSTALL_NAME_DIR TRUE)
 				set_target_properties(${PROJECTNAME} PROPERTIES INSTALL_NAME_DIR "@executable_path/../lib")
-			endif (APPLE)
+			endif ()
 		endif ()
-	endif (MYGUI_STATIC)
+	endif ()
 	mygui_install_target(${PROJECTNAME} "")
 
 	if (MYGUI_INSTALL_PDB AND NOT MYGUI_STATIC)
@@ -441,7 +441,7 @@ function(mygui_config_lib PROJECTNAME)
 			CONFIGURATIONS RelWithDebInfo
 		)
 	endif ()
-endfunction(mygui_config_lib)
+endfunction()
 
 
 # setup demo build
@@ -454,4 +454,4 @@ function(mygui_config_sample PROJECTNAME)
 			INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 		set_property(TARGET ${PROJECTNAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
 	endif ()
-endfunction(mygui_config_sample)
+endfunction()

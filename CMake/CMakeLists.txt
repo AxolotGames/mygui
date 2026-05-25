@@ -6,9 +6,9 @@
 
 if(WIN32)
 	set(MYGUI_CMAKE_DIR "CMake")
-else(WIN32)
+else()
 	set(MYGUI_CMAKE_DIR "lib/MYGUI/cmake")
-endif(WIN32)
+endif()
 
 set(INST_FILES
   Packages/FindOGRE.cmake

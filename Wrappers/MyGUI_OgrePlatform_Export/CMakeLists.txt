@@ -30,7 +30,7 @@ if(MYGUI_RENDERSYSTEM EQUAL 3)
 		add_dependencies(${PROJECTNAME} MyGUIEngine)
 		add_dependencies(${PROJECTNAME} MyGUI.OgrePlatform)
 		target_link_libraries(${PROJECTNAME} MyGUI.OgrePlatform)
-	endfunction(mygui_orge_platform_export)
+	endfunction()
 
 	mygui_orge_platform_export(MyGUI_OgrePlatform_Export Wrappers)
 

@@ -49,9 +49,9 @@ else()
 		# lib files are in DIRECTX_DIR/Lib/x64|x86
 		if(CMAKE_CL_64)
 			set(DirectX_LIBPATH_SUFFIX "x64")
-		else(CMAKE_CL_64)
+		else()
 			set(DirectX_LIBPATH_SUFFIX "x86")
-		endif(CMAKE_CL_64)
+		endif()
 		find_library(DirectX_LIBRARY NAMES d3d9 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
 		find_library(DirectX_D3DX9_LIBRARY NAMES d3dx9 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
 		find_library(DirectX_DXERR9_LIBRARY NAMES dxerr HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
@@ -61,7 +61,7 @@ else()
 			if (NOT DIRECTX_DIR)
 				set(DIRECTX_DIR ${DirectX_INCLUDE_DIR}/.. CACHE PATH "Path to DirectX SDK (set it if you don't have DIrectX SDK properly installed or CMake can't find path to it)" FORCE)
 			endif ()
-		endif(DirectX_INCLUDE_DIR)
+		endif()
 
 
 		findpkg_finish(DirectX)
@@ -71,7 +71,7 @@ else()
 		${DirectX_DXGUID_LIBRARY}
 		)
 
-	endif(WIN32)
+	endif()
 
 
 	if(WIN32) # The only platform it makes sense to check for DirectX11 SDK
@@ -104,9 +104,9 @@ else()
 		# lib files are in DIRECTX_DIR/Lib/x64|x86
 		if(CMAKE_CL_64)
 			set(DirectX_LIBPATH_SUFFIX "x64")
-		else(CMAKE_CL_64)
+		else()
 			set(DirectX_LIBPATH_SUFFIX "x86")
-		endif(CMAKE_CL_64)
+		endif()
 		find_library(DirectX11_D3D11_LIBRARY NAMES d3d11 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
 		find_library(DirectX11_D3DX11_LIBRARY NAMES d3dx11 HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
 		find_library(DirectX11_DXGUID_LIBRARY NAMES dxguid HINTS ${DirectX_LIB_SEARCH_PATH} PATH_SUFFIXES ${DirectX_LIBPATH_SUFFIX})
@@ -118,7 +118,7 @@ else()
 			if (NOT DIRECTX_DIR)
 				set(DIRECTX_DIR ${DirectX11_INCLUDE_DIR}/.. CACHE PATH "Path to DirectX SDK (set it if you don't have DIrectX SDK properly installed or CMake can't find path to it)" FORCE)
 			endif ()
-		endif(DirectX11_INCLUDE_DIR)
+		endif()
 
 		findpkg_finish(DirectX11)
 		set(DirectX11_LIBRARIES ${DirectX11_LIBRARIES} 
@@ -130,5 +130,5 @@ else()
 		${DirectX11_COMPILER_LIBRARY}
 		)
 
-	endif(WIN32)
+	endif()
 endif ()

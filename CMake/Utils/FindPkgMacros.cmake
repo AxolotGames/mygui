@@ -7,7 +7,7 @@ macro(findpkg_begin PREFIX)
   if (NOT ${PREFIX}_FIND_QUIETLY)
     message(STATUS "Looking for ${PREFIX}...")
   endif ()
-endmacro(findpkg_begin)
+endmacro()
 
 # Get environment variable, define it as ENV_$var and make sure backslashes are converted to forward slashes
 macro(getenv_path VAR)
@@ -16,7 +16,7 @@ macro(getenv_path VAR)
    if (ENV_${VAR})
      string( REGEX REPLACE "\\\\" "/" ENV_${VAR} ${ENV_${VAR}} )
    endif ()
-endmacro(getenv_path)
+endmacro()
 
 # Construct search paths for includes and libraries from a PREFIX_PATH
 macro(create_search_paths PREFIX)
@@ -25,9 +25,9 @@ macro(create_search_paths PREFIX)
       ${dir}/include ${dir}/include/${PREFIX} ${dir}/Headers)
     set(${PREFIX}_LIB_SEARCH_PATH ${${PREFIX}_LIB_SEARCH_PATH}
       ${dir}/lib ${dir}/lib/${PREFIX} ${dir}/Libs)
-  endforeach(dir)
+  endforeach()
   set(${PREFIX}_FRAMEWORK_SEARCH_PATH ${${PREFIX}_PREFIX_PATH})
-endmacro(create_search_paths)
+endmacro()
 
 # clear cache variables if a certain variable changed
 macro(clear_if_changed TESTVAR)
@@ -36,10 +36,10 @@ macro(clear_if_changed TESTVAR)
     message(STATUS "${TESTVAR} changed.")
     foreach(var ${ARGN})
       set(${var} "NOTFOUND" CACHE STRING "x" FORCE)
-    endforeach(var)
+    endforeach()
   endif ()
   set(${TESTVAR}_INT_CHECK ${${TESTVAR}} CACHE INTERNAL "x" FORCE)
-endmacro(clear_if_changed)
+endmacro()
 
 # Do the final processing for the package find.
 macro(findpkg_finish PREFIX)
@@ -63,4 +63,4 @@ macro(findpkg_finish PREFIX)
 
     mark_as_advanced(${PREFIX}_INCLUDE_DIR ${PREFIX}_LIBRARY ${PREFIX}_LIBRARY_REL ${PREFIX}_LIBRARY_DBG ${PREFIX}_LIBRARY_FWK)
   endif ()
-endmacro(findpkg_finish)
+endmacro()

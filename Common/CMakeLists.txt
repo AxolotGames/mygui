@@ -1,7 +1,7 @@
 function(mygui_add_base_manager_include PLATFORM_ID)
 	mygui_set_platform_name(${PLATFORM_ID})
 	include_directories(../../Common/Base/${MYGUI_PLATFORM_NAME})
-endfunction(mygui_add_base_manager_include)
+endfunction()
 
 set (PROJECTNAME MyGUICommon)
 

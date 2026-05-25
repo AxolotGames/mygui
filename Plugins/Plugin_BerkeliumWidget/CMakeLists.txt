@@ -20,7 +20,7 @@ function(mygui_plugin_berkelium PROJECTNAME)
 	install(FILES ${HEADER_FILES}
 		DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/MYGUI"
 	)
-endfunction(mygui_plugin_berkelium)
+endfunction()
 
 
 mygui_plugin_berkelium(Plugin_BerkeliumWidget)

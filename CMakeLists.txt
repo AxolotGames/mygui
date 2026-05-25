@@ -5,20 +5,7 @@
 # and provide build configuration options.
 ######################################################################
 
-cmake_minimum_required(VERSION 2.8.12)
-if(POLICY CMP0048)
-	cmake_policy(SET CMP0048 NEW)
-endif()
-
-# for link time optimization, remove if cmake version is >= 3.9
-if(POLICY CMP0069) # LTO
-  cmake_policy(SET CMP0069 NEW)
-endif()
-
-# for position-independent executable, remove if cmake version is >= 3.14
-if(POLICY CMP0083)
-  cmake_policy(SET CMP0083 NEW)
-endif()
+cmake_minimum_required(VERSION 3.16)
 
 project(MYGUI)
 
@@ -82,7 +69,7 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_C
 		else ()
 			set(MYGUI_GCC_VISIBILITY_FLAGS "${MYGUI_GCC_VISIBILITY_FLAGS} -fvisibility-inlines-hidden")
 		endif ()
-	endif (MYGUI_GCC_VISIBILITY)
+	endif ()
 
 	# Fix x64 issues on Linux
 	if(("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" OR "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "amd64") AND NOT APPLE)
@@ -105,8 +92,8 @@ if (WIN32 OR APPLE)
 				"${MYGUI_BINARY_DIR}/sdk" CACHE PATH "MYGUI install prefix" FORCE
 			)
 		endif ()
-	endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-endif(WIN32 OR APPLE)
+	endif ()
+endif()
 
 ######################################################################
 # Provide user options to customise the build process

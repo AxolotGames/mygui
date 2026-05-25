@@ -36,9 +36,9 @@ if(WIN32) # The only platform it makes sense to check for DirectX11 SDK
 		# Windows 10.x SDK
 		if(CMAKE_CL_64)
 			set(DirectX11_LIBPATH_SUFFIX "x64")
-		else(CMAKE_CL_64)
+		else()
 			set(DirectX11_LIBPATH_SUFFIX "x86")
-		endif(CMAKE_CL_64)
+		endif()
 		get_filename_component(kit10_dir "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot10]" REALPATH)
 		file(GLOB kit10_list ${kit10_dir}/Include/10.*)
 		foreach(tmp_elem ${kit10_list})
@@ -94,9 +94,9 @@ if(WIN32) # The only platform it makes sense to check for DirectX11 SDK
 		# lib files are in DirectX11_ROOT_DIR/Lib/x64|x86
 		if(CMAKE_CL_64)
 			set(DirectX11_LIBPATH_SUFFIX "x64")
-		else(CMAKE_CL_64)
+		else()
 			set(DirectX11_LIBPATH_SUFFIX "x86")
-		endif(CMAKE_CL_64)
+		endif()
 
 		# look for D3D11 components
 		find_path(DirectX11_INCLUDE_DIR NAMES d3d11.h HINTS ${DirectX11_INC_SEARCH_PATH})
@@ -143,4 +143,4 @@ if(WIN32) # The only platform it makes sense to check for DirectX11 SDK
 		unset (DirectX11_INCLUDE_DIRS CACHE)
 	endif()		
 	
-endif(WIN32)
+endif()
