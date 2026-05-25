@@ -773,6 +773,28 @@ namespace MyGUI
 				renderMsdfGlyphs(glyphHeightMap, msdfFont, texBuffer, texWidth, texHeight);
 #endif
 
+			// Propagate uvRect to code points that share a glyph index with another code point.
+			// GlyphHeightMap only stores one GlyphInfo* per glyph index, so when multiple code points
+			// map to the same glyph, only the first one processed gets its uvRect set by renderGlyph().
+			for (auto& [codePoint, glyphInfo] : mGlyphMap)
+			{
+				if (glyphInfo.width > 0 && glyphInfo.uvRect.right == 0 && glyphInfo.uvRect.bottom == 0)
+				{
+					int height = (int)std::ceil(glyphInfo.height);
+					auto heightIt = glyphHeightMap.find(height);
+					if (heightIt != glyphHeightMap.end())
+					{
+						auto charIt = mCharMap.find(codePoint);
+						if (charIt != mCharMap.end())
+						{
+							auto glyphIt = heightIt->second.find(charIt->second);
+							if (glyphIt != heightIt->second.end())
+								glyphInfo.uvRect = glyphIt->second->uvRect;
+						}
+					}
+				}
+			}
+
 			mTexture->unlock();
 
 			MYGUI_LOG(Info, "ResourceTrueTypeFont: Font '" << getResourceName() << "' using texture size " << texWidth << " x " << texHeight << ".");
