@@ -138,7 +138,7 @@ namespace MyGUI
 		return result;
 	}
 
-	const std::string& OgreDataManager::getDataPath(const std::string& _name) const
+	std::string OgreDataManager::getDataPath(const std::string& _name) const
 	{
 		static std::string result;
 		result.clear();

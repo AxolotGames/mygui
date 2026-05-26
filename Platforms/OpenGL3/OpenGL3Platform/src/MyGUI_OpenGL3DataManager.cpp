@@ -86,7 +86,7 @@ namespace MyGUI
 		return result;
 	}
 
-	const std::string& OpenGL3DataManager::getDataPath(const std::string& _name) const
+	std::string OpenGL3DataManager::getDataPath(const std::string& _name) const
 	{
 		static std::string path;
 		VectorString result;

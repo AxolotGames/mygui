@@ -82,7 +82,7 @@ namespace MyGUI
 		return result;
 	}
 
-	const std::string& OpenGLESDataManager::getDataPath(const std::string& _name) const
+	std::string OpenGLESDataManager::getDataPath(const std::string& _name) const
 	{
 		static std::string path;
 		VectorString result;
